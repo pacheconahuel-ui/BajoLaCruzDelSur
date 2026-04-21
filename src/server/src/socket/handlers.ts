@@ -181,8 +181,8 @@ function broadcastGameState(io: AppServer, roomId: string): void {
   // Persist after every state change
   persistRoom(roomId);
 
-  // Cleanup DB when game fully ends
-  if (state.phase === 'finished') cleanupRoom(roomId);
+  // Cleanup DB when game fully ends (scoring is the terminal state in 7 Wonders)
+  if (state.phase === 'finished' || state.phase === 'scoring') cleanupRoom(roomId);
 
   if (state.phase === 'choose') triggerBots(io, roomId);
   if (state.phase === 'choose_from_discard') triggerBotDiscardPick(io, roomId);

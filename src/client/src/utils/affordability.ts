@@ -131,6 +131,8 @@ export interface Affordability {
 export interface WonderAffordability {
   canBuild: boolean;
   tradeCostTotal: number;
+  leftCoins?: number;
+  rightCoins?: number;
 }
 
 export function computeAffordability(
@@ -247,7 +249,8 @@ export function computeWonderAffordability(
 
   const leftT = getTradeableFixed(left);
   const rightT = getTradeableFixed(right);
-  let totalTrade = 0;
+  let leftCoins = 0;
+  let rightCoins = 0;
 
   for (const res of Object.keys(remaining) as Resource[]) {
     let need = remaining[res];
@@ -258,15 +261,16 @@ export function computeWonderAffordability(
 
     while (need > 0) {
       if (leftT[res] > 0 && (lc <= rc || rightT[res] === 0)) {
-        totalTrade += lc; leftT[res]--; need--;
+        leftCoins += lc; leftT[res]--; need--;
       } else if (rightT[res] > 0) {
-        totalTrade += rc; rightT[res]--; need--;
+        rightCoins += rc; rightT[res]--; need--;
       } else {
-        return { canBuild: false, tradeCostTotal: totalTrade };
+        return { canBuild: false, tradeCostTotal: leftCoins + rightCoins, leftCoins, rightCoins };
       }
     }
   }
 
-  if (player.coins < totalTrade) return { canBuild: false, tradeCostTotal: totalTrade };
-  return { canBuild: true, tradeCostTotal: totalTrade };
+  const totalTrade = leftCoins + rightCoins;
+  if (player.coins < totalTrade) return { canBuild: false, tradeCostTotal: totalTrade, leftCoins, rightCoins };
+  return { canBuild: true, tradeCostTotal: totalTrade, leftCoins, rightCoins };
 }

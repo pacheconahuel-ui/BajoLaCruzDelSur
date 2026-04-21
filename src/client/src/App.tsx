@@ -73,8 +73,8 @@ export default function App() {
     socket.on('game:state', state => {
       setGameState(state);
       setScreen('game');
-      // Clear session when the game is fully finished so players start fresh next time
-      if (state.phase === 'finished') clearSession();
+      // Clear session when the game ends (scoring is the terminal phase)
+      if (state.phase === 'finished' || state.phase === 'scoring') clearSession();
     });
 
     socket.on('game:error', msg => {

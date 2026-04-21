@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { PublicGameState, Card, PendingAction, PublicPlayerState, MilitaryToken } from '@7wonders/shared';
+import { PublicGameState, Card, PendingAction, PublicPlayerState, MilitaryToken, TradeDecision } from '@7wonders/shared';
 import { socket } from '../socket/socket';
 import CardView from '../components/CardView';
 import CityTableau from '../components/CityTableau';
@@ -53,7 +53,21 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
 
   function submitAction() {
     if (!selectedCard || !actionType) return;
-    const action: PendingAction = { cardId: selectedCard.id, action: { type: actionType } };
+
+    let trade: TradeDecision | undefined;
+    if (actionType === 'build_structure') {
+      const aff = computeAffordability(selectedCard, me, leftNeighbor, rightNeighbor);
+      if (aff.tradeCostTotal > 0 && aff.canBuild) {
+        trade = { leftCoins: aff.leftCoins, rightCoins: aff.rightCoins };
+      }
+    } else if (actionType === 'build_wonder_stage') {
+      const wAff = computeWonderAffordability(me.wonderId, me.wonderStagesBuilt, me, leftNeighbor, rightNeighbor);
+      if (wAff?.tradeCostTotal > 0 && wAff.canBuild) {
+        trade = { leftCoins: wAff.leftCoins ?? 0, rightCoins: wAff.rightCoins ?? 0 };
+      }
+    }
+
+    const action: PendingAction = { cardId: selectedCard.id, action: { type: actionType }, trade };
     socket.emit('game:action', action, (err) => {
       if (err) { setError(err); return; }
       setSelectedCard(null);

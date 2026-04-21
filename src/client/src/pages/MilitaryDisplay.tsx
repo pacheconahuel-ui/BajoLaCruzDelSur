@@ -10,8 +10,10 @@ const AGE_REWARD: Record<number, number> = { 1: 1, 2: 3, 3: 5 };
 const AUTO_ADVANCE_MS = 4000;
 
 export default function MilitaryDisplay({ state }: Props) {
-  const age = state.age;
-  const reward = AGE_REWARD[age] ?? 1;
+  // state.age is already incremented to the NEXT age when phase='military',
+  // so the age that just finished is state.age - 1.
+  const justCompletedAge = (state.age - 1) as 1 | 2 | 3;
+  const reward = AGE_REWARD[justCompletedAge] ?? 1;
   const n = state.players.length;
 
   // Visual countdown — counts down from AUTO_ADVANCE_MS to 0
@@ -25,7 +27,7 @@ export default function MilitaryDisplay({ state }: Props) {
       if (ms >= AUTO_ADVANCE_MS) clearInterval(interval);
     }, 50);
     return () => clearInterval(interval);
-  }, [state.age]); // reset when age changes
+  }, [justCompletedAge]); // reset when completed age changes
 
   const progress = Math.min(elapsed / AUTO_ADVANCE_MS, 1);
   const secondsLeft = Math.max(0, Math.ceil((AUTO_ADVANCE_MS - elapsed) / 1000));
@@ -40,7 +42,7 @@ export default function MilitaryDisplay({ state }: Props) {
       <div style={{ textAlign: 'center', marginBottom: 28 }}>
         <div style={{ fontSize: '2.5rem', marginBottom: 6 }}>⚔️</div>
         <h2 style={{ fontSize: '1.6rem', color: 'var(--color-gold)', marginBottom: 4 }}>
-          Resolución Militar — Era {age}
+          Resolución Militar — Era {justCompletedAge}
         </h2>
         <p style={{ color: 'var(--color-text-dim)', fontSize: '0.85rem' }}>
           Victoria: +{reward} PV &nbsp;·&nbsp; Derrota: −1 PV &nbsp;·&nbsp; Empate: sin ficha
@@ -53,7 +55,7 @@ export default function MilitaryDisplay({ state }: Props) {
           const left  = state.players[(i - 1 + n) % n];
           const right = state.players[(i + 1) % n];
           const isMe  = i === state.myIndex;
-          const ageTokens  = p.militaryTokens.filter(t => t.age === age);
+          const ageTokens  = p.militaryTokens.filter(t => t.age === justCompletedAge);
           const victories  = ageTokens.filter(t => t.value > 0).length;
           const defeats    = ageTokens.filter(t => t.value < 0).length;
           const netPV      = ageTokens.reduce((s, t) => s + t.value, 0);
@@ -120,8 +122,8 @@ export default function MilitaryDisplay({ state }: Props) {
       {/* Countdown progress bar */}
       <div style={{ textAlign: 'center', marginTop: 8 }}>
         <p style={{ color: 'var(--color-text-dim)', fontSize: '0.82rem', marginBottom: 8 }}>
-          {age < 3
-            ? `La Era ${age + 1} comenzará en ${secondsLeft}s…`
+          {justCompletedAge < 3
+            ? `La Era ${state.age} comenzará en ${secondsLeft}s…`
             : `Puntuación final en ${secondsLeft}s…`}
         </p>
         <div style={{
