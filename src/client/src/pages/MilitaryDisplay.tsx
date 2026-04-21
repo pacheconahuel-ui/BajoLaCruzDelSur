@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { PublicGameState } from '@7wonders/shared';
 
 interface Props {
@@ -6,10 +7,28 @@ interface Props {
 
 const AGE_REWARD: Record<number, number> = { 1: 1, 2: 3, 3: 5 };
 
+const AUTO_ADVANCE_MS = 4000;
+
 export default function MilitaryDisplay({ state }: Props) {
   const age = state.age;
   const reward = AGE_REWARD[age] ?? 1;
   const n = state.players.length;
+
+  // Visual countdown — counts down from AUTO_ADVANCE_MS to 0
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    setElapsed(0);
+    const start = Date.now();
+    const interval = setInterval(() => {
+      const ms = Date.now() - start;
+      setElapsed(ms);
+      if (ms >= AUTO_ADVANCE_MS) clearInterval(interval);
+    }, 50);
+    return () => clearInterval(interval);
+  }, [state.age]); // reset when age changes
+
+  const progress = Math.min(elapsed / AUTO_ADVANCE_MS, 1);
+  const secondsLeft = Math.max(0, Math.ceil((AUTO_ADVANCE_MS - elapsed) / 1000));
 
   return (
     <div style={{
@@ -98,9 +117,26 @@ export default function MilitaryDisplay({ state }: Props) {
         })}
       </div>
 
-      <p style={{ textAlign: 'center', color: 'var(--color-text-dim)', fontSize: '0.82rem' }}>
-        La siguiente Era comenzará en unos segundos…
-      </p>
+      {/* Countdown progress bar */}
+      <div style={{ textAlign: 'center', marginTop: 8 }}>
+        <p style={{ color: 'var(--color-text-dim)', fontSize: '0.82rem', marginBottom: 8 }}>
+          {age < 3
+            ? `La Era ${age + 1} comenzará en ${secondsLeft}s…`
+            : `Puntuación final en ${secondsLeft}s…`}
+        </p>
+        <div style={{
+          width: '100%', height: 4, borderRadius: 2,
+          background: 'rgba(255,255,255,0.08)',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            height: '100%', borderRadius: 2,
+            width: `${progress * 100}%`,
+            background: 'linear-gradient(90deg, var(--color-gold), #e63946)',
+            transition: 'width 0.05s linear',
+          }} />
+        </div>
+      </div>
     </div>
   );
 }

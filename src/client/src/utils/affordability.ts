@@ -121,10 +121,11 @@ export function getWonderStageCost(wonderId: string, stageIndex: number): Resour
 
 export interface Affordability {
   canBuild: boolean;
-  isFree: boolean;        // chain or Olympia free build
-  tradeCostTotal: number; // 0 if own resources cover it
-  leftCoins: number;      // coins paid to left neighbor
-  rightCoins: number;     // coins paid to right neighbor
+  isFree: boolean;           // chain or Olympia free build
+  freeReason?: 'chain' | 'olympia'; // why it's free
+  tradeCostTotal: number;    // 0 if own resources cover it
+  leftCoins: number;         // coins paid to left neighbor
+  rightCoins: number;        // coins paid to right neighbor
 }
 
 export interface WonderAffordability {
@@ -145,12 +146,12 @@ export function computeAffordability(
 
   // Free via chain
   if (hasChain(player, card)) {
-    return { canBuild: true, isFree: true, tradeCostTotal: 0, leftCoins: 0, rightCoins: 0 };
+    return { canBuild: true, isFree: true, freeReason: 'chain', tradeCostTotal: 0, leftCoins: 0, rightCoins: 0 };
   }
 
   // Free via Olympia
   if (player.freeBuildsLeft > 0) {
-    return { canBuild: true, isFree: true, tradeCostTotal: 0, leftCoins: 0, rightCoins: 0 };
+    return { canBuild: true, isFree: true, freeReason: 'olympia', tradeCostTotal: 0, leftCoins: 0, rightCoins: 0 };
   }
 
   const bankCoins = card.cost.coins ?? 0;

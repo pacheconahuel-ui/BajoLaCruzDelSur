@@ -9,9 +9,10 @@ interface Props {
   dimmed?: boolean;
   compact?: boolean;
   tradeCost?: { total: number; leftCoins?: number; rightCoins?: number };
+  freeReason?: 'chain' | 'olympia';
 }
 
-export default function CardView({ card, selected, onClick, disabled, dimmed, compact, tradeCost }: Props) {
+export default function CardView({ card, selected, onClick, disabled, dimmed, compact, tradeCost, freeReason }: Props) {
   const bg     = COLOR_BG[card.color];
   const img    = COLOR_IMG[card.color];
   const accent = COLOR_ACCENT[card.color];
@@ -162,6 +163,22 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
           </div>
         );
       })()}
+
+      {/* Free-build badge (chain / Olympia) */}
+      {freeReason && !selected && (
+        <div style={{
+          position: 'absolute', top: -5, left: -5,
+          background: freeReason === 'chain' ? '#15803d' : '#6b21a8',
+          borderRadius: 8,
+          padding: '2px 5px',
+          fontSize: '0.58rem', fontWeight: 700, color: '#fff',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
+          border: '1.5px solid rgba(255,255,255,0.2)',
+          whiteSpace: 'nowrap',
+        }}>
+          {freeReason === 'chain' ? '⛓ gratis' : '🏛 gratis'}
+        </div>
+      )}
 
       {/* "Can't build" overlay indicator (dimmed cards) */}
       {dimmed && !selected && (

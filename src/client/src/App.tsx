@@ -45,6 +45,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    let hasConnectedOnce = false;
     function onConnect() {
       // Attempt to rejoin a previous session on (re)connect
       const saved = loadSession();
@@ -56,9 +57,11 @@ export default function App() {
             setRoomId(saved.roomId);
             setPlayerId(saved.playerId);
             setScreen('waiting'); // game:state will override to 'game' if active
+            if (hasConnectedOnce) showToast('✅ Reconectado a la partida');
           }
         });
       }
+      hasConnectedOnce = true;
     }
 
     socket.on('connect', onConnect);
@@ -153,14 +156,28 @@ export default function App() {
 
   if (screen === 'waiting') {
     return (
-      <WaitingRoom
-        roomId={roomId}
-        players={lobbyPlayers}
-        playerId={playerId}
-        isHost={lobbyPlayers[0]?.id === playerId}
-        onStart={handleStartGame}
-        error={error}
-      />
+      <>
+        <WaitingRoom
+          roomId={roomId}
+          players={lobbyPlayers}
+          playerId={playerId}
+          isHost={lobbyPlayers[0]?.id === playerId}
+          onStart={handleStartGame}
+          error={error}
+        />
+        {toast && (
+          <div style={{
+            position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+            background: '#1c1610', border: '1px solid var(--color-accent)',
+            borderRadius: 8, padding: '10px 20px',
+            color: 'var(--color-text)', fontSize: '0.85rem',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+            zIndex: 999, maxWidth: 360, textAlign: 'center',
+          }}>
+            {toast}
+          </div>
+        )}
+      </>
     );
   }
 

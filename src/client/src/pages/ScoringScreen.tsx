@@ -1,4 +1,4 @@
-import { PublicGameState, PlayerScore } from '@7wonders/shared';
+import { PublicGameState, PlayerScore, CardEffect } from '@7wonders/shared';
 
 interface Props {
   state: PublicGameState;
@@ -16,6 +16,25 @@ const SCORE_COLS: { key: keyof PlayerScore; label: string; icon: string }[] = [
 ];
 
 const MEDALS = ['🥇', '🥈', '🥉'];
+
+function getScienceBreakdown(state: PublicGameState, playerId: string): string {
+  const player = state.players.find(p => p.id === playerId);
+  if (!player) return '';
+  let compass = 0, gear = 0, tablet = 0;
+  for (const card of player.builtStructures) {
+    if (card.color !== 'green') continue;
+    for (const e of card.effects as CardEffect[]) {
+      if (e.type === 'science') {
+        if (e.symbol === 'compass') compass++;
+        else if (e.symbol === 'gear') gear++;
+        else if (e.symbol === 'tablet') tablet++;
+      }
+    }
+  }
+  const sets = Math.min(compass, gear, tablet);
+  const pts = compass ** 2 + gear ** 2 + tablet ** 2 + sets * 7;
+  return `🧭${compass} ⚙️${gear} 📋${tablet} = ${sets > 0 ? `${sets}×7 + ` : ''}${pts}pts`;
+}
 
 export default function ScoringScreen({ state, onReturnToMenu }: Props) {
   const scores: PlayerScore[] = state.scores?.length
@@ -146,11 +165,16 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
                   </td>
                   {SCORE_COLS.map(col => {
                     const v = row[col.key] as number;
+                    const tooltip = col.key === 'science' && v > 0
+                      ? getScienceBreakdown(state, row.playerId)
+                      : undefined;
                     return (
-                      <td key={col.key} style={{
+                      <td key={col.key} title={tooltip} style={{
                         padding: '10px 8px', textAlign: 'center',
                         color: v > 0 ? 'var(--color-text)' : v < 0 ? '#f87171' : 'var(--color-text-dim)',
                         fontWeight: v !== 0 ? 500 : 400,
+                        cursor: tooltip ? 'help' : 'default',
+                        textDecoration: tooltip ? 'underline dotted' : 'none',
                       }}>
                         {v !== 0 ? v : '—'}
                       </td>

@@ -223,7 +223,8 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
                         key={card.id}
                         card={card}
                         selected={selectedCard?.id === card.id}
-                        dimmed={!aff.canBuild}
+                        dimmed={!aff.canBuild && !aff.isFree}
+                        freeReason={aff.isFree ? aff.freeReason : undefined}
                         tradeCost={aff.tradeCostTotal > 0 ? { total: aff.tradeCostTotal, leftCoins: aff.leftCoins, rightCoins: aff.rightCoins } : undefined}
                         onClick={() => {
                           setSelectedCard(card);
