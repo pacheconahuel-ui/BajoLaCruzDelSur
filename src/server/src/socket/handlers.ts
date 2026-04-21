@@ -11,6 +11,9 @@ import {
   getLobbyPlayers,
   addBot,
   getBotIds,
+  persistRoom,
+  restoreRoom,
+  cleanupRoom,
 } from './roomManager';
 
 type AppSocket = Socket<ClientToServerEvents, ServerToClientEvents, {}, SocketData>;
@@ -110,8 +113,13 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
     }
   });
 
-  socket.on('game:rejoin', (roomId, playerId, callback) => {
-    const ok = rejoinRoom(roomId, playerId, socket.id);
+  socket.on('game:rejoin', async (roomId, playerId, callback) => {
+    // Try in-memory first, then restore from DB if server restarted
+    let ok = rejoinRoom(roomId, playerId, socket.id);
+    if (!ok) {
+      const restoredEngine = await restoreRoom(roomId);
+      if (restoredEngine) ok = rejoinRoom(roomId, playerId, socket.id);
+    }
     if (!ok) { callback('Cannot rejoin'); return; }
     socket.data.playerId = playerId;
     socket.data.roomId = roomId;
@@ -120,10 +128,8 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
 
     const engine = getEngine(roomId);
     if (engine) {
-      // Game is running — send personalized game state
       broadcastGameState(io, roomId);
     } else {
-      // Still in lobby — send player list so WaitingRoom renders correctly
       socket.emit('lobby:updated', getLobbyPlayers(roomId));
     }
   });
@@ -149,15 +155,18 @@ function broadcastGameState(io: AppServer, roomId: string): void {
   if (!room) return;
 
   for (const member of room.players) {
-    if (member.isBot) continue; // bots have no socket to send to
+    if (member.isBot) continue;
     const personalState = buildPublicState(state, member.id);
     io.to(member.socketId).emit('game:state', personalState);
   }
 
-  // After broadcasting, auto-play for any bots that haven't chosen yet
-  if (state.phase === 'choose') {
-    triggerBots(io, roomId);
-  }
+  // Persist after every state change
+  persistRoom(roomId);
+
+  // Cleanup DB when game fully ends
+  if (state.phase === 'finished') cleanupRoom(roomId);
+
+  if (state.phase === 'choose') triggerBots(io, roomId);
 }
 
 /** Auto-submit actions for all bot players, with a small delay for realism. */

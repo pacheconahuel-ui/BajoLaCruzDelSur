@@ -1,5 +1,6 @@
 import { GameState, PublicGameState, PublicPlayerState, PlayerState } from '@7wonders/shared';
 import { GameEngine, createGameState } from '../game/gameEngine';
+import { saveGame, loadGame, deleteGame } from '../db/persistence';
 
 interface RoomPlayer {
   id: string;
@@ -77,6 +78,7 @@ export function startGame(roomId: string, requesterId: string): GameState | { er
   engine.startAge();
   room.engine = engine;
   room.phase = 'playing';
+  saveGame(roomId, engine.getState()).catch(() => {});
   return engine.getState();
 }
 
@@ -129,4 +131,37 @@ export function getBotIds(roomId: string): string[] {
 
 export function getLobbyPlayers(roomId: string): { id: string; name: string; isBot?: boolean }[] {
   return rooms.get(roomId)?.players.map(p => ({ id: p.id, name: p.name, isBot: p.isBot })) ?? [];
+}
+
+/** Persist current engine state to DB. Call after every state change. */
+export function persistRoom(roomId: string): void {
+  const engine = rooms.get(roomId)?.engine;
+  if (!engine) return;
+  saveGame(roomId, engine.getState()).catch(() => {});
+}
+
+/** Try to restore a room from DB after server restart. Returns engine or null. */
+export async function restoreRoom(roomId: string): Promise<GameEngine | null> {
+  if (rooms.has(roomId)) return rooms.get(roomId)!.engine;
+  const state = await loadGame(roomId);
+  if (!state) return null;
+
+  const engine = new GameEngine(state);
+  rooms.set(roomId, {
+    id: roomId,
+    players: state.players.map(p => ({
+      id: p.id,
+      name: p.name,
+      socketId: '',   // will be updated on rejoin
+      isBot: p.isBot,
+    })),
+    engine,
+    phase: state.phase === 'scoring' || state.phase === 'finished' ? 'finished' : 'playing',
+  });
+  return engine;
+}
+
+/** Remove room from DB when game ends. */
+export function cleanupRoom(roomId: string): void {
+  deleteGame(roomId).catch(() => {});
 }

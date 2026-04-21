@@ -5,6 +5,7 @@ import cors from 'cors';
 import { Server } from 'socket.io';
 import { ClientToServerEvents, ServerToClientEvents, SocketData } from '@7wonders/shared';
 import { registerHandlers } from './socket/handlers';
+import { initDb } from './db/persistence';
 
 const app = express();
 const server = http.createServer(app);
@@ -24,6 +25,7 @@ io.on('connection', socket => {
   registerHandlers(io, socket);
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log(`7 Wonders server listening on port ${PORT}`);
+  await initDb();  // no-op if DATABASE_URL is not set
 });

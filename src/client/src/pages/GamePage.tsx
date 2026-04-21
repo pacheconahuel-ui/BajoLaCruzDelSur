@@ -22,6 +22,7 @@ export default function GamePage({ state }: Props) {
   const [actionType, setActionType] = useState<'build_structure' | 'build_wonder_stage' | 'discard' | null>(null);
   const [error, setError] = useState('');
   const [showHelp, setShowHelp] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'me' | 'left' | 'right'>('me');
 
   function cancelSelection() {
     setSelectedCard(null);
@@ -88,15 +89,33 @@ export default function GamePage({ state }: Props) {
         ))}
       </div>
 
+      {/* ── Mobile tab bar ── */}
+      <div className="mobile-tabs">
+        <button
+          className={mobileTab === 'left' ? 'active' : ''}
+          onClick={() => setMobileTab('left')}
+        >← {leftNeighbor.name}</button>
+        <button
+          className={mobileTab === 'me' ? 'active' : ''}
+          onClick={() => setMobileTab('me')}
+        >🏛 Yo</button>
+        <button
+          className={mobileTab === 'right' ? 'active' : ''}
+          onClick={() => setMobileTab('right')}
+        >{rightNeighbor.name} →</button>
+      </div>
+
       {/* ── Main grid: neighbors + my area ── */}
       <div className="game-table" style={{ marginBottom: 8 }}>
         <div className="game-grid">
 
         {/* Left neighbor */}
-        <NeighborCity title={`← ${leftNeighbor.name}`} player={leftNeighbor} />
+        <div className={`mobile-panel ${mobileTab === 'left' ? 'mobile-visible' : 'mobile-hidden'}`}>
+          <NeighborCity title={`← ${leftNeighbor.name}`} player={leftNeighbor} />
+        </div>
 
         {/* My city (centre) */}
-        <div className="mat-me">
+        <div className={`mat-me mobile-panel ${mobileTab === 'me' ? 'mobile-visible' : 'mobile-hidden'}`}>
           {/* Wonder board */}
           <div style={{ marginBottom: 10 }}>
             <WonderBoard player={me} compact />
@@ -172,7 +191,9 @@ export default function GamePage({ state }: Props) {
         </div>
 
         {/* Right neighbor */}
-        <NeighborCity title={`${rightNeighbor.name} →`} player={rightNeighbor} />
+        <div className={`mobile-panel ${mobileTab === 'right' ? 'mobile-visible' : 'mobile-hidden'}`}>
+          <NeighborCity title={`${rightNeighbor.name} →`} player={rightNeighbor} />
+        </div>
         </div>{/* end game-grid */}
       </div>{/* end game-table */}
 
