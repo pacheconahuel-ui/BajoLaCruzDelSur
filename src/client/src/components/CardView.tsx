@@ -55,7 +55,7 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
         borderRadius: 10,
         cursor: disabled ? 'default' : onClick ? 'pointer' : 'default',
         opacity: disabled ? 0.4 : dimmed ? 0.6 : 1,
-        width: 126,
+        width: 145,
         flexShrink: 0,
         position: 'relative',
         transition: 'transform 0.14s, box-shadow 0.14s, opacity 0.14s',
@@ -71,7 +71,7 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
     >
       {/* Illustration — top 55% of card */}
       <div style={{
-        height: 102,
+        height: 118,
         backgroundImage: `url(${img})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center top',
@@ -91,7 +91,7 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
         </div>
         {/* Gradient fade to card body */}
         <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: 36,
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 42,
           background: `linear-gradient(transparent, ${bg})`,
         }} />
       </div>

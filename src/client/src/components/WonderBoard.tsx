@@ -31,8 +31,8 @@ function StageSlots({ built, total, size }: { built: number; total: number; size
       {Array.from({ length: total }).map((_, i) => (
         <div key={i} style={{
           flex: size === 'sm' ? 1 : undefined,
-          width: size === 'sm' ? undefined : 34,
-          height: size === 'sm' ? 22 : 34,
+          width: size === 'sm' ? undefined : 38,
+          height: size === 'sm' ? 24 : 38,
           borderRadius: size === 'sm' ? 4 : 6,
           background: i < built ? 'linear-gradient(135deg, #d4a017, #8a6a10)' : 'rgba(255,255,255,0.05)',
           border: i < built ? `${size === 'sm' ? 1 : 1.5}px solid #fcd34d` : `${size === 'sm' ? 1 : 1.5}px solid rgba(255,255,255,0.12)`,
@@ -66,7 +66,7 @@ export default function WonderBoard({ player, compact }: Props) {
       }}>
         {/* Illustration strip with name overlay */}
         <div style={{
-          height: 60,
+          height: 70,
           backgroundImage: img ? `url(${img})` : undefined,
           backgroundColor: '#1c1610',
           backgroundSize: 'cover',
@@ -106,7 +106,7 @@ export default function WonderBoard({ player, compact }: Props) {
     }}>
       {/* Illustration banner */}
       <div style={{
-        height: 92,
+        height: 106,
         backgroundImage: img ? `url(${img})` : undefined,
         backgroundColor: '#1c1610',
         backgroundSize: 'cover',

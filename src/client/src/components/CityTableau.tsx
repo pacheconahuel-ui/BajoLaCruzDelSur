@@ -25,14 +25,14 @@ const COLOR_LABEL_SM: Record<CardColor, string> = {
 };
 
 // Visible peek per card when stacked
-const OVERLAP: Record<'md' | 'sm', number> = { md: 32, sm: 20 };
+const OVERLAP: Record<'md' | 'sm', number> = { md: 36, sm: 22 };
 
 // Actual rendered card heights (imgH + name + effect + borders)
-// md: 60 + 34 + 24 + 4 = ~122px   sm: 36 + 26 + 18 + 4 = ~84px
-const CARD_H: Record<'md' | 'sm', number> = { md: 122, sm: 84 };
+// md: 70 + 38 + 26 + 4 = ~138px   sm: 42 + 28 + 20 + 4 = ~94px
+const CARD_H: Record<'md' | 'sm', number> = { md: 138, sm: 94 };
 
 // Column widths must match TableauCard widths
-const COL_W: Record<'md' | 'sm', number> = { md: 96, sm: 62 };
+const COL_W: Record<'md' | 'sm', number> = { md: 110, sm: 68 };
 
 interface Props {
   structures: Card[];

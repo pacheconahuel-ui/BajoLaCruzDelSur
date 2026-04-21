@@ -55,7 +55,7 @@ export default function GamePage({ state }: Props) {
   const waiting = me.isReady;
 
   return (
-    <div style={{ padding: '8px 10px', maxWidth: 1200, margin: '0 auto', paddingBottom: 24 }}>
+    <div style={{ padding: '8px 12px', maxWidth: 1400, margin: '0 auto', paddingBottom: 24 }}>
 
       {/* ── Header bar ── */}
       <div style={{
