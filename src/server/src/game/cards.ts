@@ -406,11 +406,11 @@ export const AGE1_CARDS: Card[] = [
     effects: [{ type: 'trade_discount_both', resources: ['gray'] }],
   },
   {
-    id: 'marketplace_6',
+    id: 'marketplace_7',
     name: 'Mercado',
     color: 'yellow',
     age: 1,
-    minPlayers: [6],
+    minPlayers: [7],
     cost: {},
     chainTo: ['Caravansería'],
     effects: [{ type: 'trade_discount_both', resources: ['gray'] }],
