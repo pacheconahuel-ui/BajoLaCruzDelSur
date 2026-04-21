@@ -132,12 +132,27 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
         justifyContent: 'space-between',
         alignItems: 'center',
       }}>
-        <span>{costStr}</span>
-        {card.chainTo && card.chainTo.length > 0 && (
-          <span title={`Desbloquea: ${card.chainTo.join(', ')}`} style={{ color: '#fcd34d', fontSize: '0.62rem' }}>
-            ⛓
-          </span>
-        )}
+        <span>
+          {freeReason === 'chain' ? (
+            <span style={{ color: '#4ade80' }}>⛓ gratis (cadena)</span>
+          ) : freeReason === 'olympia' ? (
+            <span style={{ color: '#a78bfa' }}>🏛 gratis (Olimpia)</span>
+          ) : (
+            costStr
+          )}
+        </span>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          {card.chainFrom && (
+            <span title={`Gratis si tenés: ${card.chainFrom}`} style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.6rem' }}>
+              ⛓{card.chainFrom.slice(0, 8)}
+            </span>
+          )}
+          {card.chainTo && card.chainTo.length > 0 && (
+            <span title={`Desbloquea: ${card.chainTo.join(', ')}`} style={{ color: '#fcd34d', fontSize: '0.62rem' }}>
+              ⛓→
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Trade cost badge with direction */}

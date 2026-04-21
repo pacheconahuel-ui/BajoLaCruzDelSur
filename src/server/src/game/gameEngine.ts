@@ -395,7 +395,7 @@ export class GameEngine {
 
   private addLog(msg: string): void {
     this.state.log.push(msg);
-    if (this.state.log.length > 20) this.state.log.shift();
+    if (this.state.log.length > 40) this.state.log.shift();
   }
 
   /** Generate a strategic action for a bot player. */

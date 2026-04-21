@@ -214,9 +214,9 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
 
           {/* My city (centre) */}
           <div className={`mat-me mobile-panel ${mobileTab === 'me' ? 'mobile-visible' : 'mobile-hidden'}`}>
-            {/* Wonder board */}
+            {/* Wonder board — full view for the current player */}
             <div style={{ marginBottom: 10 }}>
-              <WonderBoard player={me} compact />
+              <WonderBoard player={me} />
             </div>
 
             {/* Built structures */}
@@ -318,12 +318,15 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
                 Nadie ha escrito aún…
               </div>
             ) : (
-              chatMessages.map((m, i) => (
-                <div key={i} style={{ fontSize: '0.75rem', padding: '2px 0', color: 'var(--color-text)' }}>
-                  <span style={{ color: 'var(--color-gold)', fontWeight: 700 }}>{m.playerName}: </span>
-                  <span>{m.text}</span>
-                </div>
-              ))
+              chatMessages.map((m, i) => {
+                const isSystem = m.playerName === '⚡ Sistema';
+                return (
+                  <div key={i} style={{ fontSize: '0.75rem', padding: '2px 0', color: isSystem ? 'var(--color-text-dim)' : 'var(--color-text)', fontStyle: isSystem ? 'italic' : 'normal' }}>
+                    {!isSystem && <span style={{ color: 'var(--color-gold)', fontWeight: 700 }}>{m.playerName}: </span>}
+                    <span>{m.text}</span>
+                  </div>
+                );
+              })
             )}
             <div ref={chatEndRef} />
           </div>
@@ -362,7 +365,7 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
             {state.log.length === 0 ? (
               <div style={{ color: 'var(--color-text-dim)', fontSize: '0.72rem', fontStyle: 'italic', padding: '6px 0' }}>Sin eventos aún.</div>
             ) : (
-              [...state.log].reverse().slice(0, 8).map((entry, i) => (
+              [...state.log].reverse().slice(0, 14).map((entry, i) => (
                 <div key={i} style={{
                   fontSize: '0.75rem', padding: '3px 0',
                   borderBottom: '1px solid rgba(255,255,255,0.04)',
@@ -554,7 +557,7 @@ function NeighborCity({ title, player }: { title: string; player: PublicPlayerSt
           {title} {player.hasChosen ? '✓' : '⋯'}
         </span>
         <span style={{ color: 'var(--color-text-dim)', fontWeight: 400, fontSize: '0.72rem' }}>
-          💰{player.coins} 🛡{player.shields}
+          💰{player.coins} 🛡{player.shields} 🃏{player.handSize}
         </span>
       </div>
 
