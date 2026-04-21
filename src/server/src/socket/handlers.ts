@@ -154,10 +154,11 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
   // ── DISCONNECT ────────────────────────────────────────────────────────────
 
   socket.on('disconnect', () => {
-    // Socket is gone but player data is preserved — they can rejoin
-    const { roomId } = socket.data;
-    if (roomId) {
-      io.to(roomId).emit('game:error', `${socket.data.playerName} disconnected.`);
+    // Socket is gone but player data is preserved — they can rejoin within the session
+    const { roomId, playerName } = socket.data;
+    if (roomId && playerName) {
+      // Use game:chat to notify others as a system message (less alarming than an error)
+      io.to(roomId).emit('game:chat', '⚡ Sistema', `${playerName} se desconectó. Puede reconectarse.`, Date.now());
     }
   });
 }

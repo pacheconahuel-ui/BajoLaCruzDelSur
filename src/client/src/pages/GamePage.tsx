@@ -75,7 +75,27 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
   if (state.phase === 'scoring' || state.phase === 'finished') {
     return <ScoringScreen state={state} onReturnToMenu={onReturnToMenu} />;
   }
-  if (state.phase === 'choose_from_discard') return <DiscardPickerScreen state={state} />;
+  if (state.phase === 'choose_from_discard') {
+    // If it's my turn to pick from discard, show the picker screen
+    if (state.pendingDiscardPlayerId === state.myState.id) {
+      return <DiscardPickerScreen state={state} />;
+    }
+    // Otherwise show a waiting message
+    const pickerName = state.players.find(p => p.id === state.pendingDiscardPlayerId)?.name ?? '…';
+    return (
+      <div style={{ maxWidth: 480, margin: '80px auto', padding: '0 20px', textAlign: 'center' }}>
+        <div style={{ fontSize: '2rem', marginBottom: 12 }}>📜</div>
+        <h2 style={{ color: 'var(--color-gold)', marginBottom: 8 }}>Halicarnaso activa</h2>
+        <p style={{ color: 'var(--color-text-dim)', lineHeight: 1.6 }}>
+          <strong style={{ color: 'var(--color-text)' }}>{pickerName}</strong> está eligiendo
+          una carta del descarte (Etapa 2 de su Maravilla).
+        </p>
+        <p style={{ color: 'var(--color-text-dim)', fontSize: '0.82rem', marginTop: 12 }}>
+          El turno continuará cuando elija…
+        </p>
+      </div>
+    );
+  }
 
   const waiting = me.isReady;
 
