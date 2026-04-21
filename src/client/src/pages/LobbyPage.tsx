@@ -74,6 +74,7 @@ export default function LobbyPage({ onCreate, onJoin, error }: Props) {
             onChange={e => setRoomCode(e.target.value.toUpperCase())}
             placeholder="ABC123"
             maxLength={6}
+            autoFocus
             style={{ letterSpacing: 5, fontWeight: 800, fontSize: '1.3rem', textAlign: 'center' }}
             onKeyDown={e => e.key === 'Enter' && handleJoin()}
           />

@@ -216,9 +216,21 @@ function triggerBotDiscardPick(io: AppServer, roomId: string): void {
     if (discard.length === 0) {
       err = currentEngine.skipDiscardPick(botId);
     } else {
-      // Pick a random card from the discard pile
-      const card = discard[Math.floor(Math.random() * discard.length)];
-      err = currentEngine.buildFromDiscard(botId, card.id);
+      // Pick the highest-value card from the discard pile
+      const scored = discard.map(card => {
+        let v = 0;
+        for (const e of card.effects) {
+          if (e.type === 'victory_points') v += (e as any).points * 3;
+          else if (e.type === 'shields') v += (e as any).count * 3;
+          else if (e.type === 'science') v += 6;
+          else if (e.type === 'produce_resource') v += 4;
+          else if (e.type === 'produce_choice') v += 3;
+          else v += 1;
+        }
+        return { card, v };
+      });
+      scored.sort((a, b) => b.v - a.v);
+      err = currentEngine.buildFromDiscard(botId, scored[0].card.id);
     }
 
     if (!err) {

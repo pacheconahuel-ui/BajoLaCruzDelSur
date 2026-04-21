@@ -6,21 +6,6 @@ interface Props {
 }
 
 export default function RevealDisplay({ state }: Props) {
-  // Extract what each player did from the most recent log entries
-  // Log format: "X construyó Y." / "X descartó Y y ganó…" / "X construyó la etapa N…"
-  const logActions: Record<string, string> = {};
-  for (const entry of state.log) {
-    const buildMatch = entry.match(/^(.+?) construyó (.+?)\./);
-    const discardMatch = entry.match(/^(.+?) descartó (.+?) y ganó/);
-    const wonderMatch = entry.match(/^(.+?) construyó la etapa (\d+) de su Maravilla/);
-    const discardPickMatch = entry.match(/^(.+?) construyó (.+?) desde el descarte/);
-
-    if (buildMatch) logActions[buildMatch[1]] = `🏗 ${buildMatch[2]}`;
-    else if (discardMatch) logActions[discardMatch[1]] = `🗑 ${discardMatch[2]} (+3💰)`;
-    else if (wonderMatch) logActions[wonderMatch[1]] = `🏛 Etapa ${wonderMatch[2]} de Maravilla`;
-    else if (discardPickMatch) logActions[discardPickMatch[1]] = `📜 ${discardPickMatch[2]} (descarte)`;
-  }
-
   return (
     <div style={{
       maxWidth: 700,
@@ -45,8 +30,6 @@ export default function RevealDisplay({ state }: Props) {
           const myActionType = isMe && state.myState.pendingAction
             ? state.myState.pendingAction.action.type
             : null;
-          const logAction = logActions[p.name];
-
           return (
             <div
               key={p.id}
@@ -86,17 +69,25 @@ export default function RevealDisplay({ state }: Props) {
                      : '🗑 Descarta'}
                   </span>
                 </div>
-              ) : logAction ? (
+              ) : p.hasChosen ? (
                 <div style={{
-                  fontSize: '0.82rem', color: 'var(--color-text)', fontWeight: 500,
+                  fontSize: '0.8rem', color: '#4ade80', fontWeight: 600,
+                  display: 'flex', alignItems: 'center', gap: 6,
                 }}>
-                  {logAction}
+                  <span style={{
+                    display: 'inline-block',
+                    width: 8, height: 8, borderRadius: '50%',
+                    background: '#4ade80',
+                    boxShadow: '0 0 6px #4ade80',
+                  }} />
+                  Eligió — resolviendo…
                 </div>
               ) : (
                 <div style={{
-                  fontSize: '0.8rem', color: '#4ade80', fontWeight: 600,
+                  fontSize: '0.8rem', color: 'var(--color-text-dim)',
+                  display: 'flex', alignItems: 'center', gap: 6,
                 }}>
-                  ✓ Listo
+                  <span>⏳ Pensando…</span>
                 </div>
               )}
             </div>
