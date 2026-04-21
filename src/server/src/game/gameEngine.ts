@@ -125,11 +125,14 @@ export class GameEngine {
     // If a wonder stage triggered choose_from_discard, pause here.
     // buildFromDiscard() will complete the age/turn flow when player picks.
     if ((this.state.phase as string) === 'choose_from_discard') {
-      // Discard remaining hands (turn 6 or not — they stay empty for turn 6 anyway)
-      for (const player of this.state.players) {
-        if (player.hand.length > 0) {
-          this.state.discardPile.push(...player.hand);
-          player.hand = [];
+      // On turn 6, hands are finished — discard them all before the pick
+      // On turns 1-5, hands are NOT discarded; they will be passed to neighbors after the pick
+      if (this.state.turn === 6) {
+        for (const player of this.state.players) {
+          if (player.hand.length > 0) {
+            this.state.discardPile.push(...player.hand);
+            player.hand = [];
+          }
         }
       }
       return;
