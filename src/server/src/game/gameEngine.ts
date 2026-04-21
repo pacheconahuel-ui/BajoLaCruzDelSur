@@ -181,13 +181,12 @@ export class GameEngine {
       const stageIdx = player.wonderStagesBuilt;
       const stage = wonder.stages[stageIdx];
 
-      // Apply trade: use explicit trade if provided, otherwise auto-apply computed
+      // Always recompute trade server-side (ignore client-provided trade to prevent cheating)
       const stageOpt = validateBuildWonderStage(player, left, right, wonder.stages);
-      const wonderTrade = action.trade ?? stageOpt.tradeCost ?? null;
-      if (wonderTrade) {
-        player.coins -= wonderTrade.leftCoins + wonderTrade.rightCoins;
-        left.coins += wonderTrade.leftCoins;
-        right.coins += wonderTrade.rightCoins;
+      if (stageOpt.tradeCost) {
+        player.coins -= stageOpt.tradeCost.leftCoins + stageOpt.tradeCost.rightCoins;
+        left.coins += stageOpt.tradeCost.leftCoins;
+        right.coins += stageOpt.tradeCost.rightCoins;
       }
 
       this.state.discardPile.push(card); // card used as stage marker goes face-down
@@ -210,12 +209,11 @@ export class GameEngine {
         // Pay coins to bank
         if (card.cost.coins) player.coins -= card.cost.coins;
 
-        // Apply trade: use explicit trade if provided, otherwise auto-apply computed trade
-        const tradeToApply = action.trade ?? opt.tradeCost ?? null;
-        if (tradeToApply) {
-          player.coins -= tradeToApply.leftCoins + tradeToApply.rightCoins;
-          left.coins += tradeToApply.leftCoins;
-          right.coins += tradeToApply.rightCoins;
+        // Always recompute trade server-side (ignore client-provided trade to prevent cheating)
+        if (opt.tradeCost) {
+          player.coins -= opt.tradeCost.leftCoins + opt.tradeCost.rightCoins;
+          left.coins += opt.tradeCost.leftCoins;
+          right.coins += opt.tradeCost.rightCoins;
         }
       }
 
