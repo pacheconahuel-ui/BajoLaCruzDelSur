@@ -359,9 +359,9 @@ export class GameEngine {
     resolveMilitary(this.state);
 
     if (this.state.age === 3) {
-      this.state.phase = 'scoring';
-      computeScores(this.state);
-      this.addLog('¡Fin del juego! Puntajes finales calculados.');
+      // Show age 3 military display before scoring (startNextAge will compute scores)
+      this.state.phase = 'military';
+      this.addLog('Era 3 terminada. Batallas finales resueltas.');
     } else {
       this.state.age = (this.state.age + 1) as Age;
       // Re-grant Olympia free build for new age if player has stage 2 built
@@ -377,10 +377,17 @@ export class GameEngine {
     }
   }
 
-  /** Advance from 'military' display phase to next age. */
+  /** Advance from 'military' display phase: start next age or compute final scores. */
   startNextAge(): void {
     if (this.state.phase !== 'military') return;
-    this.startAge();
+    if (this.state.age === 3) {
+      // Age 3 military display done → compute final scores
+      this.state.phase = 'scoring';
+      computeScores(this.state);
+      this.addLog('¡Fin del juego! Puntajes finales calculados.');
+    } else {
+      this.startAge();
+    }
   }
 
   private leftNeighbor(playerIdx: number): PlayerState {
