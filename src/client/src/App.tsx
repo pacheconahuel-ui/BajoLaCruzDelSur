@@ -204,9 +204,20 @@ function WaitingRoom({
   onStart: () => void;
   error: string;
 }) {
+  const [copied, setCopied] = useState(false);
+
   function addBot() {
     socket.emit('lobby:add_bot', (err?: string) => {
       if (err) console.error(err);
+    });
+  }
+
+  function copyCode() {
+    navigator.clipboard.writeText(roomId).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      // fallback: select the code text
     });
   }
 
@@ -215,12 +226,27 @@ function WaitingRoom({
       <div style={{ textAlign: 'center', marginBottom: 28 }}>
         <div style={{ fontSize: '2rem', marginBottom: 4 }}>⚱</div>
         <h2 style={{ fontSize: '1.5rem', color: 'var(--color-gold)' }}>Sala de espera</h2>
-        <div style={{ marginTop: 10, display: 'inline-block', background: 'var(--color-surface2)', borderRadius: 8, padding: '8px 20px' }}>
-          <span style={{ color: 'var(--color-text-dim)', fontSize: '0.82rem' }}>Código: </span>
-          <strong style={{ fontSize: '1.6rem', letterSpacing: 5, color: 'var(--color-gold)', fontFamily: 'monospace' }}>{roomId}</strong>
+        <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+          <div style={{ background: 'var(--color-surface2)', borderRadius: 8, padding: '8px 20px' }}>
+            <span style={{ color: 'var(--color-text-dim)', fontSize: '0.82rem' }}>Código: </span>
+            <strong style={{ fontSize: '1.6rem', letterSpacing: 5, color: 'var(--color-gold)', fontFamily: 'monospace' }}>{roomId}</strong>
+          </div>
+          <button
+            onClick={copyCode}
+            title="Copiar código"
+            style={{
+              background: copied ? '#1a3d2a' : 'var(--color-surface2)',
+              color: copied ? 'var(--color-success)' : 'var(--color-text-dim)',
+              padding: '8px 14px', fontSize: '0.85rem', borderRadius: 8,
+              border: `1px solid ${copied ? 'var(--color-success)' : 'var(--color-border)'}`,
+              transition: 'all 0.2s',
+            }}
+          >
+            {copied ? '✓ Copiado' : '📋 Copiar'}
+          </button>
         </div>
-        <p style={{ marginTop: 6, color: 'var(--color-text-dim)', fontSize: '0.8rem' }}>
-          Compartí este código con tus amigos (misma WiFi: usá tu IP local)
+        <p style={{ marginTop: 8, color: 'var(--color-text-dim)', fontSize: '0.8rem' }}>
+          Compartí este código con tus amigos (misma red: usá tu IP local)
         </p>
       </div>
 
