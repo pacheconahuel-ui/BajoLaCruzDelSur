@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { PublicGameState, Card, PendingAction, PublicPlayerState } from '@7wonders/shared';
+import { useState, useRef, useEffect } from 'react';
+import { PublicGameState, Card, PendingAction, PublicPlayerState, MilitaryToken } from '@7wonders/shared';
 import { socket } from '../socket/socket';
 import CardView from '../components/CardView';
 import CityTableau from '../components/CityTableau';
@@ -12,17 +12,32 @@ import DiscardPickerScreen from './DiscardPickerScreen';
 import { computeAffordability, computeWonderAffordability, getWonderStageCost, WonderAffordability } from '../utils/affordability';
 import { formatCost } from '../utils/icons';
 import CheatSheet from '../components/CheatSheet';
+import type { ChatMessage } from '../App';
 
 interface Props {
   state: PublicGameState;
+  onAbandon?: () => void;
+  chatMessages?: ChatMessage[];
+  onChat?: (msg: string) => void;
+  onReturnToMenu?: () => void;
 }
 
-export default function GamePage({ state }: Props) {
-  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
-  const [actionType, setActionType] = useState<'build_structure' | 'build_wonder_stage' | 'discard' | null>(null);
-  const [error, setError] = useState('');
-  const [showHelp, setShowHelp] = useState(false);
-  const [mobileTab, setMobileTab] = useState<'me' | 'left' | 'right'>('me');
+export default function GamePage({ state, onAbandon, chatMessages = [], onChat, onReturnToMenu }: Props) {
+  const [selectedCard, setSelectedCard]   = useState<Card | null>(null);
+  const [actionType, setActionType]       = useState<'build_structure' | 'build_wonder_stage' | 'discard' | null>(null);
+  const [error, setError]                 = useState('');
+  const [showHelp, setShowHelp]           = useState(false);
+  const [mobileTab, setMobileTab]         = useState<'me' | 'left' | 'right'>('me');
+  const [showAbandon, setShowAbandon]     = useState(false);
+  const [showStats, setShowStats]         = useState(false);
+  const [showMilitary, setShowMilitary]   = useState(false);
+  const [chatInput, setChatInput]         = useState('');
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll chat to latest message
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages.length]);
 
   function cancelSelection() {
     setSelectedCard(null);
@@ -30,9 +45,9 @@ export default function GamePage({ state }: Props) {
     setError('');
   }
 
-  const me = state.myState;
-  const myIndex = state.myIndex;
-  const n = state.players.length;
+  const me           = state.myState;
+  const myIndex      = state.myIndex;
+  const n            = state.players.length;
   const leftNeighbor  = state.players[(myIndex - 1 + n) % n];
   const rightNeighbor = state.players[(myIndex + 1) % n];
 
@@ -47,15 +62,41 @@ export default function GamePage({ state }: Props) {
     });
   }
 
+  function sendChat(e: React.FormEvent) {
+    e.preventDefault();
+    const msg = chatInput.trim();
+    if (!msg) return;
+    onChat?.(msg);
+    setChatInput('');
+  }
+
   if (state.phase === 'reveal' || state.phase === 'action') return <RevealDisplay state={state} />;
   if (state.phase === 'military') return <MilitaryDisplay state={state} />;
-  if (state.phase === 'scoring' || state.phase === 'finished') return <ScoringScreen state={state} />;
+  if (state.phase === 'scoring' || state.phase === 'finished') {
+    return <ScoringScreen state={state} onReturnToMenu={onReturnToMenu} />;
+  }
   if (state.phase === 'choose_from_discard') return <DiscardPickerScreen state={state} />;
 
   const waiting = me.isReady;
 
+  // Check if any era has completed military tokens
+  const hasAnyMilitary = state.players.some(p => p.militaryTokens.length > 0);
+
   return (
-    <div style={{ padding: '8px 12px', maxWidth: 1400, margin: '0 auto', paddingBottom: 24 }}>
+    <div style={{ padding: '6px 10px', maxWidth: 1600, margin: '0 auto', paddingBottom: 16 }}>
+
+      {/* ── Game title ── */}
+      <div style={{
+        textAlign: 'center', paddingBottom: 4, paddingTop: 4, marginBottom: 4,
+      }}>
+        <span style={{
+          fontSize: '1.5rem', fontWeight: 900, color: 'var(--color-gold)',
+          letterSpacing: '0.12em', textTransform: 'uppercase',
+          textShadow: '0 0 18px rgba(212,160,23,0.35)',
+        }}>
+          ⚱ 7 Wonders
+        </span>
+      </div>
 
       {/* ── Header bar ── */}
       <div style={{
@@ -64,20 +105,57 @@ export default function GamePage({ state }: Props) {
         padding: '7px 12px', marginBottom: 8, flexWrap: 'wrap',
       }}>
         <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--color-gold)' }}>
-          ⚱ Era {state.age}
+          Era {state.age}
         </span>
         <span style={{ fontSize: '0.8rem', color: 'var(--color-text-dim)' }}>
           Turno {state.turn}/6 · {state.handDirection === 'left' ? '← izquierda' : '→ derecha'}
         </span>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: '0.8rem', color: waiting ? 'var(--color-success)' : 'var(--color-gold)' }}>
-            {waiting ? '⏳ Esperando…' : '🃏 Tu turno'}
-          </span>
+        <span style={{ fontSize: '0.8rem', color: waiting ? 'var(--color-success)' : 'var(--color-gold)' }}>
+          {waiting ? '⏳ Esperando…' : '🃏 Tu turno'}
+        </span>
+
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+          {/* Live stats button */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => { setShowStats(s => !s); setShowMilitary(false); }}
+              style={{ background: 'var(--color-surface2)', color: 'var(--color-text-dim)', padding: '4px 10px', fontSize: '0.78rem', borderRadius: 20 }}
+            >
+              📊 Stats {showStats ? '▲' : '▼'}
+            </button>
+            {showStats && (
+              <StatsDropdown players={state.players} onClose={() => setShowStats(false)} />
+            )}
+          </div>
+
+          {/* Military history button */}
+          {hasAnyMilitary && (
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => { setShowMilitary(s => !s); setShowStats(false); }}
+                style={{ background: 'var(--color-surface2)', color: 'var(--color-text-dim)', padding: '4px 10px', fontSize: '0.78rem', borderRadius: 20 }}
+              >
+                ⚔ Batallas {showMilitary ? '▲' : '▼'}
+              </button>
+              {showMilitary && (
+                <MilitaryHistoryDropdown players={state.players} onClose={() => setShowMilitary(false)} />
+              )}
+            </div>
+          )}
+
           <button
             onClick={() => setShowHelp(true)}
-            style={{ background: 'var(--color-surface2)', color: 'var(--color-text-dim)', padding: '4px 10px', fontSize: '0.8rem', borderRadius: 20 }}
+            style={{ background: 'var(--color-surface2)', color: 'var(--color-text-dim)', padding: '4px 10px', fontSize: '0.78rem', borderRadius: 20 }}
           >
             ? Ayuda
+          </button>
+
+          {/* Abandon button */}
+          <button
+            onClick={() => setShowAbandon(true)}
+            style={{ background: '#3a1414', color: '#f87171', padding: '4px 10px', fontSize: '0.78rem', borderRadius: 20, border: '1px solid #7f2929' }}
+          >
+            🚪 Salir
           </button>
         </div>
       </div>
@@ -109,120 +187,335 @@ export default function GamePage({ state }: Props) {
       <div className="game-table" style={{ marginBottom: 8 }}>
         <div className="game-grid">
 
-        {/* Left neighbor */}
-        <div className={`mobile-panel ${mobileTab === 'left' ? 'mobile-visible' : 'mobile-hidden'}`}>
-          <NeighborCity title={`← ${leftNeighbor.name}`} player={leftNeighbor} />
-        </div>
-
-        {/* My city (centre) */}
-        <div className={`mat-me mobile-panel ${mobileTab === 'me' ? 'mobile-visible' : 'mobile-hidden'}`}>
-          {/* Wonder board */}
-          <div style={{ marginBottom: 10 }}>
-            <WonderBoard player={me} compact />
+          {/* Left neighbor */}
+          <div className={`mobile-panel ${mobileTab === 'left' ? 'mobile-visible' : 'mobile-hidden'}`}>
+            <NeighborCity title={`← ${leftNeighbor.name}`} player={leftNeighbor} />
           </div>
 
-          {/* Built structures */}
-          {me.builtStructures.length > 0 && (
+          {/* My city (centre) */}
+          <div className={`mat-me mobile-panel ${mobileTab === 'me' ? 'mobile-visible' : 'mobile-hidden'}`}>
+            {/* Wonder board */}
             <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--color-text-dim)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Ciudad · {me.builtStructures.length} estructuras
-              </div>
-              <CityTableau structures={me.builtStructures} size="md" />
+              <WonderBoard player={me} compact />
             </div>
-          )}
 
-          {/* ── Hand ── */}
-          {!waiting && (
-            <>
-              <div style={{ fontSize: '0.78rem', color: 'var(--color-text-dim)', marginBottom: 6 }}>
-                Mi mano ({me.hand.length} cartas) — toca una para seleccionarla
+            {/* Built structures */}
+            {me.builtStructures.length > 0 && (
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-dim)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Ciudad · {me.builtStructures.length} estructuras
+                </div>
+                <CityTableau structures={me.builtStructures} size="md" />
               </div>
-              <div className="hand-scroll" style={{ marginBottom: 22, paddingTop: 8, paddingRight: 24, paddingLeft: 8, paddingBottom: 16 }}>
-                {me.hand.map(card => {
-                  const aff = computeAffordability(card, me, leftNeighbor, rightNeighbor);
+            )}
+
+            {/* ── Hand ── */}
+            {!waiting && (
+              <>
+                <div style={{ fontSize: '0.78rem', color: 'var(--color-text-dim)', marginBottom: 6 }}>
+                  Mi mano ({me.hand.length} cartas) — toca una para seleccionarla
+                </div>
+                <div className="hand-scroll" style={{ marginBottom: 22, paddingTop: 8, paddingRight: 24, paddingLeft: 8, paddingBottom: 16 }}>
+                  {me.hand.map(card => {
+                    const aff = computeAffordability(card, me, leftNeighbor, rightNeighbor);
+                    return (
+                      <CardView
+                        key={card.id}
+                        card={card}
+                        selected={selectedCard?.id === card.id}
+                        dimmed={!aff.canBuild}
+                        tradeCost={aff.tradeCostTotal > 0 ? { total: aff.tradeCostTotal, leftCoins: aff.leftCoins, rightCoins: aff.rightCoins } : undefined}
+                        onClick={() => {
+                          setSelectedCard(card);
+                          setActionType(null);
+                          setError('');
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+
+                {selectedCard && (() => {
+                  const wonderStageCost = getWonderStageCost(me.wonderId, me.wonderStagesBuilt);
+                  const wonderAff = wonderStageCost
+                    ? computeWonderAffordability(me.wonderId, me.wonderStagesBuilt, me, leftNeighbor, rightNeighbor)
+                    : null;
                   return (
-                    <CardView
-                      key={card.id}
-                      card={card}
-                      selected={selectedCard?.id === card.id}
-                      // Never fully disabled — player can always discard.
-                      // We dim the card visually if unaffordable, but keep it clickable.
-                      dimmed={!aff.canBuild}
-                      tradeCost={aff.tradeCostTotal > 0 ? { total: aff.tradeCostTotal, leftCoins: aff.leftCoins, rightCoins: aff.rightCoins } : undefined}
-                      onClick={() => {
-                        setSelectedCard(card);
-                        setActionType(null);
-                        setError('');
-                      }}
+                    <ActionPanel
+                      card={selectedCard}
+                      wonderStagesBuilt={me.wonderStagesBuilt}
+                      aff={computeAffordability(selectedCard, me, leftNeighbor, rightNeighbor)}
+                      wonderAff={wonderAff}
+                      wonderStageCostStr={wonderStageCost ? formatCost(wonderStageCost) : null}
+                      actionType={actionType}
+                      onAction={setActionType}
+                      onConfirm={submitAction}
+                      onCancel={cancelSelection}
+                      error={error}
                     />
                   );
-                })}
+                })()}
+              </>
+            )}
+
+            {waiting && (
+              <div style={{ textAlign: 'center', padding: 16, color: 'var(--color-text-dim)' }}>
+                <div style={{ fontSize: '1.1rem', color: 'var(--color-success)', marginBottom: 8 }}>✓ Acción enviada</div>
+                <WaitingDots players={state.players} myIndex={myIndex} />
               </div>
+            )}
+          </div>
 
-              {selectedCard && (() => {
-                const wonderStageCost = getWonderStageCost(me.wonderId, me.wonderStagesBuilt);
-                const wonderAff = wonderStageCost
-                  ? computeWonderAffordability(me.wonderId, me.wonderStagesBuilt, me, leftNeighbor, rightNeighbor)
-                  : null;
-                return (
-                  <ActionPanel
-                    card={selectedCard}
-                    wonderStagesBuilt={me.wonderStagesBuilt}
-                    aff={computeAffordability(selectedCard, me, leftNeighbor, rightNeighbor)}
-                    wonderAff={wonderAff}
-                    wonderStageCostStr={wonderStageCost ? formatCost(wonderStageCost) : null}
-                    actionType={actionType}
-                    onAction={setActionType}
-                    onConfirm={submitAction}
-                    onCancel={cancelSelection}
-                    error={error}
-                  />
-                );
-              })()}
-            </>
-          )}
-
-          {waiting && (
-            <div style={{ textAlign: 'center', padding: 16, color: 'var(--color-text-dim)' }}>
-              <div style={{ fontSize: '1.1rem', color: 'var(--color-success)', marginBottom: 8 }}>✓ Acción enviada</div>
-              <WaitingDots players={state.players} myIndex={myIndex} />
-            </div>
-          )}
-        </div>
-
-        {/* Right neighbor */}
-        <div className={`mobile-panel ${mobileTab === 'right' ? 'mobile-visible' : 'mobile-hidden'}`}>
-          <NeighborCity title={`${rightNeighbor.name} →`} player={rightNeighbor} />
-        </div>
+          {/* Right neighbor */}
+          <div className={`mobile-panel ${mobileTab === 'right' ? 'mobile-visible' : 'mobile-hidden'}`}>
+            <NeighborCity title={`${rightNeighbor.name} →`} player={rightNeighbor} />
+          </div>
         </div>{/* end game-grid */}
       </div>{/* end game-table */}
 
-      {/* ── Log ── */}
-      {state.log.length > 0 && (
+      {/* ── Bottom panel: Chat + Log ── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 8,
+        marginBottom: 10,
+      }}>
+        {/* Chat panel */}
         <div style={{
           background: 'linear-gradient(135deg, #131008, #0d0b06)',
-          borderRadius: 8, padding: '8px 12px',
-          border: '1px solid rgba(255,255,255,0.06)',
+          borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)',
           boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.4)',
+          display: 'flex', flexDirection: 'column',
+          minHeight: 140, maxHeight: 200,
         }}>
-          <div style={{ fontSize: '0.68rem', color: 'var(--color-text-dim)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <div style={{ fontSize: '0.68rem', color: 'var(--color-text-dim)', padding: '7px 12px 4px', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+            💬 Chat
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '4px 12px', scrollbarWidth: 'thin' }}>
+            {chatMessages.length === 0 ? (
+              <div style={{ color: 'var(--color-text-dim)', fontSize: '0.72rem', fontStyle: 'italic', padding: '6px 0' }}>
+                Nadie ha escrito aún…
+              </div>
+            ) : (
+              chatMessages.map((m, i) => (
+                <div key={i} style={{ fontSize: '0.75rem', padding: '2px 0', color: 'var(--color-text)' }}>
+                  <span style={{ color: 'var(--color-gold)', fontWeight: 700 }}>{m.playerName}: </span>
+                  <span>{m.text}</span>
+                </div>
+              ))
+            )}
+            <div ref={chatEndRef} />
+          </div>
+          <form onSubmit={sendChat} style={{ display: 'flex', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '4px 8px', gap: 6 }}>
+            <input
+              value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+              placeholder="Escribe un mensaje…"
+              maxLength={200}
+              style={{
+                flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 4, padding: '4px 8px', fontSize: '0.75rem',
+                color: 'var(--color-text)', fontFamily: 'inherit',
+              }}
+            />
+            <button
+              type="submit"
+              style={{ background: 'var(--color-surface2)', color: 'var(--color-text-dim)', padding: '4px 10px', fontSize: '0.72rem', borderRadius: 4, border: '1px solid rgba(255,255,255,0.1)' }}
+            >
+              ↵
+            </button>
+          </form>
+        </div>
+
+        {/* Log panel */}
+        <div style={{
+          background: 'linear-gradient(135deg, #131008, #0d0b06)',
+          borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)',
+          boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.4)',
+          minHeight: 140, maxHeight: 200, overflowY: 'auto',
+        }}>
+          <div style={{ fontSize: '0.68rem', color: 'var(--color-text-dim)', padding: '7px 12px 4px', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
             📜 Registro
           </div>
-          {[...state.log].reverse().slice(0, 4).map((entry, i) => (
-            <div key={i} style={{
-              fontSize: '0.75rem', padding: '3px 0',
-              borderBottom: '1px solid rgba(255,255,255,0.04)',
-              color: i === 0 ? 'var(--color-text)' : 'var(--color-text-dim)',
-              fontStyle: i === 0 ? 'normal' : 'italic',
-            }}>
-              {i === 0 ? '▶ ' : '  '}{entry}
-            </div>
-          ))}
+          <div style={{ padding: '4px 12px' }}>
+            {state.log.length === 0 ? (
+              <div style={{ color: 'var(--color-text-dim)', fontSize: '0.72rem', fontStyle: 'italic', padding: '6px 0' }}>Sin eventos aún.</div>
+            ) : (
+              [...state.log].reverse().slice(0, 8).map((entry, i) => (
+                <div key={i} style={{
+                  fontSize: '0.75rem', padding: '3px 0',
+                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  color: i === 0 ? 'var(--color-text)' : 'var(--color-text-dim)',
+                  fontStyle: i === 0 ? 'normal' : 'italic',
+                }}>
+                  {i === 0 ? '▶ ' : '  '}{entry}
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      )}
+      </div>
+
+      {/* ── Footer ── */}
+      <div style={{ textAlign: 'center', padding: '6px 0 2px', color: 'var(--color-text-dim)', fontSize: '0.65rem', letterSpacing: '0.04em' }}>
+        © By Pipo · 7 Wonders Digital
+      </div>
 
       {/* ── Cheat sheet overlay ── */}
       {showHelp && <CheatSheet onClose={() => setShowHelp(false)} />}
+
+      {/* ── Abandon confirmation modal ── */}
+      {showAbandon && (
+        <div className="overlay-bg" onClick={() => setShowAbandon(false)}>
+          <div className="overlay-box" onClick={e => e.stopPropagation()} style={{ maxWidth: 360, textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', marginBottom: 8 }}>🚪</div>
+            <h3 style={{ color: 'var(--color-gold)', marginBottom: 8, fontSize: '1.1rem' }}>¿Abandonar la partida?</h3>
+            <p style={{ color: 'var(--color-text-dim)', fontSize: '0.85rem', marginBottom: 20, lineHeight: 1.5 }}>
+              Todos los jugadores serán enviados al menú principal. Esta acción no se puede deshacer.
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button
+                onClick={() => setShowAbandon(false)}
+                style={{ background: 'var(--color-surface2)', color: 'var(--color-text)', padding: '10px 24px' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => { setShowAbandon(false); onAbandon?.(); }}
+                style={{ background: '#7f2929', color: '#fff', padding: '10px 24px', fontWeight: 700 }}
+              >
+                🚪 Sí, abandonar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Stats dropdown ─────────────────────────────────────────────────────── */
+function StatsDropdown({ players, onClose }: { players: PublicPlayerState[]; onClose: () => void }) {
+  return (
+    <div
+      style={{
+        position: 'absolute', top: '110%', right: 0, zIndex: 50,
+        background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+        borderRadius: 8, padding: '10px 14px', minWidth: 280,
+        boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+      }}
+      onMouseLeave={onClose}
+    >
+      <div style={{ fontSize: '0.68rem', color: 'var(--color-text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+        📊 Estadísticas visibles
+      </div>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+        <thead>
+          <tr>
+            <th style={{ textAlign: 'left', padding: '3px 6px', color: 'var(--color-text-dim)', fontWeight: 600 }}>Jugador</th>
+            <th style={{ textAlign: 'center', padding: '3px 6px', color: 'var(--color-text-dim)', fontWeight: 600 }}>💰</th>
+            <th style={{ textAlign: 'center', padding: '3px 6px', color: 'var(--color-text-dim)', fontWeight: 600 }}>🛡</th>
+            <th style={{ textAlign: 'center', padding: '3px 6px', color: 'var(--color-text-dim)', fontWeight: 600 }}>🏛</th>
+            <th style={{ textAlign: 'center', padding: '3px 6px', color: 'var(--color-text-dim)', fontWeight: 600 }}>🃏</th>
+          </tr>
+        </thead>
+        <tbody>
+          {players.map(p => {
+            const militaryTotal = p.militaryTokens.reduce((s, t) => s + t.value, 0);
+            return (
+              <tr key={p.id} style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <td style={{ padding: '4px 6px', color: 'var(--color-text)', fontWeight: 500, whiteSpace: 'nowrap', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {p.name}
+                </td>
+                <td style={{ padding: '4px 6px', textAlign: 'center', color: '#fcd34d' }}>{p.coins}</td>
+                <td style={{ padding: '4px 6px', textAlign: 'center', color: '#93c5fd' }}>{p.shields}</td>
+                <td style={{ padding: '4px 6px', textAlign: 'center', color: 'var(--color-gold)' }}>{p.wonderStagesBuilt}</td>
+                <td style={{ padding: '4px 6px', textAlign: 'center', color: militaryTotal >= 0 ? '#4ade80' : '#f87171' }}>
+                  {militaryTotal > 0 ? `+${militaryTotal}` : militaryTotal}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div style={{ fontSize: '0.6rem', color: 'var(--color-text-dim)', marginTop: 6, lineHeight: 1.4 }}>
+        🏛 Etapas maravilla · 🃏 Puntos militares netos
+      </div>
+    </div>
+  );
+}
+
+/* ── Military history dropdown ──────────────────────────────────────────── */
+function MilitaryHistoryDropdown({ players, onClose }: { players: PublicPlayerState[]; onClose: () => void }) {
+  type Age = 1 | 2 | 3;
+  const completedAges = ([1, 2, 3] as Age[]).filter(age =>
+    players.some(p => p.militaryTokens.some((t: MilitaryToken) => t.age === age))
+  );
+
+  return (
+    <div
+      style={{
+        position: 'absolute', top: '110%', right: 0, zIndex: 50,
+        background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+        borderRadius: 8, padding: '10px 14px', minWidth: 300,
+        boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+      }}
+      onMouseLeave={onClose}
+    >
+      <div style={{ fontSize: '0.68rem', color: 'var(--color-text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+        ⚔ Historial de batallas
+      </div>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+        <thead>
+          <tr>
+            <th style={{ textAlign: 'left', padding: '3px 6px', color: 'var(--color-text-dim)', fontWeight: 600 }}>Jugador</th>
+            {completedAges.map(age => (
+              <th key={age} style={{ textAlign: 'center', padding: '3px 8px', color: 'var(--color-gold)', fontWeight: 600 }}>
+                Era {age}
+              </th>
+            ))}
+            <th style={{ textAlign: 'center', padding: '3px 6px', color: 'var(--color-text-dim)', fontWeight: 600 }}>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {players.map(p => {
+            const total = p.militaryTokens.reduce((s, t) => s + t.value, 0);
+            return (
+              <tr key={p.id} style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <td style={{ padding: '4px 6px', color: 'var(--color-text)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                  {p.name}
+                </td>
+                {completedAges.map(age => {
+                  const ageTokens = p.militaryTokens.filter((t: MilitaryToken) => t.age === age);
+                  const ageSum = ageTokens.reduce((s, t) => s + t.value, 0);
+                  const wins = ageTokens.filter(t => t.value > 0).length;
+                  const losses = ageTokens.filter(t => t.value < 0).length;
+                  return (
+                    <td key={age} style={{
+                      padding: '4px 8px', textAlign: 'center',
+                      color: ageSum > 0 ? '#4ade80' : ageSum < 0 ? '#f87171' : 'var(--color-text-dim)',
+                      fontWeight: 600,
+                    }}>
+                      {ageTokens.length === 0 ? '—' : (
+                        <span title={`${wins}V / ${losses}D`}>
+                          {ageSum > 0 ? '+' : ''}{ageSum}
+                        </span>
+                      )}
+                    </td>
+                  );
+                })}
+                <td style={{
+                  padding: '4px 6px', textAlign: 'center',
+                  fontWeight: 700,
+                  color: total > 0 ? '#4ade80' : total < 0 ? '#f87171' : 'var(--color-text-dim)',
+                }}>
+                  {total > 0 ? `+${total}` : total}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -395,4 +688,3 @@ function ActionPanel({
     </div>
   );
 }
-

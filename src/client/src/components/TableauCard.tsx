@@ -14,8 +14,8 @@ export default function TableauCard({ card, size = 'md' }: Props) {
   const effectStr = formatEffect(card.effects);
 
   const img         = COLOR_IMG[card.color];
-  const w           = size === 'md' ? 110 : 68;
-  const imgH        = size === 'md' ? 70 : 42;
+  const w           = size === 'md' ? 122 : 76;
+  const imgH        = size === 'md' ? 78 : 48;
   const nameSize    = size === 'md' ? '0.7rem' : '0.6rem';
   const effectSize  = size === 'md' ? '0.68rem' : '0.58rem';
   const footerPad   = size === 'md' ? '4px 7px 6px' : '2px 4px 3px';

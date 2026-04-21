@@ -165,3 +165,9 @@ export async function restoreRoom(roomId: string): Promise<GameEngine | null> {
 export function cleanupRoom(roomId: string): void {
   deleteGame(roomId).catch(() => {});
 }
+
+/** Immediately destroy a room (abandon). Removes from memory + DB. */
+export function destroyRoom(roomId: string): void {
+  rooms.delete(roomId);
+  deleteGame(roomId).catch(() => {});
+}

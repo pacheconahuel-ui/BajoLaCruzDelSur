@@ -4,6 +4,12 @@ import { socket } from './socket/socket';
 import LobbyPage from './pages/LobbyPage';
 import GamePage from './pages/GamePage';
 
+export interface ChatMessage {
+  playerName: string;
+  text: string;
+  time: number;
+}
+
 type AppScreen = 'lobby' | 'waiting' | 'game';
 
 const SESSION_KEY = '7w_session';
@@ -31,6 +37,7 @@ export default function App() {
   const [lobbyPlayers, setLobbyPlayers] = useState<{ id: string; name: string }[]>([]);
   const [error, setError] = useState('');
   const [toast, setToast] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -72,6 +79,18 @@ export default function App() {
       showToast(msg);
     });
 
+    socket.on('game:chat', (playerName, text, time) => {
+      setChatMessages(prev => [...prev.slice(-99), { playerName, text, time }]);
+    });
+
+    socket.on('game:abandoned', reason => {
+      showToast(reason);
+      clearSession();
+      setChatMessages([]);
+      setGameState(null);
+      setScreen('lobby');
+    });
+
     socket.connect();
 
     return () => {
@@ -79,6 +98,8 @@ export default function App() {
       socket.off('lobby:updated');
       socket.off('game:state');
       socket.off('game:error');
+      socket.off('game:chat');
+      socket.off('game:abandoned');
       socket.disconnect();
     };
   }, []);
@@ -108,6 +129,24 @@ export default function App() {
     });
   }
 
+  function handleAbandon() {
+    socket.emit('game:abandon', (err) => {
+      if (err) showToast(err ?? 'Error al abandonar');
+      // server will broadcast game:abandoned to everyone including us
+    });
+  }
+
+  function handleChat(msg: string) {
+    socket.emit('game:chat', msg);
+  }
+
+  function handleReturnToMenu() {
+    clearSession();
+    setChatMessages([]);
+    setGameState(null);
+    setScreen('lobby');
+  }
+
   if (screen === 'lobby') {
     return <LobbyPage onCreate={handleCreate} onJoin={handleJoin} error={error} />;
   }
@@ -128,7 +167,13 @@ export default function App() {
   if (screen === 'game' && gameState) {
     return (
       <>
-        <GamePage state={gameState} />
+        <GamePage
+          state={gameState}
+          onAbandon={handleAbandon}
+          onChat={handleChat}
+          chatMessages={chatMessages}
+          onReturnToMenu={handleReturnToMenu}
+        />
         {toast && (
           <div style={{
             position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',

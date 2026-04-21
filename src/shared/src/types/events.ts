@@ -9,6 +9,8 @@ export interface ClientToServerEvents {
   'game:action': (action: PendingAction, callback: (error?: string) => void) => void;
   'game:rejoin': (roomId: string, playerId: string, callback: (error?: string) => void) => void;
   'game:choose_from_discard': (cardId: string, callback: (error?: string) => void) => void;
+  'game:abandon': (callback: (error?: string) => void) => void;
+  'game:chat': (message: string) => void;
 }
 
 // Events sent FROM server TO client
@@ -16,6 +18,8 @@ export interface ServerToClientEvents {
   'lobby:updated': (players: { id: string; name: string; isBot?: boolean }[]) => void;
   'game:state': (state: PublicGameState) => void;
   'game:error': (message: string) => void;
+  'game:chat': (playerName: string, message: string, timestamp: number) => void;
+  'game:abandoned': (reason: string) => void;
 }
 
 // Socket data stored per socket

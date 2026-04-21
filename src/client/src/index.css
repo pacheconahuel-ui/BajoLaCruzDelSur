@@ -30,7 +30,7 @@
   --card-purple-light: #6b28c8;
 
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  font-size: 20px;
+  font-size: 22px;
   color: var(--color-text);
   background: var(--color-bg);
   -webkit-tap-highlight-color: transparent;
@@ -89,6 +89,20 @@ h1, h2, h3 { font-weight: 700; line-height: 1.2; }
   .show-mobile { display: block !important; }
 }
 
+/* ── Chat + Log bottom panel ─────────────────────────────────────────────── */
+.bottom-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 700px) {
+  .bottom-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Game layout ─────────────────────────────────────────────────────────── */
 
 /* Table surface — real wood photo texture */
@@ -120,7 +134,7 @@ h1, h2, h3 { font-weight: 700; line-height: 1.2; }
 
 .game-grid {
   display: grid;
-  grid-template-columns: 330px 1fr 330px;
+  grid-template-columns: 360px 1fr 360px;
   gap: 10px;
   align-items: start;
 }
@@ -171,8 +185,10 @@ h1, h2, h3 { font-weight: 700; line-height: 1.2; }
   scrollbar-width: thin;
 }
 
-.hand-scroll::-webkit-scrollbar { height: 3px; }
-.hand-scroll::-webkit-scrollbar-thumb { background: var(--color-border); }
+.hand-scroll::-webkit-scrollbar { height: 5px; }
+.hand-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 3px; }
+.hand-scroll::-webkit-scrollbar-thumb { background: var(--color-gold-dim); border-radius: 3px; }
+.hand-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-gold); }
 
 /* ── Action panel ────────────────────────────────────────────────────────── */
 .action-btns {

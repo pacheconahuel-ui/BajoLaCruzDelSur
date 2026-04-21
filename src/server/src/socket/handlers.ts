@@ -14,6 +14,7 @@ import {
   persistRoom,
   restoreRoom,
   cleanupRoom,
+  destroyRoom,
 } from './roomManager';
 
 type AppSocket = Socket<ClientToServerEvents, ServerToClientEvents, {}, SocketData>;
@@ -111,6 +112,22 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
         broadcastGameState(io, roomId);
       }, 4000);
     }
+  });
+
+  socket.on('game:abandon', (callback: (err?: string) => void) => {
+    const { roomId, playerName } = socket.data;
+    if (!roomId) { callback('Not in a room'); return; }
+    // Notify everyone in the room first, then destroy
+    io.to(roomId).emit('game:abandoned', `${playerName} abandonó la partida.`);
+    destroyRoom(roomId);
+    callback();
+  });
+
+  socket.on('game:chat', (message: string) => {
+    const { roomId, playerName } = socket.data;
+    if (!roomId || !message?.trim()) return;
+    const text = message.trim().slice(0, 200);
+    io.to(roomId).emit('game:chat', playerName ?? 'Anónimo', text, Date.now());
   });
 
   socket.on('game:rejoin', async (roomId, playerId, callback) => {

@@ -2,6 +2,7 @@ import { PublicGameState, PlayerScore } from '@7wonders/shared';
 
 interface Props {
   state: PublicGameState;
+  onReturnToMenu?: () => void;
 }
 
 const SCORE_COLS: { key: keyof PlayerScore; label: string; icon: string }[] = [
@@ -16,7 +17,7 @@ const SCORE_COLS: { key: keyof PlayerScore; label: string; icon: string }[] = [
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
-export default function ScoringScreen({ state }: Props) {
+export default function ScoringScreen({ state, onReturnToMenu }: Props) {
   const scores: PlayerScore[] = state.scores?.length
     ? [...state.scores].sort((a, b) => b.total - a.total)
     : state.players.map(p => {
@@ -182,10 +183,10 @@ export default function ScoringScreen({ state }: Props) {
         </div>
       </div>
 
-      {/* ── Play again ── */}
-      <div style={{ textAlign: 'center' }}>
+      {/* ── Play again / Return ── */}
+      <div style={{ textAlign: 'center', display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
         <button
-          onClick={() => window.location.reload()}
+          onClick={onReturnToMenu ?? (() => window.location.reload())}
           style={{
             background: 'linear-gradient(135deg, #c8650f, #e63946)',
             color: '#fff', padding: '13px 48px', fontSize: '1rem',
