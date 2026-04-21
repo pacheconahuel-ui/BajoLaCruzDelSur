@@ -64,12 +64,19 @@ export class GameEngine {
     player.pendingAction = action;
     player.isReady = true;
 
-    // If all players ready, trigger reveal
+    // If all players ready, enter 'reveal' phase so clients can show a brief reveal moment.
+    // The handler is responsible for calling applyRevealedActions() after the display delay.
     if (this.state.players.every(p => p.isReady)) {
-      this.resolveAllActions();
+      this.state.phase = 'reveal';
     }
 
     return null;
+  }
+
+  /** Apply all pending actions and advance the turn (called after the reveal display delay). */
+  applyRevealedActions(): void {
+    if (this.state.phase !== 'reveal') return;
+    this.resolveAllActions();
   }
 
   private validateAction(
@@ -101,10 +108,8 @@ export class GameEngine {
     return 'Unknown action type';
   }
 
-  /** Called when all players have submitted. Apply all actions, pass hands, advance turn. */
+  /** Apply all pending actions, pass hands, and advance the turn. Phase must be 'reveal'. */
   private resolveAllActions(): void {
-    this.state.phase = 'reveal';
-
     // Apply each player's action
     for (let i = 0; i < this.state.players.length; i++) {
       const player = this.state.players[i];

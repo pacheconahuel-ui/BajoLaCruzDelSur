@@ -81,15 +81,7 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
 
     callback();
     broadcastGameState(io, roomId);
-
-    // If phase advanced to 'military', schedule auto-advance after 4s display
-    const state = engine.getState();
-    if (state.phase === 'military') {
-      setTimeout(() => {
-        engine.startNextAge();
-        broadcastGameState(io, roomId);
-      }, 4000);
-    }
+    scheduleRevealAndAdvance(io, roomId);
   });
 
   socket.on('game:choose_from_discard', (cardId: string, callback: (err?: string) => void) => {
@@ -104,11 +96,7 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
 
     callback();
     broadcastGameState(io, roomId);
-
-    const state = engine.getState();
-    if (state.phase === 'military') {
-      setTimeout(() => { engine.startNextAge(); broadcastGameState(io, roomId); }, 4000);
-    }
+    scheduleRevealAndAdvance(io, roomId);
   });
 
   socket.on('game:skip_discard_pick', (callback: (err?: string) => void) => {
@@ -123,11 +111,7 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
 
     callback();
     broadcastGameState(io, roomId);
-
-    const state = engine.getState();
-    if (state.phase === 'military') {
-      setTimeout(() => { engine.startNextAge(); broadcastGameState(io, roomId); }, 4000);
-    }
+    scheduleRevealAndAdvance(io, roomId);
   });
 
   socket.on('game:abandon', (callback: (err?: string) => void) => {
@@ -238,10 +222,7 @@ function triggerBotDiscardPick(io: AppServer, roomId: string): void {
 
     if (!err) {
       broadcastGameState(io, roomId);
-      const newState = currentEngine.getState();
-      if (newState.phase === 'military') {
-        setTimeout(() => { currentEngine.startNextAge(); broadcastGameState(io, roomId); }, 4000);
-      }
+      scheduleRevealAndAdvance(io, roomId);
     }
   }, delay);
 }
@@ -266,13 +247,38 @@ function triggerBots(io: AppServer, roomId: string): void {
     }
 
     broadcastGameState(io, roomId);
-
-    const newState = currentEngine.getState();
-    if (newState.phase === 'military') {
-      setTimeout(() => {
-        currentEngine.startNextAge();
-        broadcastGameState(io, roomId);
-      }, 4000);
-    }
+    scheduleRevealAndAdvance(io, roomId);
   }, delay);
+}
+
+/**
+ * After all players submit (phase='reveal'), apply actions after a brief display delay,
+ * then handle military auto-advance if needed.
+ */
+function scheduleRevealAndAdvance(io: AppServer, roomId: string): void {
+  const engine = getEngine(roomId);
+  if (!engine) return;
+  const phase = engine.getState().phase;
+
+  if (phase === 'reveal') {
+    // Let clients show the reveal screen for 1.5s, then apply actions
+    setTimeout(() => {
+      const currentEngine = getEngine(roomId);
+      if (!currentEngine || currentEngine.getState().phase !== 'reveal') return;
+      currentEngine.applyRevealedActions();
+      broadcastGameState(io, roomId);
+      const newState = currentEngine.getState();
+      if (newState.phase === 'military') {
+        setTimeout(() => {
+          currentEngine.startNextAge();
+          broadcastGameState(io, roomId);
+        }, 4000);
+      }
+    }, 1500);
+  } else if (phase === 'military') {
+    setTimeout(() => {
+      engine.startNextAge();
+      broadcastGameState(io, roomId);
+    }, 4000);
+  }
 }
