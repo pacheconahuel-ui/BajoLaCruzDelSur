@@ -418,39 +418,84 @@ export class GameEngine {
     const wonder = WONDERS.find(w => w.id === player.wonderId)!;
     const age = this.state.age;
 
+    // Count existing science symbols for synergy bonus
+    const sciCounts = { compass: 0, gear: 0, tablet: 0 };
+    for (const c of player.builtStructures) {
+      for (const e of c.effects) {
+        if (e.type === 'science') sciCounts[e.symbol as keyof typeof sciCounts]++;
+      }
+    }
+    // Existing shields for threat assessment
+    const myShields = player.shields;
+    const leftShields = left.shields;
+    const rightShields = right.shields;
+    const threatBonus = (myShields <= leftShields || myShields <= rightShields) ? 3 : 0;
+
+    // Cards already in the chain pipeline (have a chainTo card in the hand)
+    const handNames = new Set(player.hand.map(c => c.name));
+    const chainsToHandCard = (card: Card): boolean =>
+      (card.chainTo ?? []).some(name => handNames.has(name));
+
     // Score each card's strategic value (higher = prefer it)
-    function cardValue(card: Card): number {
+    const cardValue = (card: Card): number => {
       let v = 0;
       for (const e of card.effects) {
         switch (e.type) {
-          case 'victory_points': v += e.points * 3; break;
-          case 'shields':        v += e.count * (age === 3 ? 4 : 3); break;
-          case 'science':        v += 6; break;
-          case 'produce_resource': v += 5; break;
-          case 'produce_choice': v += 4; break;
-          case 'coins':          v += e.amount * 1.5; break;
+          case 'victory_points':
+            v += e.points * (age === 3 ? 4 : 3);
+            break;
+          case 'shields':
+            // Extra value if we're losing to a neighbor
+            v += e.count * ((age === 3 ? 4 : 3) + threatBonus);
+            break;
+          case 'science': {
+            // Quadratic scoring: value depends on current count of this symbol
+            const sym = e.symbol as keyof typeof sciCounts;
+            const cur = sciCounts[sym];
+            const marginalVP = (cur + 1) ** 2 - cur ** 2; // marginal VP from +1 of this type
+            const setBonus = (cur === Math.min(sciCounts.compass, sciCounts.gear, sciCounts.tablet)) ? 7 : 0;
+            v += (marginalVP + setBonus) * 1.5;
+            break;
+          }
+          case 'produce_resource': v += age === 1 ? 6 : 3; break;
+          case 'produce_choice':   v += age === 1 ? 5 : 2; break;
+          case 'coins':            v += e.amount * 1.5; break;
           case 'coins_and_vp_from_brown':
           case 'coins_and_vp_from_gray':
           case 'coins_and_vp_from_yellow':
-          case 'coins_and_vp_from_wonder': v += 4; break;
+          case 'coins_and_vp_from_wonder': v += age === 3 ? 6 : 4; break;
           case 'trade_discount_left':
           case 'trade_discount_right':
-          case 'trade_discount_both': v += (age === 1 ? 4 : 2); break;
-          case 'extra_science_symbol': v += 8; break;
+          case 'trade_discount_both': v += age === 1 ? 5 : (age === 2 ? 3 : 1); break;
+          case 'extra_science_symbol': v += 12; break;
+          // Guild cards: use simple VP estimate
+          case 'vp_from_brown_neighbors':
+          case 'vp_from_gray_neighbors':
+          case 'vp_from_yellow_neighbors':
+          case 'vp_from_blue_neighbors':
+          case 'vp_from_red_neighbors':
+          case 'vp_from_green_neighbors':
+          case 'vp_from_wonder_stages':
+          case 'vp_from_defeat_tokens_neighbors':
+          case 'vp_from_own_brown_gray_purple': v += 6; break;
           default: v += 1;
         }
       }
+      // Bonus if this card enables a chain for a card we could play later
+      if (chainsToHandCard(card)) v += 4;
       // Slight randomness so bots aren't identical
       v += Math.random() * 2;
       return v;
-    }
+    };
 
     // Collect affordable structures sorted by value (descending)
     const affordable: { card: Card; trade?: TradeDecision }[] = [];
     for (const card of player.hand) {
       const opt = validateBuildStructure(card, player, left, right);
       if (opt.canBuild) {
-        const trade = opt.tradeCost ? { leftCoins: opt.tradeCost.leftCoins, rightCoins: opt.tradeCost.rightCoins } : undefined;
+        const trade = opt.tradeCost
+          ? { leftCoins: opt.tradeCost.leftCoins, rightCoins: opt.tradeCost.rightCoins }
+          : undefined;
         affordable.push({ card, trade });
       }
     }
@@ -460,27 +505,30 @@ export class GameEngine {
     if (player.wonderStagesBuilt < wonder.stages.length) {
       const opt = validateBuildWonderStage(player, left, right, wonder.stages);
       if (opt.canBuild) {
-        const trade = opt.tradeCost ? { leftCoins: opt.tradeCost.leftCoins, rightCoins: opt.tradeCost.rightCoins } : undefined;
+        const trade = opt.tradeCost
+          ? { leftCoins: opt.tradeCost.leftCoins, rightCoins: opt.tradeCost.rightCoins }
+          : undefined;
         const topCardValue = affordable.length > 0 ? cardValue(affordable[0].card) : 0;
         const stageIdx = player.wonderStagesBuilt;
         const stage = wonder.stages[stageIdx];
         // Estimate the wonder stage value
         let stageValue = 0;
         for (const e of stage.effects) {
-          if (e.type === 'victory_points') stageValue += e.points * 3;
-          else if (e.type === 'shields') stageValue += e.count * (age === 3 ? 5 : 3);
+          if (e.type === 'victory_points') stageValue += e.points * (age === 3 ? 4 : 3);
+          else if (e.type === 'shields') stageValue += e.count * ((age === 3 ? 5 : 3) + threatBonus);
           else if (e.type === 'coins') stageValue += e.amount;
-          else if (e.type === 'extra_science_symbol') stageValue += 10;
-          else if (e.type === 'free_build_per_age') stageValue += 8;
-          else if (e.type === 'build_from_discard') stageValue += 7;
-          else if (e.type === 'copy_guild') stageValue += 6;
-          else if (e.type === 'produce_choice') stageValue += 5;
+          else if (e.type === 'extra_science_symbol') stageValue += 12;
+          else if (e.type === 'free_build_per_age') stageValue += (age === 1 ? 10 : 6);
+          else if (e.type === 'build_from_discard') stageValue += 8;
+          else if (e.type === 'copy_guild') stageValue += 7;
+          else if (e.type === 'produce_choice') stageValue += age === 1 ? 6 : 3;
           else stageValue += 3;
         }
-        // Build wonder stage if it's more valuable than the best card, or 20% chance otherwise
-        if (stageValue >= topCardValue || Math.random() < 0.20) {
-          const card = player.hand[Math.floor(Math.random() * player.hand.length)];
-          return { cardId: card.id, action: { type: 'build_wonder_stage' }, trade };
+        // Build wonder stage if it's more valuable than best available card, or 15% chance
+        if (stageValue >= topCardValue || Math.random() < 0.15) {
+          // Sacrifice the least valuable card in hand
+          const sacrifice = [...player.hand].sort((a, b) => cardValue(a) - cardValue(b))[0];
+          return { cardId: sacrifice.id, action: { type: 'build_wonder_stage' }, trade };
         }
       }
     }
