@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { PublicGameState, PlayerScore, CardEffect } from '@7wonders/shared';
+import CityTableau from '../components/CityTableau';
+import WonderBoard from '../components/WonderBoard';
 
 interface Props {
   state: PublicGameState;
@@ -37,6 +40,8 @@ function getScienceBreakdown(state: PublicGameState, playerId: string): string {
 }
 
 export default function ScoringScreen({ state, onReturnToMenu }: Props) {
+  const [expandedCity, setExpandedCity] = useState<string | null>(null);
+
   const scores: PlayerScore[] = state.scores?.length
     ? [...state.scores].sort((a, b) => b.total - a.total)
     : state.players.map(p => {
@@ -204,6 +209,55 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
               {col.icon} {col.label}
             </span>
           ))}
+        </div>
+      </div>
+
+      {/* ── City review ── */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: '0.82rem', color: 'var(--color-text-dim)', marginBottom: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          🏛 Ciudades finales
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {scores.map((s, i) => {
+            const player = state.players.find(p => p.id === s.playerId);
+            const isExpanded = expandedCity === s.playerId;
+            if (!player) return null;
+            return (
+              <div key={s.playerId} style={{
+                background: 'var(--color-surface)',
+                borderRadius: 8,
+                border: '1px solid var(--color-border)',
+                overflow: 'hidden',
+              }}>
+                <button
+                  onClick={() => setExpandedCity(isExpanded ? null : s.playerId)}
+                  style={{
+                    width: '100%', background: 'transparent', border: 'none',
+                    padding: '10px 14px', textAlign: 'left', borderRadius: 0,
+                    display: 'flex', alignItems: 'center', gap: 10,
+                  }}
+                >
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: i === 0 ? 'var(--color-gold)' : 'var(--color-text)' }}>
+                    {MEDALS[i] ?? `${i + 1}.`} {s.playerName}
+                  </span>
+                  <span style={{ color: 'var(--color-text-dim)', fontSize: '0.78rem' }}>
+                    {player.builtStructures.length} estructuras · {player.wonderStagesBuilt}/3 etapas
+                  </span>
+                  <span style={{ marginLeft: 'auto', color: 'var(--color-text-dim)', fontSize: '0.75rem' }}>
+                    {isExpanded ? '▲ Ocultar' : '▼ Ver ciudad'}
+                  </span>
+                </button>
+                {isExpanded && (
+                  <div style={{ padding: '0 14px 14px' }}>
+                    <div style={{ marginBottom: 10 }}>
+                      <WonderBoard player={player} compact />
+                    </div>
+                    <CityTableau structures={player.builtStructures} size="sm" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

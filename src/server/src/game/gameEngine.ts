@@ -449,14 +449,29 @@ export class GameEngine {
     }
     affordable.sort((a, b) => cardValue(b.card) - cardValue(a.card));
 
-    // Try to build wonder stage (15% chance if affordable and we have a good reason)
-    if (Math.random() < 0.15 && player.wonderStagesBuilt < wonder.stages.length) {
+    // Try to build wonder stage
+    if (player.wonderStagesBuilt < wonder.stages.length) {
       const opt = validateBuildWonderStage(player, left, right, wonder.stages);
       if (opt.canBuild) {
         const trade = opt.tradeCost ? { leftCoins: opt.tradeCost.leftCoins, rightCoins: opt.tradeCost.rightCoins } : undefined;
-        // Only build wonder stage if we don't have a high-value card available
         const topCardValue = affordable.length > 0 ? cardValue(affordable[0].card) : 0;
-        if (topCardValue < 8) {
+        const stageIdx = player.wonderStagesBuilt;
+        const stage = wonder.stages[stageIdx];
+        // Estimate the wonder stage value
+        let stageValue = 0;
+        for (const e of stage.effects) {
+          if (e.type === 'victory_points') stageValue += e.points * 3;
+          else if (e.type === 'shields') stageValue += e.count * (age === 3 ? 5 : 3);
+          else if (e.type === 'coins') stageValue += e.amount;
+          else if (e.type === 'extra_science_symbol') stageValue += 10;
+          else if (e.type === 'free_build_per_age') stageValue += 8;
+          else if (e.type === 'build_from_discard') stageValue += 7;
+          else if (e.type === 'copy_guild') stageValue += 6;
+          else if (e.type === 'produce_choice') stageValue += 5;
+          else stageValue += 3;
+        }
+        // Build wonder stage if it's more valuable than the best card, or 20% chance otherwise
+        if (stageValue >= topCardValue || Math.random() < 0.20) {
           const card = player.hand[Math.floor(Math.random() * player.hand.length)];
           return { cardId: card.id, action: { type: 'build_wonder_stage' }, trade };
         }
