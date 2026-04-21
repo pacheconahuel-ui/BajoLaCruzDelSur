@@ -9,6 +9,8 @@ import {
   getEngine,
   buildPublicState,
   getLobbyPlayers,
+  addBot,
+  getBotIds,
 } from './roomManager';
 
 type AppSocket = Socket<ClientToServerEvents, ServerToClientEvents, {}, SocketData>;
@@ -41,6 +43,15 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
     io.to(roomId).emit('lobby:updated', getLobbyPlayers(roomId));
   });
 
+  socket.on('lobby:add_bot', (callback: (err?: string) => void) => {
+    const { roomId, playerId } = socket.data;
+    if (!roomId || !playerId) { callback('Not in a room'); return; }
+    const result = addBot(roomId, playerId);
+    if ('error' in result) { callback(result.error); return; }
+    callback();
+    io.to(roomId).emit('lobby:updated', getLobbyPlayers(roomId));
+  });
+
   socket.on('lobby:start', (callback) => {
     const { roomId, playerId } = socket.data;
     if (!roomId || !playerId) { callback('Not in a room'); return; }
@@ -49,7 +60,7 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
     if ('error' in result) { callback(result.error); return; }
 
     callback();
-    broadcastGameState(io, roomId);
+    broadcastGameState(io, roomId); // triggerBots is called inside broadcastGameState
   });
 
   // ── GAME ──────────────────────────────────────────────────────────────────
@@ -68,6 +79,28 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
     broadcastGameState(io, roomId);
 
     // If phase advanced to 'military', schedule auto-advance after 4s display
+    const state = engine.getState();
+    if (state.phase === 'military') {
+      setTimeout(() => {
+        engine.startNextAge();
+        broadcastGameState(io, roomId);
+      }, 4000);
+    }
+  });
+
+  socket.on('game:choose_from_discard', (cardId: string, callback: (err?: string) => void) => {
+    const { roomId, playerId } = socket.data;
+    if (!roomId || !playerId) { callback('Not in a room'); return; }
+
+    const engine = getEngine(roomId);
+    if (!engine) { callback('No active game'); return; }
+
+    const error = engine.buildFromDiscard(playerId, cardId);
+    if (error) { callback(error); return; }
+
+    callback();
+    broadcastGameState(io, roomId);
+
     const state = engine.getState();
     if (state.phase === 'military') {
       setTimeout(() => {
@@ -116,7 +149,44 @@ function broadcastGameState(io: AppServer, roomId: string): void {
   if (!room) return;
 
   for (const member of room.players) {
+    if (member.isBot) continue; // bots have no socket to send to
     const personalState = buildPublicState(state, member.id);
     io.to(member.socketId).emit('game:state', personalState);
   }
+
+  // After broadcasting, auto-play for any bots that haven't chosen yet
+  if (state.phase === 'choose') {
+    triggerBots(io, roomId);
+  }
+}
+
+/** Auto-submit actions for all bot players, with a small delay for realism. */
+function triggerBots(io: AppServer, roomId: string): void {
+  const botIds = getBotIds(roomId);
+  if (botIds.length === 0) return;
+
+  const engine = getEngine(roomId);
+  if (!engine) return;
+
+  // Small random delay (300-900ms) so bots feel less instant
+  const delay = 300 + Math.floor(Math.random() * 600);
+  setTimeout(() => {
+    const currentEngine = getEngine(roomId);
+    if (!currentEngine || currentEngine.getState().phase !== 'choose') return;
+
+    for (const botId of botIds) {
+      const action = currentEngine.getBotAction(botId);
+      if (action) currentEngine.submitAction(botId, action);
+    }
+
+    broadcastGameState(io, roomId);
+
+    const newState = currentEngine.getState();
+    if (newState.phase === 'military') {
+      setTimeout(() => {
+        currentEngine.startNextAge();
+        broadcastGameState(io, roomId);
+      }, 4000);
+    }
+  }, delay);
 }

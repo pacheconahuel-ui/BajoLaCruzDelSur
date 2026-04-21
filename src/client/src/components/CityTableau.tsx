@@ -6,10 +6,10 @@ const COLOR_ORDER: CardColor[] = ['brown', 'gray', 'blue', 'green', 'yellow', 'r
 // Full labels for md (main city), short for sm (neighbor panels)
 const COLOR_LABEL_MD: Record<CardColor, string> = {
   brown:  'Materia',
-  gray:   'Manufac.',
+  gray:   'Manufactura',
   blue:   'Civil',
   green:  'Ciencia',
-  yellow: 'Comerc.',
+  yellow: 'Comercial',
   red:    'Militar',
   purple: 'Gremio',
 };
@@ -25,14 +25,14 @@ const COLOR_LABEL_SM: Record<CardColor, string> = {
 };
 
 // Visible peek per card when stacked
-const OVERLAP: Record<'md' | 'sm', number> = { md: 28, sm: 17 };
+const OVERLAP: Record<'md' | 'sm', number> = { md: 32, sm: 20 };
 
 // Actual rendered card heights (imgH + name + effect + borders)
-// md: 52 + 31 + 22 + 3 = ~108px   sm: 32 + 23 + 17 + 2 = ~74px
-const CARD_H: Record<'md' | 'sm', number> = { md: 108, sm: 74 };
+// md: 60 + 34 + 24 + 4 = ~122px   sm: 36 + 26 + 18 + 4 = ~84px
+const CARD_H: Record<'md' | 'sm', number> = { md: 122, sm: 84 };
 
 // Column widths must match TableauCard widths
-const COL_W: Record<'md' | 'sm', number> = { md: 84, sm: 54 };
+const COL_W: Record<'md' | 'sm', number> = { md: 96, sm: 62 };
 
 interface Props {
   structures: Card[];

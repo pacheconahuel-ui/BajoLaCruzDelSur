@@ -8,6 +8,7 @@ import PlayerInfo from '../components/PlayerInfo';
 import RevealDisplay from './RevealDisplay';
 import MilitaryDisplay from './MilitaryDisplay';
 import ScoringScreen from './ScoringScreen';
+import DiscardPickerScreen from './DiscardPickerScreen';
 import { computeAffordability, computeWonderAffordability, getWonderStageCost, WonderAffordability } from '../utils/affordability';
 import { formatCost } from '../utils/icons';
 import CheatSheet from '../components/CheatSheet';
@@ -48,6 +49,7 @@ export default function GamePage({ state }: Props) {
   if (state.phase === 'reveal' || state.phase === 'action') return <RevealDisplay state={state} />;
   if (state.phase === 'military') return <MilitaryDisplay state={state} />;
   if (state.phase === 'scoring' || state.phase === 'finished') return <ScoringScreen state={state} />;
+  if (state.phase === 'choose_from_discard') return <DiscardPickerScreen state={state} />;
 
   const waiting = me.isReady;
 
@@ -127,7 +129,7 @@ export default function GamePage({ state }: Props) {
                       // Never fully disabled — player can always discard.
                       // We dim the card visually if unaffordable, but keep it clickable.
                       dimmed={!aff.canBuild}
-                      tradeCost={aff.tradeCostTotal > 0 ? { total: aff.tradeCostTotal } : undefined}
+                      tradeCost={aff.tradeCostTotal > 0 ? { total: aff.tradeCostTotal, leftCoins: aff.leftCoins, rightCoins: aff.rightCoins } : undefined}
                       onClick={() => {
                         setSelectedCard(card);
                         setActionType(null);
@@ -257,7 +259,7 @@ function ActionPanel({
 }: {
   card: Card;
   wonderStagesBuilt: number;
-  aff: { canBuild: boolean; isFree: boolean; tradeCostTotal: number };
+  aff: { canBuild: boolean; isFree: boolean; tradeCostTotal: number; leftCoins: number; rightCoins: number };
   wonderAff: WonderAffordability | null;
   wonderStageCostStr: string | null;
   actionType: 'build_structure' | 'build_wonder_stage' | 'discard' | null;
@@ -266,10 +268,15 @@ function ActionPanel({
   onCancel: () => void;
   error: string;
 }) {
+  const tradeDir = aff.tradeCostTotal > 0
+    ? (aff.leftCoins > 0 && aff.rightCoins > 0
+        ? `←${aff.leftCoins} →${aff.rightCoins}💰`
+        : aff.leftCoins > 0 ? `←${aff.leftCoins}💰` : `→${aff.rightCoins}💰`)
+    : '';
   const buildLabel = aff.isFree
     ? '🏗 Construir (gratis)'
     : aff.tradeCostTotal > 0
-    ? `🏗 Construir (+${aff.tradeCostTotal}💰 comercio)`
+    ? `🏗 Construir (${tradeDir} comercio)`
     : aff.canBuild
     ? '🏗 Construir'
     : '🏗 Construir (sin recursos)';

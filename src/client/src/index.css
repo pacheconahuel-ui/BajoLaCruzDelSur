@@ -30,7 +30,7 @@
   --card-purple-light: #6b28c8;
 
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  font-size: 16px;
+  font-size: 18px;
   color: var(--color-text);
   background: var(--color-bg);
   -webkit-tap-highlight-color: transparent;
@@ -84,7 +84,7 @@ h1, h2, h3 { font-weight: 700; line-height: 1.2; }
 .show-mobile { display: none; }
 
 @media (max-width: 700px) {
-  :root { font-size: 14px; }
+  :root { font-size: 15px; }
   .hide-mobile { display: none !important; }
   .show-mobile { display: block !important; }
 }
@@ -120,7 +120,7 @@ h1, h2, h3 { font-weight: 700; line-height: 1.2; }
 
 .game-grid {
   display: grid;
-  grid-template-columns: 260px 1fr 260px;
+  grid-template-columns: 295px 1fr 295px;
   gap: 10px;
   align-items: start;
 }
@@ -146,6 +146,7 @@ h1, h2, h3 { font-weight: 700; line-height: 1.2; }
   padding: 10px;
   min-width: 0;
   opacity: 0.92;
+  overflow-x: clip;   /* clip columns that wrap beyond panel width, allow y to grow */
 }
 
 @media (max-width: 960px) {

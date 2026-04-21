@@ -121,8 +121,10 @@ export function getWonderStageCost(wonderId: string, stageIndex: number): Resour
 
 export interface Affordability {
   canBuild: boolean;
-  isFree: boolean;       // chain or Olympia free build
+  isFree: boolean;        // chain or Olympia free build
   tradeCostTotal: number; // 0 if own resources cover it
+  leftCoins: number;      // coins paid to left neighbor
+  rightCoins: number;     // coins paid to right neighbor
 }
 
 export interface WonderAffordability {
@@ -138,22 +140,22 @@ export function computeAffordability(
 ): Affordability {
   // Already built?
   if (player.builtStructures.some(c => c.name === card.name)) {
-    return { canBuild: false, isFree: false, tradeCostTotal: 0 };
+    return { canBuild: false, isFree: false, tradeCostTotal: 0, leftCoins: 0, rightCoins: 0 };
   }
 
   // Free via chain
   if (hasChain(player, card)) {
-    return { canBuild: true, isFree: true, tradeCostTotal: 0 };
+    return { canBuild: true, isFree: true, tradeCostTotal: 0, leftCoins: 0, rightCoins: 0 };
   }
 
   // Free via Olympia
   if (player.freeBuildsLeft > 0) {
-    return { canBuild: true, isFree: true, tradeCostTotal: 0 };
+    return { canBuild: true, isFree: true, tradeCostTotal: 0, leftCoins: 0, rightCoins: 0 };
   }
 
   const bankCoins = card.cost.coins ?? 0;
   if (player.coins < bankCoins) {
-    return { canBuild: false, isFree: false, tradeCostTotal: 0 };
+    return { canBuild: false, isFree: false, tradeCostTotal: 0, leftCoins: 0, rightCoins: 0 };
   }
 
   const needed = costToPool(card.cost);
@@ -161,7 +163,7 @@ export function computeAffordability(
   const choices = getChoiceResources(player);
 
   if (canCover(fixed, choices, needed)) {
-    return { canBuild: true, isFree: false, tradeCostTotal: 0 };
+    return { canBuild: true, isFree: false, tradeCostTotal: 0, leftCoins: 0, rightCoins: 0 };
   }
 
   // Compute trade cost (simplified: greedy own resources then trade)
@@ -176,12 +178,13 @@ export function computeAffordability(
   }
 
   if (allZero(remaining)) {
-    return { canBuild: true, isFree: false, tradeCostTotal: 0 };
+    return { canBuild: true, isFree: false, tradeCostTotal: 0, leftCoins: 0, rightCoins: 0 };
   }
 
   const leftT = getTradeableFixed(left);
   const rightT = getTradeableFixed(right);
-  let totalTrade = 0;
+  let leftCoins = 0;
+  let rightCoins = 0;
 
   for (const res of Object.keys(remaining) as Resource[]) {
     let need = remaining[res];
@@ -192,25 +195,22 @@ export function computeAffordability(
 
     while (need > 0) {
       if (leftT[res] > 0 && (lc <= rc || rightT[res] === 0)) {
-        totalTrade += lc;
-        leftT[res]--;
-        need--;
+        leftCoins += lc; leftT[res]--; need--;
       } else if (rightT[res] > 0) {
-        totalTrade += rc;
-        rightT[res]--;
-        need--;
+        rightCoins += rc; rightT[res]--; need--;
       } else {
-        return { canBuild: false, isFree: false, tradeCostTotal: totalTrade };
+        return { canBuild: false, isFree: false, tradeCostTotal: leftCoins + rightCoins, leftCoins, rightCoins };
       }
     }
   }
 
+  const totalTrade = leftCoins + rightCoins;
   const totalCost = bankCoins + totalTrade;
   if (player.coins < totalCost) {
-    return { canBuild: false, isFree: false, tradeCostTotal: totalTrade };
+    return { canBuild: false, isFree: false, tradeCostTotal: totalTrade, leftCoins, rightCoins };
   }
 
-  return { canBuild: true, isFree: false, tradeCostTotal: totalTrade };
+  return { canBuild: true, isFree: false, tradeCostTotal: totalTrade, leftCoins, rightCoins };
 }
 
 export function computeWonderAffordability(

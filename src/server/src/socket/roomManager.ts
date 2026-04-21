@@ -1,9 +1,16 @@
 import { GameState, PublicGameState, PublicPlayerState, PlayerState } from '@7wonders/shared';
 import { GameEngine, createGameState } from '../game/gameEngine';
 
+interface RoomPlayer {
+  id: string;
+  name: string;
+  socketId: string;
+  isBot: boolean;
+}
+
 interface Room {
   id: string;
-  players: { id: string; name: string; socketId: string }[];
+  players: RoomPlayer[];
   engine: GameEngine | null;
   phase: 'lobby' | 'playing' | 'finished';
 }
@@ -24,7 +31,7 @@ export function createRoom(playerName: string, socketId: string): { roomId: stri
   const playerId = generatePlayerId();
   rooms.set(roomId, {
     id: roomId,
-    players: [{ id: playerId, name: playerName, socketId }],
+    players: [{ id: playerId, name: playerName, socketId, isBot: false }],
     engine: null,
     phase: 'lobby',
   });
@@ -42,7 +49,7 @@ export function joinRoom(
   if (room.players.length >= 7) return { error: 'Room is full' };
 
   const playerId = generatePlayerId();
-  room.players.push({ id: playerId, name: playerName, socketId });
+  room.players.push({ id: playerId, name: playerName, socketId, isBot: false });
   return { playerId };
 }
 
@@ -65,7 +72,7 @@ export function startGame(roomId: string, requesterId: string): GameState | { er
   if (room.players[0].id !== requesterId) return { error: 'Only host can start' };
   if (room.players.length < 3) return { error: 'Need at least 3 players' };
 
-  const state = createGameState(roomId, room.players);
+  const state = createGameState(roomId, room.players.map(p => ({ id: p.id, name: p.name, isBot: p.isBot })));
   const engine = new GameEngine(state);
   engine.startAge();
   room.engine = engine;
@@ -103,6 +110,23 @@ export function buildPublicState(state: GameState, forPlayerId: string): PublicG
   };
 }
 
-export function getLobbyPlayers(roomId: string): { id: string; name: string }[] {
-  return rooms.get(roomId)?.players.map(p => ({ id: p.id, name: p.name })) ?? [];
+export function addBot(roomId: string, requesterId: string): { playerId: string } | { error: string } {
+  const room = rooms.get(roomId);
+  if (!room) return { error: 'Room not found' };
+  if (room.players[0].id !== requesterId) return { error: 'Only host can add bots' };
+  if (room.phase !== 'lobby') return { error: 'Game already started' };
+  if (room.players.length >= 7) return { error: 'Room is full' };
+
+  const n = room.players.filter(p => p.isBot).length + 1;
+  const playerId = generatePlayerId();
+  room.players.push({ id: playerId, name: `Bot ${n}`, socketId: `bot_${playerId}`, isBot: true });
+  return { playerId };
+}
+
+export function getBotIds(roomId: string): string[] {
+  return rooms.get(roomId)?.players.filter(p => p.isBot).map(p => p.id) ?? [];
+}
+
+export function getLobbyPlayers(roomId: string): { id: string; name: string; isBot?: boolean }[] {
+  return rooms.get(roomId)?.players.map(p => ({ id: p.id, name: p.name, isBot: p.isBot })) ?? [];
 }

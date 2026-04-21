@@ -8,7 +8,7 @@ interface Props {
   disabled?: boolean;
   dimmed?: boolean;
   compact?: boolean;
-  tradeCost?: { total: number };
+  tradeCost?: { total: number; leftCoins?: number; rightCoins?: number };
 }
 
 export default function CardView({ card, selected, onClick, disabled, dimmed, compact, tradeCost }: Props) {
@@ -55,7 +55,7 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
         borderRadius: 10,
         cursor: disabled ? 'default' : onClick ? 'pointer' : 'default',
         opacity: disabled ? 0.4 : dimmed ? 0.6 : 1,
-        width: 112,
+        width: 126,
         flexShrink: 0,
         position: 'relative',
         transition: 'transform 0.14s, box-shadow 0.14s, opacity 0.14s',
@@ -71,7 +71,7 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
     >
       {/* Illustration — top 55% of card */}
       <div style={{
-        height: 90,
+        height: 102,
         backgroundImage: `url(${img})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center top',
@@ -91,7 +91,7 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
         </div>
         {/* Gradient fade to card body */}
         <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: 32,
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 36,
           background: `linear-gradient(transparent, ${bg})`,
         }} />
       </div>
@@ -139,21 +139,29 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
         )}
       </div>
 
-      {/* Trade cost badge */}
-      {tradeCost && tradeCost.total > 0 && (
-        <div style={{
-          position: 'absolute', top: -5, right: -5,
-          background: '#c8650f',
-          borderRadius: '50%',
-          width: 22, height: 22,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '0.58rem', fontWeight: 700, color: '#fff',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
-          border: '1.5px solid rgba(255,255,255,0.2)',
-        }}>
-          +{tradeCost.total}
-        </div>
-      )}
+      {/* Trade cost badge with direction */}
+      {tradeCost && tradeCost.total > 0 && (() => {
+        const l = tradeCost.leftCoins ?? 0;
+        const r = tradeCost.rightCoins ?? 0;
+        const label = l > 0 && r > 0
+          ? `←${l} →${r}💰`
+          : l > 0 ? `←${l}💰`
+          : `→${r}💰`;
+        return (
+          <div style={{
+            position: 'absolute', top: -5, right: -5,
+            background: '#c8650f',
+            borderRadius: 8,
+            padding: '2px 5px',
+            fontSize: '0.58rem', fontWeight: 700, color: '#fff',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
+            border: '1.5px solid rgba(255,255,255,0.2)',
+            whiteSpace: 'nowrap',
+          }}>
+            {label}
+          </div>
+        );
+      })()}
 
       {/* "Can't build" overlay indicator (dimmed cards) */}
       {dimmed && !selected && (

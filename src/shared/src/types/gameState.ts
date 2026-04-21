@@ -8,6 +8,7 @@ export type TurnPhase =
   | 'choose'               // players are picking a card
   | 'reveal'               // cards are being revealed (brief animation phase)
   | 'action'               // server processing actions (auto, no input needed)
+  | 'choose_from_discard'  // Halicarnaso etapa 2: one player picks a card from discard pile
   | 'military'             // end-of-age military resolution display
   | 'scoring'              // final scoring screen
   | 'finished';            // game over
@@ -51,6 +52,7 @@ export interface PlayerState {
     right: ('brown' | 'gray')[];
   };
   freeBuildsLeft: number;         // from Olympia wonder effect
+  isBot: boolean;                 // true for AI players
 }
 
 export interface PlayerScore {
@@ -76,6 +78,7 @@ export interface GameState {
   discardPile: Card[];
   log: string[];       // human-readable event log (last 20 entries)
   scores?: PlayerScore[];
+  pendingDiscardPlayerId?: string;  // set during 'choose_from_discard' phase
 }
 
 // Subset of player state safe to send to other players (hides hand contents)

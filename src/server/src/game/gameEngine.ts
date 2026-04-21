@@ -117,6 +117,19 @@ export class GameEngine {
       player.hand = player.hand.filter(c => c.id !== pending.cardId);
     }
 
+    // If a wonder stage triggered choose_from_discard, pause here.
+    // buildFromDiscard() will complete the age/turn flow when player picks.
+    if (this.state.phase === 'choose_from_discard') {
+      // Discard remaining hands (turn 6 or not — they stay empty for turn 6 anyway)
+      for (const player of this.state.players) {
+        if (player.hand.length > 0) {
+          this.state.discardPile.push(...player.hand);
+          player.hand = [];
+        }
+      }
+      return;
+    }
+
     // Handle last turn of age (turn 6 → discard last card, no coins)
     if (this.state.turn === 6) {
       for (const player of this.state.players) {
@@ -249,8 +262,49 @@ export class GameEngine {
       if (effect.type === 'coins') player.coins += effect.amount;
       if (effect.type === 'shields') player.shields += effect.count;
       if (effect.type === 'free_build_per_age') player.freeBuildsLeft++;
-      // produce_resource / produce_choice effects are read dynamically
+      if (effect.type === 'build_from_discard') {
+        // Suspend normal flow — player must pick a card from the discard pile
+        this.state.phase = 'choose_from_discard';
+        this.state.pendingDiscardPlayerId = player.id;
+      }
+      // produce_resource / produce_choice / copy_guild effects are read dynamically
     }
+  }
+
+  /** Halicarnaso etapa 2: build a card from discard pile for free. */
+  buildFromDiscard(playerId: string, cardId: string): string | null {
+    if (this.state.phase !== 'choose_from_discard') return 'Not in choose_from_discard phase';
+    if (this.state.pendingDiscardPlayerId !== playerId) return 'Not your turn to choose from discard';
+
+    const cardIdx = this.state.discardPile.findIndex(c => c.id === cardId);
+    if (cardIdx === -1) return 'Card not found in discard pile';
+
+    const card = this.state.discardPile[cardIdx];
+    const player = this.state.players.find(p => p.id === playerId)!;
+
+    // Build the card for free
+    this.state.discardPile.splice(cardIdx, 1);
+    player.builtStructures.push(card);
+    this.addLog(`${player.name} construyó ${card.name} desde el descarte (Halicarnaso).`);
+
+    // Clear pending state
+    this.state.pendingDiscardPlayerId = undefined;
+
+    // Resume the turn flow that was interrupted in resolveAllActions
+    if (this.state.turn === 6) {
+      // End of age was pending
+      this.endAge();
+    } else {
+      // Mid-age: pass hands and continue
+      this.passHands();
+      for (const p of this.state.players) {
+        p.isReady = false;
+        p.pendingAction = undefined;
+      }
+      this.state.turn++;
+      this.state.phase = 'choose';
+    }
+    return null;
   }
 
   private passHands(): void {
@@ -313,6 +367,43 @@ export class GameEngine {
     this.state.log.push(msg);
     if (this.state.log.length > 20) this.state.log.shift();
   }
+
+  /** Generate a random valid action for a bot player. */
+  getBotAction(playerId: string): PendingAction | null {
+    if (this.state.phase !== 'choose') return null;
+    const playerIdx = this.state.players.findIndex(p => p.id === playerId);
+    if (playerIdx === -1) return null;
+    const player = this.state.players[playerIdx];
+    if (player.isReady) return null;
+
+    const left  = this.leftNeighbor(playerIdx);
+    const right = this.rightNeighbor(playerIdx);
+
+    // Shuffle hand for randomness
+    const hand = [...player.hand].sort(() => Math.random() - 0.5);
+
+    // Try to build wonder stage first (25% chance if affordable)
+    const wonder = WONDERS.find(w => w.id === player.wonderId)!;
+    if (Math.random() < 0.25 && player.wonderStagesBuilt < wonder.stages.length) {
+      const opt = validateBuildWonderStage(player, left, right, wonder.stages);
+      if (opt.canBuild) {
+        const trade = opt.tradeCost ? { leftCoins: opt.tradeCost.leftCoins, rightCoins: opt.tradeCost.rightCoins } : undefined;
+        return { cardId: hand[0].id, action: { type: 'build_wonder_stage' }, trade };
+      }
+    }
+
+    // Try to build a structure
+    for (const card of hand) {
+      const opt = validateBuildStructure(card, player, left, right);
+      if (opt.canBuild) {
+        const trade = opt.tradeCost ? { leftCoins: opt.tradeCost.leftCoins, rightCoins: opt.tradeCost.rightCoins } : undefined;
+        return { cardId: card.id, action: { type: 'build_structure' }, trade };
+      }
+    }
+
+    // Fallback: discard the first card
+    return { cardId: hand[0].id, action: { type: 'discard' } };
+  }
 }
 
 function countColor(player: PlayerState, color: string): number {
@@ -322,7 +413,7 @@ function countColor(player: PlayerState, color: string): number {
 /** Factory: create a new GameState for a room ready to start. */
 export function createGameState(
   roomId: string,
-  players: { id: string; name: string }[],
+  players: { id: string; name: string; isBot?: boolean }[],
 ): GameState {
   const wonderIds = shuffle([...WONDERS.map(w => w.id)]).slice(0, players.length);
 
@@ -342,6 +433,7 @@ export function createGameState(
       pendingAction: undefined,
       tradeDiscounts: { left: [], right: [] },
       freeBuildsLeft: 0,
+      isBot: p.isBot ?? false,
     };
   });
 

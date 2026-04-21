@@ -153,12 +153,18 @@ function WaitingRoom({
   roomId, players, playerId, isHost, onStart, error,
 }: {
   roomId: string;
-  players: { id: string; name: string }[];
+  players: { id: string; name: string; isBot?: boolean }[];
   playerId: string;
   isHost: boolean;
   onStart: () => void;
   error: string;
 }) {
+  function addBot() {
+    socket.emit('lobby:add_bot', (err?: string) => {
+      if (err) console.error(err);
+    });
+  }
+
   return (
     <div className="lobby-wrap">
       <div style={{ textAlign: 'center', marginBottom: 28 }}>
@@ -173,7 +179,7 @@ function WaitingRoom({
         </p>
       </div>
 
-      <div style={{ background: 'var(--color-surface)', borderRadius: 8, padding: 14, marginBottom: 20, border: '1px solid var(--color-border)' }}>
+      <div style={{ background: 'var(--color-surface)', borderRadius: 8, padding: 14, marginBottom: 16, border: '1px solid var(--color-border)' }}>
         <p style={{ marginBottom: 10, color: 'var(--color-text-dim)', fontSize: '0.82rem' }}>
           Jugadores ({players.length}/7 — mínimo 3):
         </p>
@@ -181,15 +187,29 @@ function WaitingRoom({
           <div key={p.id} style={{
             padding: '7px 0', borderBottom: '1px solid var(--color-border)',
             display: 'flex', alignItems: 'center', gap: 8,
-            color: p.id === playerId ? 'var(--color-gold)' : 'var(--color-text)',
+            color: p.id === playerId ? 'var(--color-gold)' : p.isBot ? 'var(--color-text-dim)' : 'var(--color-text)',
             fontWeight: p.id === playerId ? 700 : 400,
           }}>
-            <span>{i === 0 ? '👑' : '•'}</span>
+            <span>{p.isBot ? '🤖' : i === 0 ? '👑' : '•'}</span>
             <span>{p.name}</span>
-            {i === 0 && <span style={{ fontSize: '0.72rem', color: 'var(--color-text-dim)', marginLeft: 'auto' }}>host</span>}
+            {i === 0 && !p.isBot && <span style={{ fontSize: '0.72rem', color: 'var(--color-text-dim)', marginLeft: 'auto' }}>host</span>}
           </div>
         ))}
       </div>
+
+      {isHost && players.length < 7 && (
+        <button
+          onClick={addBot}
+          style={{
+            width: '100%', padding: 10, fontSize: '0.9rem', marginBottom: 10,
+            background: 'var(--color-surface2)',
+            color: 'var(--color-text-dim)',
+            border: '1px dashed var(--color-border)',
+          }}
+        >
+          🤖 Agregar Bot ({players.length}/7)
+        </button>
+      )}
 
       {error && <p style={{ color: 'var(--color-accent)', marginBottom: 12, textAlign: 'center' }}>✗ {error}</p>}
 

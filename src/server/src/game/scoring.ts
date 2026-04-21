@@ -92,52 +92,64 @@ function bestScienceSymbol(sym: { compass: number; gear: number; tablet: number 
   return keys.reduce((best, k) => delta(k) > delta(best) ? k : best, 'compass' as const);
 }
 
+/** Score a single guild card as if owned by `player` (used for copy_guild too). */
+function scoreGuildCard(card: { name: string; effects: { type: string; [k: string]: any }[] }, player: PlayerState, left: PlayerState, right: PlayerState): number {
+  if (card.name === 'Gremio de Armadores') {
+    return player.builtStructures.filter(c =>
+      c.color === 'brown' || c.color === 'gray' || c.color === 'purple'
+    ).length;
+  }
+  let vp = 0;
+  for (const e of card.effects) {
+    switch (e.type) {
+      case 'vp_from_brown_neighbors':
+        vp += e.per_card * (countColor(left, 'brown') + countColor(right, 'brown')); break;
+      case 'vp_from_gray_neighbors':
+        vp += e.per_card * (countColor(left, 'gray') + countColor(right, 'gray')); break;
+      case 'vp_from_yellow_neighbors':
+        vp += e.per_card * (countColor(left, 'yellow') + countColor(right, 'yellow')); break;
+      case 'vp_from_blue_neighbors':
+        vp += e.per_card * (countColor(left, 'blue') + countColor(right, 'blue')); break;
+      case 'vp_from_red_neighbors':
+        vp += e.per_card * (countColor(left, 'red') + countColor(right, 'red')); break;
+      case 'vp_from_green_neighbors':
+        vp += e.per_card * (countColor(left, 'green') + countColor(right, 'green')); break;
+      case 'vp_from_wonder_stages': {
+        const n = left.wonderStagesBuilt + right.wonderStagesBuilt +
+          (e.include_self ? player.wonderStagesBuilt : 0);
+        vp += n; break;
+      }
+      case 'vp_from_defeat_tokens_neighbors':
+        vp += left.militaryTokens.filter(t => t.value < 0).length +
+              right.militaryTokens.filter(t => t.value < 0).length;
+        break;
+    }
+  }
+  return vp;
+}
+
 function computeGuildScore(player: PlayerState, left: PlayerState, right: PlayerState): number {
   let score = 0;
 
   for (const card of player.builtStructures) {
     if (card.color !== 'purple') continue;
+    score += scoreGuildCard(card, player, left, right);
+  }
 
-    // Shipowners Guild — special: VP per own brown + gray + purple card (incl. itself)
-    if (card.name === 'Shipowners Guild') {
-      score += player.builtStructures.filter(c =>
-        c.color === 'brown' || c.color === 'gray' || c.color === 'purple'
-      ).length;
-      continue;
-    }
+  // Halicarnaso etapa 3: copy_guild — score the best guild from neighbors automatically
+  const wonder = WONDERS.find(w => w.id === player.wonderId)!;
+  const hasCopyGuild = wonder.stages
+    .slice(0, player.wonderStagesBuilt)
+    .some(s => s.effects.some(e => e.type === 'copy_guild'));
 
-    for (const e of card.effects) {
-      switch (e.type) {
-        case 'vp_from_brown_neighbors':
-          score += e.per_card * (countColor(left, 'brown') + countColor(right, 'brown'));
-          break;
-        case 'vp_from_gray_neighbors':
-          score += e.per_card * (countColor(left, 'gray') + countColor(right, 'gray'));
-          break;
-        case 'vp_from_yellow_neighbors':
-          score += e.per_card * (countColor(left, 'yellow') + countColor(right, 'yellow'));
-          break;
-        case 'vp_from_blue_neighbors':
-          score += e.per_card * (countColor(left, 'blue') + countColor(right, 'blue'));
-          break;
-        case 'vp_from_red_neighbors':
-          score += e.per_card * (countColor(left, 'red') + countColor(right, 'red'));
-          break;
-        case 'vp_from_green_neighbors':
-          score += e.per_card * (countColor(left, 'green') + countColor(right, 'green'));
-          break;
-        case 'vp_from_wonder_stages': {
-          const n = left.wonderStagesBuilt + right.wonderStagesBuilt +
-            (e.include_self ? player.wonderStagesBuilt : 0);
-          score += n;
-          break;
-        }
-        case 'vp_from_defeat_tokens_neighbors':
-          score += left.militaryTokens.filter(t => t.value < 0).length +
-                   right.militaryTokens.filter(t => t.value < 0).length;
-          break;
-        // extra_science_symbol handled in computeScienceScore
-      }
+  if (hasCopyGuild) {
+    const neighborGuilds = [
+      ...left.builtStructures.filter(c => c.color === 'purple'),
+      ...right.builtStructures.filter(c => c.color === 'purple'),
+    ];
+    if (neighborGuilds.length > 0) {
+      const best = Math.max(...neighborGuilds.map(g => scoreGuildCard(g, player, left, right)));
+      score += best;
     }
   }
 

@@ -85,9 +85,9 @@ export function formatEffect(effects: CardEffect[]): string {
       case 'coins_and_vp_from_gray':   return `+2💰+2★/📦`;
       case 'coins_and_vp_from_yellow': return `+💰+★/🟡`;
       case 'coins_and_vp_from_wonder': return `+3💰+★/🏛`;
-      case 'trade_discount_left':   return `↙${e.resources.join('/')} →1💰`;
-      case 'trade_discount_right':  return `↗${e.resources.join('/')} →1💰`;
-      case 'trade_discount_both':   return `↔${e.resources.join('/')} →1💰`;
+      case 'trade_discount_left':   return `← ${e.resources.map(r => r === 'brown' ? 'Mat.' : 'Manuf.').join('/')} ×1💰`;
+      case 'trade_discount_right':  return `→ ${e.resources.map(r => r === 'brown' ? 'Mat.' : 'Manuf.').join('/')} ×1💰`;
+      case 'trade_discount_both':   return `↔ ${e.resources.map(r => r === 'brown' ? 'Mat.' : 'Manuf.').join('/')} ×1💰`;
       case 'free_build_per_age':    return `1 gratis/era`;
       case 'build_from_discard':    return `construir descarte`;
       case 'copy_guild':            return `copiar guild`;
