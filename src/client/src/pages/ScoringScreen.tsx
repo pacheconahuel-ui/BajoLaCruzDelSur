@@ -42,8 +42,18 @@ function getScienceBreakdown(state: PublicGameState, playerId: string): string {
 export default function ScoringScreen({ state, onReturnToMenu }: Props) {
   const [expandedCity, setExpandedCity] = useState<string | null>(null);
 
+  // Sort by total, then by final coins as tiebreaker (7 Wonders rules)
+  function sortScores(arr: PlayerScore[]): PlayerScore[] {
+    return [...arr].sort((a, b) => {
+      if (b.total !== a.total) return b.total - a.total;
+      const aCoins = state.players.find(p => p.id === a.playerId)?.coins ?? 0;
+      const bCoins = state.players.find(p => p.id === b.playerId)?.coins ?? 0;
+      return bCoins - aCoins;
+    });
+  }
+
   const scores: PlayerScore[] = state.scores?.length
-    ? [...state.scores].sort((a, b) => b.total - a.total)
+    ? sortScores(state.scores)
     : state.players.map(p => {
         const military = p.militaryTokens.reduce((s, t) => s + t.value, 0);
         const treasury = Math.floor(p.coins / 3);
@@ -145,6 +155,14 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
                   </th>
                 ))}
                 <th style={{
+                  padding: '10px 8px', textAlign: 'center',
+                  color: 'var(--color-text-dim)', fontWeight: 600,
+                  borderBottom: '1px solid var(--color-border)',
+                  fontSize: '0.75rem', whiteSpace: 'nowrap',
+                }}>
+                  💰fin
+                </th>
+                <th style={{
                   padding: '10px 14px', textAlign: 'center',
                   color: 'var(--color-gold)', fontWeight: 800,
                   borderBottom: '1px solid var(--color-border)',
@@ -185,6 +203,12 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
                       </td>
                     );
                   })}
+                  <td style={{
+                    padding: '10px 8px', textAlign: 'center',
+                    color: 'var(--color-text-dim)', fontSize: '0.82rem',
+                  }}>
+                    {state.players.find(p => p.id === row.playerId)?.coins ?? 0}
+                  </td>
                   <td style={{
                     padding: '10px 14px', textAlign: 'center',
                     fontWeight: 800, fontSize: '1rem',
