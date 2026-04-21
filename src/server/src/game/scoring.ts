@@ -40,7 +40,8 @@ function scorePlayer(player: PlayerState, playerIdx: number, state: GameState): 
       if (e.type === 'coins_and_vp_from_brown') {
         commercial += e.vp_per_card * countColor(player, 'brown');
       } else if (e.type === 'coins_and_vp_from_gray') {
-        commercial += e.vp_per_card * countColor(player, 'gray');
+        // Chamber of Commerce: counts NEIGHBORS' gray cards (not own)
+        commercial += e.vp_per_card * (countColor(left, 'gray') + countColor(right, 'gray'));
       } else if (e.type === 'coins_and_vp_from_yellow') {
         commercial += e.vp_per_card * countColor(player, 'yellow');
       } else if (e.type === 'coins_and_vp_from_wonder') {

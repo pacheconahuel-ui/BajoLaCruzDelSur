@@ -10,11 +10,9 @@ const AGE_REWARD: Record<number, number> = { 1: 1, 2: 3, 3: 5 };
 const AUTO_ADVANCE_MS = 4000;
 
 export default function MilitaryDisplay({ state }: Props) {
-  // For ages 1 and 2: state.age is incremented to the NEXT age during 'military' phase,
-  //   so the completed age is state.age - 1.
-  // For age 3: state.age stays at 3 (no next age to increment to),
-  //   so the completed age is state.age itself.
-  const justCompletedAge = (state.age === 3 ? 3 : state.age - 1) as 1 | 2 | 3;
+  // Use the server-provided militaryAge field (the age whose battles just resolved).
+  // Fallback: state.age for age 3, state.age-1 for ages 1→2 (legacy safe-guard only).
+  const justCompletedAge = (state.militaryAge ?? (state.age === 3 ? 3 : state.age - 1)) as 1 | 2 | 3;
   const reward = AGE_REWARD[justCompletedAge] ?? 1;
   const n = state.players.length;
 

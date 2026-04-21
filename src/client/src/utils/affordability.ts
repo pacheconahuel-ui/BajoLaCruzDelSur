@@ -21,6 +21,13 @@ function getFixedResources(player: PlayerState | PublicPlayerState): ResourcePoo
   const pool = emptyPool();
   const startRes = WONDER_STARTING[player.wonderId];
   if (startRes) pool[startRes]++;
+  // Wonder stage production effects
+  const stageProduction = WONDER_STAGE_PRODUCTION[player.wonderId] ?? [];
+  for (let i = 0; i < player.wonderStagesBuilt; i++) {
+    for (const eff of stageProduction[i] ?? []) {
+      if (eff.fixed) pool[eff.fixed]++;
+    }
+  }
   for (const card of player.builtStructures) {
     for (const e of card.effects as CardEffect[]) {
       if (e.type === 'produce_resource') pool[e.resource]++;
@@ -31,6 +38,13 @@ function getFixedResources(player: PlayerState | PublicPlayerState): ResourcePoo
 
 function getChoiceResources(player: PlayerState | PublicPlayerState): ChoicePool {
   const choices: ChoicePool = [];
+  // Wonder stage choice production effects
+  const stageProduction = WONDER_STAGE_PRODUCTION[player.wonderId] ?? [];
+  for (let i = 0; i < player.wonderStagesBuilt; i++) {
+    for (const eff of stageProduction[i] ?? []) {
+      if (eff.choice) choices.push(eff.choice);
+    }
+  }
   for (const card of player.builtStructures) {
     for (const e of card.effects as CardEffect[]) {
       if (e.type === 'produce_choice') choices.push(e.options as Resource[]);
@@ -113,6 +127,20 @@ const WONDER_STAGE_COSTS: Record<string, ResourceCost[]> = {
   olympia:       [{ wood: 2 }, { loom: 2, stone: 1 }, { stone: 2, ore: 1 }],
   halicarnassus: [{ loom: 2 }, { ore: 3, loom: 1 }, { glass: 2, ore: 2 }],
   giza:          [{ stone: 2 }, { wood: 3 }, { stone: 4 }],
+};
+
+/**
+ * Production granted by built wonder stages (mirrors wonders.ts on the server).
+ * Each entry is an array of per-stage effects: 'fixed:wood', 'choice:wood/stone/...'
+ */
+const WONDER_STAGE_PRODUCTION: Record<string, Array<{ fixed?: Resource; choice?: Resource[] }[]>> = {
+  colossus:      [[], [], []],
+  lighthouse:    [[], [{ choice: ['wood', 'stone', 'clay', 'ore'] }], []],
+  temple:        [[], [], []],
+  babylon:       [[], [], []],
+  olympia:       [[], [], []],
+  halicarnassus: [[], [], []],
+  giza:          [[], [], []],
 };
 
 export function getWonderStageCost(wonderId: string, stageIndex: number): ResourceCost | null {

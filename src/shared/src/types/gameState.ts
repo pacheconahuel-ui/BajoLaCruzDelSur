@@ -79,6 +79,7 @@ export interface GameState {
   log: string[];       // human-readable event log (last 20 entries)
   scores?: PlayerScore[];
   pendingDiscardPlayerId?: string;  // set during 'choose_from_discard' phase
+  militaryAge?: Age;   // the age whose military was just resolved (set during 'military' phase)
 }
 
 // Subset of player state safe to send to other players (hides hand contents)

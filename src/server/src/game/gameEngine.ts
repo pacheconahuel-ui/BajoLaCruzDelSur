@@ -245,18 +245,7 @@ export class GameEngine {
         case 'coins_from_yellow':
           player.coins += e.per_yellow * countColor(player, 'yellow');
           break;
-        case 'coins_and_vp_from_brown':
-          player.coins += e.per_card * countColor(player, 'brown');
-          break;
-        case 'coins_and_vp_from_gray':
-          player.coins += e.per_card * countColor(player, 'gray');
-          break;
-        case 'coins_and_vp_from_yellow':
-          player.coins += e.per_card * countColor(player, 'yellow');
-          break;
-        case 'coins_and_vp_from_wonder':
-          player.coins += e.per_stage * player.wonderStagesBuilt;
-          break;
+        // coins_and_vp_from_* are end-of-game effects — coins applied in applyEndGameCoins()
         // produce_resource, produce_choice, trade_discount_*, etc. are read dynamically
       }
     }
@@ -356,7 +345,11 @@ export class GameEngine {
   }
 
   private endAge(): void {
+    const completedAge = this.state.age;
     resolveMilitary(this.state);
+
+    // Record which age just resolved (used by client MilitaryDisplay)
+    this.state.militaryAge = completedAge;
 
     if (this.state.age === 3) {
       // Show age 3 military display before scoring (startNextAge will compute scores)
@@ -373,7 +366,7 @@ export class GameEngine {
         player.freeBuildsLeft = hasFreeBuild ? 1 : 0;
       }
       this.state.phase = 'military';
-      this.addLog(`Era ${this.state.age - 1} terminada. Batallas resueltas.`);
+      this.addLog(`Era ${completedAge} terminada. Batallas resueltas.`);
     }
   }
 
@@ -381,13 +374,41 @@ export class GameEngine {
   startNextAge(): void {
     if (this.state.phase !== 'military') return;
     if (this.state.age === 3) {
-      // Age 3 military display done → compute final scores
+      // Age 3 military display done → apply end-of-game commercial coins then score
       this.state.phase = 'scoring';
+      this.applyEndGameCoins();
       computeScores(this.state);
       this.addLog('¡Fin del juego! Puntajes finales calculados.');
     } else {
       this.startAge();
     }
+  }
+
+  /**
+   * Apply end-of-game coin awards from commercial cards (Haven, Lighthouse,
+   * Chamber of Commerce, Arena). These count final board state, not build-time state.
+   */
+  private applyEndGameCoins(): void {
+    const n = this.state.players.length;
+    this.state.players.forEach((player, i) => {
+      const left = this.state.players[(i - 1 + n) % n];
+      const right = this.state.players[(i + 1) % n];
+      for (const card of player.builtStructures) {
+        for (const e of card.effects) {
+          switch (e.type) {
+            case 'coins_and_vp_from_brown':
+              player.coins += e.per_card * countColor(player, 'brown'); break;
+            case 'coins_and_vp_from_gray':
+              // Chamber of Commerce: counts NEIGHBORS' gray cards (not own)
+              player.coins += e.per_card * (countColor(left, 'gray') + countColor(right, 'gray')); break;
+            case 'coins_and_vp_from_yellow':
+              player.coins += e.per_card * countColor(player, 'yellow'); break;
+            case 'coins_and_vp_from_wonder':
+              player.coins += e.per_stage * player.wonderStagesBuilt; break;
+          }
+        }
+      }
+    });
   }
 
   private leftNeighbor(playerIdx: number): PlayerState {
