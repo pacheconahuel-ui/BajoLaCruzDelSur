@@ -168,7 +168,7 @@ export default function App() {
         {toast && (
           <div style={{
             position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-            background: '#1c1610', border: '1px solid var(--color-accent)',
+            background: 'var(--color-surface)', border: '1px solid var(--color-accent)',
             borderRadius: 8, padding: '10px 20px',
             color: 'var(--color-text)', fontSize: '0.85rem',
             boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
@@ -194,7 +194,7 @@ export default function App() {
         {toast && (
           <div style={{
             position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-            background: '#1c1610', border: '1px solid var(--color-accent)',
+            background: 'var(--color-surface)', border: '1px solid var(--color-accent)',
             borderRadius: 8, padding: '10px 20px',
             color: 'var(--color-text)', fontSize: '0.85rem',
             boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
@@ -308,10 +308,10 @@ function WaitingRoom({
           style={{
             width: '100%', padding: 14, fontSize: '1rem',
             background: players.length >= 3
-              ? 'linear-gradient(135deg, #c8650f, #e63946)'
+              ? 'linear-gradient(135deg, #7a3c0a, #b94a2a)'
               : 'var(--color-surface2)',
             color: '#fff',
-            boxShadow: players.length >= 3 ? '0 4px 20px rgba(230,57,70,0.3)' : 'none',
+            boxShadow: players.length >= 3 ? '0 4px 20px rgba(185,74,42,0.3)' : 'none',
           }}
         >
           {players.length < 3 ? `Esperando jugadores (${players.length}/3 mínimo)` : '⚱ Iniciar partida'}
