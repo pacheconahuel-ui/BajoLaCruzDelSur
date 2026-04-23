@@ -1,0 +1,85 @@
+/* ============================================================
+   Bajo la Cruz del Sur — Paleta completa
+   Reemplaza el bloque :root en src/client/src/index.css
+   ============================================================ */
+
+:root {
+  /* ── Fondos base ─────────────────────────────────────── */
+  --color-bg:        #0f1419;   /* noche patagónica */
+  --color-surface:   #1a2430;   /* superficie oscura */
+  --color-surface2:  #2b3847;   /* piedra volcánica */
+  --color-border:    #3d4a5a;   /* límite sutil */
+  --color-text:      #ece3d0;   /* lana cruda */
+  --color-text-dim:  #a8b1bb;   /* silver ahumado */
+
+  /* ── Acentos semánticos ──────────────────────────────── */
+  --color-accent:    #b94a2a;   /* ember — rojo ñire (antes color-accent rojo) */
+  --color-silver:    #b8c0c9;   /* plata mapuche (reemplaza gold) */
+  --color-silver-dim:#6f7a87;   /* plata oxidada */
+  --color-success:   #6e8559;   /* verde líquen */
+
+  /* ── Aliases de compatibilidad con el código existente ─── */
+  /* Mantener estos aliases evita tocar cada componente que usa --color-gold */
+  --color-gold:      var(--color-silver);
+  --color-gold-dim:  var(--color-silver-dim);
+
+  /* ── Paleta de cartas (familias) ─────────────────────── */
+  /* brown → Materia (crudo) */
+  --card-brown:        #6b3a14;
+  --card-brown-light:  #956034;
+
+  /* gray → Oficio */
+  --card-gray:         #3d4a5c;
+  --card-gray-light:   #6f7a87;
+
+  /* blue → Rehue (lugar sagrado) */
+  --card-blue:         #1a3a6e;
+  --card-blue-light:   #2b5a8a;
+
+  /* green → Machi (saber del tiempo) */
+  --card-green:        #2c4a33;
+  --card-green-light:  #507a4d;
+
+  /* yellow → Trueque (comercio) */
+  --card-yellow:       #7a3c0a;
+  --card-yellow-light: #c08428;
+
+  /* red → Malón (militar) */
+  --card-red:          #6b1c14;
+  --card-red-light:    #a83a2c;
+
+  /* purple → Lof (linaje) */
+  --card-purple:       #2e1f44;
+  --card-purple-light: #624882;
+
+  /* ── Tipografía ──────────────────────────────────────── */
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  font-size: 22px;
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Utilidad: titulares en serif ──────────────────────── */
+h1, h2, h3,
+.display,
+.card-title {
+  font-family: 'Cormorant Garamond', 'Cormorant', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ── Ajuste del fondo de mesa ──────────────────────────── */
+/* Si vas a reemplazar table-bg.png por una textura nueva (cuero/lana/piedra),
+   mantené el mismo path. Si querés fallback sin imagen: */
+.game-table-fallback {
+  background: radial-gradient(ellipse at center top, #1a2430 0%, #0f1419 60%);
+}
+
+/* ── Borde de superficies — de oro a plata ─────────────── */
+.mat-me {
+  border: 1.5px solid var(--color-silver-dim);
+  box-shadow:
+    0 0 24px rgba(184, 192, 201, 0.10),
+    inset 0 1px 0 rgba(184, 192, 201, 0.08);
+}

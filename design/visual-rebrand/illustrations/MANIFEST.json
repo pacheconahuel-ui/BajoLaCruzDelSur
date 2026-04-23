@@ -1,0 +1,120 @@
+{
+  "description": "Mapeo de ilustraciones para cada carta/familia. Pensado para reemplazo progresivo — se puede empezar con 7 imágenes (una por familia) y luego expandir a una por carta si se desea.",
+  "strategy": "families-first",
+  "families": {
+    "brown": {
+      "label": "Materia",
+      "file": "card-brown.png",
+      "target_path": "src/client/public/assets/cards/card-brown.png",
+      "prompt_keywords": "indigenous woodcutters, Patagonian forest, hands shaping clay, axes, earth tones"
+    },
+    "gray": {
+      "label": "Oficio",
+      "file": "card-gray.png",
+      "target_path": "src/client/public/assets/cards/card-gray.png",
+      "prompt_keywords": "Mapuche loom, woman weaving, silver jewelry being hammered, basket weaving"
+    },
+    "blue": {
+      "label": "Rehue",
+      "file": "card-blue.png",
+      "target_path": "src/client/public/assets/cards/card-blue.png",
+      "prompt_keywords": "rehue carved wooden altar, ceremony by a patagonian lake, machi praying, kultrun drum"
+    },
+    "green": {
+      "label": "Machi",
+      "file": "card-green.png",
+      "target_path": "src/client/public/assets/cards/card-green.png",
+      "prompt_keywords": "lawentuchefe herbalist gathering medicinal plants, night sky stars, southern cross"
+    },
+    "yellow": {
+      "label": "Trueque",
+      "file": "card-yellow.png",
+      "target_path": "src/client/public/assets/cards/card-yellow.png",
+      "prompt_keywords": "caravan crossing patagonian steppe, horses loaded with goods, wind-blown flags, mountains"
+    },
+    "red": {
+      "label": "Malón",
+      "file": "card-red.png",
+      "target_path": "src/client/public/assets/cards/card-red.png",
+      "prompt_keywords": "indigenous warriors on horseback with lances and oval shields, dust trail, steppe"
+    },
+    "purple": {
+      "label": "Lof",
+      "file": "card-purple.png",
+      "target_path": "src/client/public/assets/cards/card-purple.png",
+      "prompt_keywords": "family gathering inside a ruka, elder telling stories by the fire, children listening"
+    }
+  },
+  "wonders": {
+    "nukemapu": {
+      "pueblo": "Ñuke Mapu (Mapuche)",
+      "file": "wonder-nukemapu.png",
+      "target_path": "src/client/public/assets/wonders/wonder-nukemapu.png",
+      "replaces": "wonder-giza.png",
+      "starting_resource": "stone",
+      "prompt_keywords": "large Mapuche ruka with smoke, carved rehue in front, snow-capped mountains behind, figures in geometric ponchos"
+    },
+    "aonikenk": {
+      "pueblo": "Aónikenk (Tehuelche)",
+      "file": "wonder-aonikenk.png",
+      "target_path": "src/client/public/assets/wonders/wonder-aonikenk.png",
+      "replaces": "wonder-babylon.png",
+      "starting_resource": "clay",
+      "prompt_keywords": "guanaco-leather toldos on patagonian steppe, horses, tall figures with painted capes"
+    },
+    "selknam": {
+      "pueblo": "Selk'nam (Ona)",
+      "file": "wonder-selknam.png",
+      "target_path": "src/client/public/assets/wonders/wonder-selknam.png",
+      "replaces": "wonder-olympia.png",
+      "starting_resource": "wood",
+      "prompt_keywords": "Selknam Hain ceremony, men painted white/red/black, subantarctic forest, central bonfire"
+    },
+    "kaweskar": {
+      "pueblo": "Kawésqar",
+      "file": "wonder-kaweskar.png",
+      "target_path": "src/client/public/assets/wonders/wonder-kaweskar.png",
+      "replaces": null,
+      "starting_resource": "ore",
+      "prompt_keywords": "long canoes in glacier channels, figures in otter-skin capes, icy water"
+    },
+    "yamana": {
+      "pueblo": "Yámana (Yaghan)",
+      "file": "wonder-yamana.png",
+      "target_path": "src/client/public/assets/wonders/wonder-yamana.png",
+      "replaces": null,
+      "starting_resource": "papyrus",
+      "prompt_keywords": "conical branch ruka by the water, fire, carved canoe, lenga forest"
+    },
+    "gununa": {
+      "pueblo": "Günün-a-Künna",
+      "file": "wonder-gununa.png",
+      "target_path": "src/client/public/assets/wonders/wonder-gununa.png",
+      "replaces": "wonder-lighthouse.png",
+      "starting_resource": "papyrus",
+      "prompt_keywords": "coastal patagonian camp, wind, tall beacon fire, northern patagonia cliffs"
+    },
+    "rankul": {
+      "pueblo": "Rankül (Ranquel)",
+      "file": "wonder-rankul.png",
+      "target_path": "src/client/public/assets/wonders/wonder-rankul.png",
+      "replaces": "wonder-halicarnassus.png",
+      "starting_resource": "loom",
+      "prompt_keywords": "pampa toldos, horses, figures weaving with boleadoras hanging nearby"
+    }
+  },
+  "table_background": {
+    "file": "table-bg.png",
+    "target_path": "src/client/public/assets/table-bg.png",
+    "prompt_keywords": "aged patagonian leather texture with subtle Mapuche geometric pattern embossed, warm brown and cream, 4k seamless",
+    "notes": "Reemplaza la textura de madera actual. Mantener resolución >= 2048x2048 para que no se vea pixelado en mesas grandes."
+  },
+  "future_expansion": {
+    "per_card_illustrations": {
+      "description": "Opcional, fase 2: ilustración individual por carta.",
+      "naming_convention": "card-{id}.png",
+      "example": "card-a2_quarry_3.png → ilustración específica de Cantera Mayor",
+      "integration_hint": "En CardView.tsx: const img = `/assets/cards/${card.id}.png`; con fallback a COLOR_IMG[card.color]"
+    }
+  }
+}
