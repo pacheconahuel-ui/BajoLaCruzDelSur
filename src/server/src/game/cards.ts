@@ -449,7 +449,7 @@ export const AGE1_CARDS: Card[] = [
   // ── ESTRUCTURAS MILITARES (red) ───────────────────────────────────────────
   {
     id: 'stockade_3',
-    name: 'Empalizada',
+    name: 'Palenque',
     color: 'red',
     age: 1,
     minPlayers: [3],
@@ -459,7 +459,7 @@ export const AGE1_CARDS: Card[] = [
   },
   {
     id: 'stockade_7',
-    name: 'Empalizada',
+    name: 'Palenque',
     color: 'red',
     age: 1,
     minPlayers: [7],
