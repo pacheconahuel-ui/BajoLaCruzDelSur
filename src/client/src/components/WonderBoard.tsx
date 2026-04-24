@@ -1,13 +1,13 @@
 import { PublicPlayerState, PlayerState } from '@7wonders/shared';
 
 export const WONDER_NAMES: Record<string, string> = {
-  colossus:      'Coloso de Rodas',
-  lighthouse:    'Faro de Alejandría',
-  temple:        'Artemisa de Éfeso',
-  babylon:       'Jardines de Babilonia',
-  olympia:       'Zeus en Olimpia',
-  halicarnassus: 'Mausoleo de Halicarnaso',
-  giza:          'Pirámides de Giza',
+  colossus:      'Kawésqar',
+  lighthouse:    'Günün-a-Künna',
+  temple:        'Yámana',
+  babylon:       'Aónikenk',
+  olympia:       "Selk'nam",
+  halicarnassus: 'Rankül',
+  giza:          'Ñuke Mapu',
 };
 
 const WONDER_IMG: Record<string, string> = {
@@ -132,7 +132,7 @@ export default function WonderBoard({ player, compact }: Props) {
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.85) 100%)' }} />
         <div style={{ position: 'absolute', bottom: 8, left: 12 }}>
           <div style={{ fontSize: '0.6rem', color: 'var(--color-text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', lineHeight: 1 }}>
-            Maravilla · {built}/{total} etapas
+            Pueblo · {built}/{total} etapas
           </div>
           <div style={{ fontSize: '1.2rem', fontWeight: 600, fontFamily: "'Cormorant Garamond', Georgia, serif", color: 'var(--color-gold)', lineHeight: 1.2 }}>
             {name}

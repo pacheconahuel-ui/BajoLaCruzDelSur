@@ -11,11 +11,11 @@ interface Props {
 const SCORE_COLS: { key: keyof PlayerScore; label: string; icon: string }[] = [
   { key: 'military',   label: 'Militar',   icon: '⚔️' },
   { key: 'treasury',   label: 'Tesoro',    icon: '💰' },
-  { key: 'wonder',     label: 'Maravilla', icon: '🏛' },
+  { key: 'wonder',     label: 'Pueblo',    icon: '🏛' },
   { key: 'civilian',   label: 'Civil',     icon: '🏛' },
   { key: 'science',    label: 'Ciencia',   icon: '🧪' },
   { key: 'commercial', label: 'Comercio',  icon: '🟡' },
-  { key: 'guilds',     label: 'Gremios',   icon: '🟣' },
+  { key: 'guilds',     label: 'Lof',       icon: '🟣' },
 ];
 
 const MEDALS = ['🥇', '🥈', '🥉'];

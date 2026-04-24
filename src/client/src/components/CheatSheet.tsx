@@ -15,7 +15,7 @@ export default function CheatSheet({ onClose }: { onClose: () => void }) {
         <Section title="🔄 Cómo es un turno">
           <ol style={{ paddingLeft: 18, lineHeight: 2, fontSize: '0.85rem', color: 'var(--color-text-dim)' }}>
             <li><b style={{ color: 'var(--color-text)' }}>Todos eligen a la vez</b> — cada jugador toca una carta de su mano</li>
-            <li>Elegís qué hacer: <b style={{ color: 'var(--color-text)' }}>Construir / Maravilla / Descartar</b> y confirmás</li>
+            <li>Elegís qué hacer: <b style={{ color: 'var(--color-text)' }}>Construir / Pueblo / Descartar</b> y confirmás</li>
             <li>Cuando <b style={{ color: 'var(--color-text)' }}>todos confirmaron</b>, el turno avanza y las manos se pasan al vecino</li>
             <li>6 turnos por era, 3 eras en total</li>
           </ol>
@@ -24,7 +24,7 @@ export default function CheatSheet({ onClose }: { onClose: () => void }) {
         {/* Actions */}
         <Section title="🎯 Acciones disponibles cada turno">
           <Row icon="🏗" label="Construir" desc="La carta entra a tu ciudad y da su efecto para siempre. Puede costar recursos (ver abajo)." />
-          <Row icon="🏛" label="Maravilla (etapa X)" desc="Sacrificás cualquier carta para avanzar tu Maravilla al próximo nivel. La carta desaparece, pero la maravilla da un bonus especial. Las etapas son en orden (1→2→3)." />
+          <Row icon="🏛" label="Pueblo (etapa X)" desc="Sacrificás cualquier carta para avanzar tu Pueblo al próximo nivel. La carta desaparece, pero el pueblo da un bonus especial. Las etapas son en orden (1→2→3)." />
           <Row icon="🗑" label="Descartar (+3💰)" desc="Tirás la carta y ganás 3 monedas. SIEMPRE disponible, incluso si no podés construir." />
         </Section>
 
@@ -107,7 +107,7 @@ export default function CheatSheet({ onClose }: { onClose: () => void }) {
             <div>🔵 <b style={{ color: 'var(--color-text)' }}>Civil</b> — PV de cartas azules</div>
             <div>⚔️ <b style={{ color: 'var(--color-text)' }}>Militar</b> — Suma de tokens de victoria/derrota</div>
             <div>💰 <b style={{ color: 'var(--color-text)' }}>Tesoro</b> — floor(monedas ÷ 3)</div>
-            <div>🏛 <b style={{ color: 'var(--color-text)' }}>Maravilla</b> — PV de etapas construidas</div>
+            <div>🏛 <b style={{ color: 'var(--color-text)' }}>Pueblo</b> — PV de etapas construidas</div>
             <div>🔬 <b style={{ color: 'var(--color-text)' }}>Ciencia</b> — compass² + gear² + tablet² + sets×7</div>
             <div>🟡 <b style={{ color: 'var(--color-text)' }}>Comercio</b> — PV de algunas cartas amarillas (Era III)</div>
             <div>🟣 <b style={{ color: 'var(--color-text)' }}>Lof</b> — PV de cartas moradas (Era III)</div>
