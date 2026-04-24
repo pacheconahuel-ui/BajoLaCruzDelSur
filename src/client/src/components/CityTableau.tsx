@@ -11,7 +11,7 @@ const COLOR_LABEL_MD: Record<CardColor, string> = {
   green:  'Ciencia',
   yellow: 'Comercial',
   red:    'Militar',
-  purple: 'Gremio',
+  purple: 'Lof',
 };
 
 const COLOR_LABEL_SM: Record<CardColor, string> = {

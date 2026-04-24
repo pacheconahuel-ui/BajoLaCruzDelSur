@@ -137,7 +137,7 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
           {freeReason === 'chain' ? (
             <span style={{ color: '#4ade80' }}>⛓ gratis (cadena)</span>
           ) : freeReason === 'olympia' ? (
-            <span style={{ color: '#a78bfa' }}>🏛 gratis (Olimpia)</span>
+            <span style={{ color: '#a78bfa' }}>🏛 gratis (Selk'nam)</span>
           ) : (
             costStr
           )}

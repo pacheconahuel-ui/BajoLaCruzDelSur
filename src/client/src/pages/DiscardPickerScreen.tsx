@@ -36,7 +36,7 @@ export default function DiscardPickerScreen({ state }: Props) {
     }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: '1.6rem', color: '#f5c542', fontWeight: 700, marginBottom: 6 }}>
-          🏛 Halicarnaso — Construir desde el descarte
+          🏛 Rankül — Construir desde el descarte
         </div>
         {isMyTurn ? (
           <div style={{ color: '#d1c08a', fontSize: '1rem' }}>
