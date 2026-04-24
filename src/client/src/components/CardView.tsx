@@ -100,8 +100,9 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
       {/* Card name */}
       <div style={{
         padding: '4px 8px 2px',
-        fontSize: '0.78rem',
-        fontWeight: 700,
+        fontSize: '0.85rem',
+        fontWeight: 600,
+        fontFamily: "'Cormorant Garamond', Georgia, serif",
         lineHeight: 1.2,
         color: '#fff',
         minHeight: 30,
@@ -166,7 +167,7 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
         return (
           <div style={{
             position: 'absolute', top: -5, right: -5,
-            background: '#c8650f',
+            background: 'var(--color-accent)',
             borderRadius: 8,
             padding: '2px 5px',
             fontSize: '0.58rem', fontWeight: 700, color: '#fff',

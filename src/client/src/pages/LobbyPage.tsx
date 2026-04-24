@@ -19,12 +19,11 @@ export default function LobbyPage({ onCreate, onJoin, error }: Props) {
 
       {/* Logo / title */}
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
-        <div style={{ fontSize: '3rem', marginBottom: 6 }}>⚱</div>
-        <h1 style={{ fontSize: '2.2rem', color: 'var(--color-gold)', letterSpacing: '-0.02em' }}>
-          7 Wonders
+        <h1 style={{ fontSize: '1.7rem', color: 'var(--color-silver)', letterSpacing: '-0.02em' }}>
+          Bajo la Cruz del Sur
         </h1>
         <p style={{ color: 'var(--color-text-dim)', marginTop: 4, fontSize: '0.9rem' }}>
-          Multijugador en tiempo real · 3–7 jugadores
+          Partida multijugador · 3–7 jugadores
         </p>
       </div>
 
@@ -36,7 +35,7 @@ export default function LobbyPage({ onCreate, onJoin, error }: Props) {
         <input
           value={name}
           onChange={e => setName(e.target.value)}
-          placeholder="Ej: Cleopatra"
+          placeholder="Ej: Lonko"
           maxLength={20}
           autoFocus
           onKeyDown={e => e.key === 'Enter' && (tab === 'create' ? handleCreate() : handleJoin())}
@@ -92,9 +91,9 @@ export default function LobbyPage({ onCreate, onJoin, error }: Props) {
         disabled={!name.trim() || (tab === 'join' && roomCode.length < 4)}
         style={{
           width: '100%', padding: '14px',
-          background: 'linear-gradient(135deg, #c8650f, #e63946)',
+          background: 'linear-gradient(135deg, #7a3c0a, #b94a2a)',
           color: '#fff', fontSize: '1rem',
-          boxShadow: '0 4px 20px rgba(230,57,70,0.3)',
+          boxShadow: '0 4px 20px rgba(185,74,42,0.3)',
         }}
       >
         {tab === 'create' ? 'Crear sala →' : 'Unirse a la sala →'}

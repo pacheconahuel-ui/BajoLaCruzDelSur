@@ -17,13 +17,13 @@ export const SCIENCE_ICON: Record<string, string> = {
 };
 
 export const COLOR_BG: Record<CardColor, string> = {
-  brown:  '#7c4a1e',
-  gray:   '#4a5568',
-  blue:   '#1a4480',
-  green:  '#166534',
-  yellow: '#92400e',
-  red:    '#7f1d1d',
-  purple: '#4c1d95',
+  brown:  '#6b3a14',
+  gray:   '#3d4a5c',
+  blue:   '#1a3a6e',
+  green:  '#2c4a33',
+  yellow: '#7a3c0a',
+  red:    '#6b1c14',
+  purple: '#2e1f44',
 };
 
 export const COLOR_IMG: Record<CardColor, string> = {
@@ -37,23 +37,23 @@ export const COLOR_IMG: Record<CardColor, string> = {
 };
 
 export const COLOR_ACCENT: Record<CardColor, string> = {
-  brown:  '#a0622a',
-  gray:   '#718096',
-  blue:   '#2563eb',
-  green:  '#16a34a',
-  yellow: '#d97706',
-  red:    '#dc2626',
-  purple: '#7c3aed',
+  brown:  '#956034',
+  gray:   '#6f7a87',
+  blue:   '#2b5a8a',
+  green:  '#507a4d',
+  yellow: '#c08428',
+  red:    '#a83a2c',
+  purple: '#624882',
 };
 
 export const COLOR_LABEL: Record<CardColor, string> = {
-  brown:  'Materia Prima',
-  gray:   'Manufactura',
-  blue:   'Civil',
-  green:  'Científica',
-  yellow: 'Comercial',
-  red:    'Militar',
-  purple: 'Guild',
+  brown:  'Materia',
+  gray:   'Oficio',
+  blue:   'Rehue',
+  green:  'Machi',
+  yellow: 'Trueque',
+  red:    'Malón',
+  purple: 'Lof',
 };
 
 export function formatCost(cost: { wood?: number; stone?: number; clay?: number; ore?: number; glass?: number; loom?: number; papyrus?: number; coins?: number }): string {
@@ -85,9 +85,9 @@ export function formatEffect(effects: CardEffect[]): string {
       case 'coins_and_vp_from_gray':   return `+2💰+2★/📦`;
       case 'coins_and_vp_from_yellow': return `+💰+★/🟡`;
       case 'coins_and_vp_from_wonder': return `+3💰+★/🏛`;
-      case 'trade_discount_left':   return `← ${e.resources.map(r => r === 'brown' ? 'Mat.' : 'Manuf.').join('/')} ×1💰`;
-      case 'trade_discount_right':  return `→ ${e.resources.map(r => r === 'brown' ? 'Mat.' : 'Manuf.').join('/')} ×1💰`;
-      case 'trade_discount_both':   return `↔ ${e.resources.map(r => r === 'brown' ? 'Mat.' : 'Manuf.').join('/')} ×1💰`;
+      case 'trade_discount_left':   return `← ${e.resources.map(r => r === 'brown' ? 'Materia' : 'Oficio').join('/')} ×1💰`;
+      case 'trade_discount_right':  return `→ ${e.resources.map(r => r === 'brown' ? 'Materia' : 'Oficio').join('/')} ×1💰`;
+      case 'trade_discount_both':   return `↔ ${e.resources.map(r => r === 'brown' ? 'Materia' : 'Oficio').join('/')} ×1💰`;
       case 'free_build_per_age':    return `1 gratis/era`;
       case 'build_from_discard':    return `construir descarte`;
       case 'copy_guild':            return `copiar guild`;

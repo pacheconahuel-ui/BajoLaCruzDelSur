@@ -1,13 +1,13 @@
 import { PublicPlayerState, PlayerState } from '@7wonders/shared';
 
 export const WONDER_NAMES: Record<string, string> = {
-  colossus:      'Coloso de Rodas',
-  lighthouse:    'Faro de Alejandría',
-  temple:        'Artemisa de Éfeso',
-  babylon:       'Jardines de Babilonia',
-  olympia:       'Zeus en Olimpia',
-  halicarnassus: 'Mausoleo de Halicarnaso',
-  giza:          'Pirámides de Giza',
+  colossus:      'Kawésqar',
+  lighthouse:    'Günün-a-Künna',
+  temple:        'Yámana',
+  babylon:       'Aónikenk',
+  olympia:       "Selk'nam",
+  halicarnassus: 'Rankül',
+  giza:          'Ñuke Mapu',
 };
 
 const WONDER_IMG: Record<string, string> = {
@@ -47,15 +47,15 @@ function StageSlots({ built, total, wonderId, size }: {
           flex: 1,
           minHeight: size === 'sm' ? 26 : 42,
           borderRadius: size === 'sm' ? 4 : 6,
-          background: i < built ? 'linear-gradient(135deg, #d4a017, #8a6a10)' : 'rgba(255,255,255,0.05)',
+          background: i < built ? 'linear-gradient(135deg, #8a9fb5, #4a5f70)' : 'rgba(255,255,255,0.05)',
           border: i < built
-            ? `${size === 'sm' ? 1 : 1.5}px solid #fcd34d`
+            ? `${size === 'sm' ? 1 : 1.5}px solid var(--color-silver)`
             : `${size === 'sm' ? 1 : 1.5}px solid rgba(255,255,255,0.12)`,
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
           padding: '2px 3px',
           gap: 2,
-          boxShadow: i < built ? '0 0 6px rgba(212,160,23,0.4)' : 'none',
+          boxShadow: i < built ? '0 0 6px rgba(184,192,201,0.4)' : 'none',
           transition: 'all 0.2s',
         }}>
           <span style={{
@@ -93,7 +93,7 @@ export default function WonderBoard({ player, compact }: Props) {
         <div style={{
           height: 80,
           backgroundImage: img ? `url(${img})` : undefined,
-          backgroundColor: '#1c1610',
+          backgroundColor: 'var(--color-bg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center 25%',
           position: 'relative',
@@ -132,9 +132,9 @@ export default function WonderBoard({ player, compact }: Props) {
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.85) 100%)' }} />
         <div style={{ position: 'absolute', bottom: 8, left: 12 }}>
           <div style={{ fontSize: '0.6rem', color: 'var(--color-text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', lineHeight: 1 }}>
-            Maravilla · {built}/{total} etapas
+            Pueblo · {built}/{total} etapas
           </div>
-          <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--color-gold)', lineHeight: 1.2 }}>
+          <div style={{ fontSize: '1.2rem', fontWeight: 600, fontFamily: "'Cormorant Garamond', Georgia, serif", color: 'var(--color-gold)', lineHeight: 1.2 }}>
             {name}
           </div>
         </div>

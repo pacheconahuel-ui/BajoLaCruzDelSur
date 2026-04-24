@@ -11,11 +11,11 @@ interface Props {
 const SCORE_COLS: { key: keyof PlayerScore; label: string; icon: string }[] = [
   { key: 'military',   label: 'Militar',   icon: '⚔️' },
   { key: 'treasury',   label: 'Tesoro',    icon: '💰' },
-  { key: 'wonder',     label: 'Maravilla', icon: '🏛' },
+  { key: 'wonder',     label: 'Pueblo',    icon: '🏛' },
   { key: 'civilian',   label: 'Civil',     icon: '🏛' },
   { key: 'science',    label: 'Ciencia',   icon: '🧪' },
   { key: 'commercial', label: 'Comercio',  icon: '🟡' },
-  { key: 'guilds',     label: 'Gremios',   icon: '🟣' },
+  { key: 'guilds',     label: 'Lof',       icon: '🟣' },
 ];
 
 const MEDALS = ['🥇', '🥈', '🥉'];
@@ -290,10 +290,10 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
         <button
           onClick={onReturnToMenu ?? (() => window.location.reload())}
           style={{
-            background: 'linear-gradient(135deg, #c8650f, #e63946)',
+            background: 'linear-gradient(135deg, #7a3c0a, #b94a2a)',
             color: '#fff', padding: '13px 48px', fontSize: '1rem',
             borderRadius: 8, fontWeight: 700,
-            boxShadow: '0 4px 20px rgba(230,57,70,0.3)',
+            boxShadow: '0 4px 20px rgba(185,74,42,0.3)',
           }}
         >
           ⚱ Nueva Partida

@@ -1,35 +1,41 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Warm ancient-Mediterranean dark theme */
-  --color-bg:        #0e0c09;
-  --color-surface:   #1a1610;
-  --color-surface2:  #252015;
-  --color-border:    #3d3425;
-  --color-accent:    #e63946;
-  --color-gold:      #d4a017;
-  --color-gold-dim:  #8a6a10;
-  --color-text:      #f0e8d8;
-  --color-text-dim:  #8a7e6e;
-  --color-success:   #4caf6e;
+  /* ── Fondos base ─────────────────────────────────────── */
+  --color-bg:        #0f1419;   /* noche patagónica */
+  --color-surface:   #1a2430;
+  --color-surface2:  #2b3847;
+  --color-border:    #3d4a5a;
+  --color-text:      #ece3d0;   /* lana cruda */
+  --color-text-dim:  #a8b1bb;
 
-  /* Card palette */
+  /* ── Acentos semánticos ──────────────────────────────── */
+  --color-accent:    #b94a2a;   /* rojo ñire */
+  --color-silver:    #b8c0c9;   /* plata mapuche */
+  --color-silver-dim:#6f7a87;
+  --color-success:   #6e8559;   /* verde líquen */
+
+  /* ── Aliases de compatibilidad con el código existente ─── */
+  --color-gold:      var(--color-silver);
+  --color-gold-dim:  var(--color-silver-dim);
+
+  /* ── Paleta de cartas (familias) ─────────────────────── */
   --card-brown:        #6b3a14;
-  --card-brown-light:  #9b5523;
+  --card-brown-light:  #956034;
   --card-gray:         #3d4a5c;
-  --card-gray-light:   #5a6e84;
+  --card-gray-light:   #6f7a87;
   --card-blue:         #1a3a6e;
-  --card-blue-light:   #2a5bbf;
-  --card-green:        #14522e;
-  --card-green-light:  #1e8047;
+  --card-blue-light:   #2b5a8a;
+  --card-green:        #2c4a33;
+  --card-green-light:  #507a4d;
   --card-yellow:       #7a3c0a;
-  --card-yellow-light: #c8650f;
-  --card-red:          #6b1414;
-  --card-red-light:    #c22020;
-  --card-purple:       #3d1470;
-  --card-purple-light: #6b28c8;
+  --card-yellow-light: #c08428;
+  --card-red:          #6b1c14;
+  --card-red-light:    #a83a2c;
+  --card-purple:       #2e1f44;
+  --card-purple-light: #624882;
 
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   font-size: 22px;
   color: var(--color-text);
   background: var(--color-bg);
@@ -72,7 +78,14 @@ input {
 }
 input:focus { outline: none; border-color: var(--color-gold); box-shadow: 0 0 0 3px rgba(212,160,23,0.18); }
 
-h1, h2, h3 { font-weight: 700; line-height: 1.2; }
+h1, h2, h3,
+.display,
+.card-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
 
 /* ── Scrollbar ───────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -145,8 +158,8 @@ h1, h2, h3 { font-weight: 700; line-height: 1.2; }
   border-radius: 10px;
   border: 1.5px solid var(--color-gold-dim);
   box-shadow:
-    0 0 24px rgba(212,160,23,0.10),
-    inset 0 1px 0 rgba(212,160,23,0.07);
+    0 0 24px rgba(184,192,201,0.10),
+    inset 0 1px 0 rgba(184,192,201,0.08);
   padding: 12px;
   min-width: 0;  /* prevent hand cards from overflowing grid cell */
 }

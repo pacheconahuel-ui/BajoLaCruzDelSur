@@ -3,7 +3,7 @@ import { WonderBoard } from '@7wonders/shared';
 export const WONDERS: WonderBoard[] = [
   {
     id: 'colossus',
-    name: 'The Colossus of Rhodes',
+    name: 'Kawésqar',
     startingResource: 'ore',
     stages: [
       { cost: { ore: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
@@ -13,7 +13,7 @@ export const WONDERS: WonderBoard[] = [
   },
   {
     id: 'lighthouse',
-    name: 'The Lighthouse of Alexandria',
+    name: 'Günün-a-Künna',
     startingResource: 'papyrus',
     stages: [
       { cost: { stone: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
@@ -27,7 +27,7 @@ export const WONDERS: WonderBoard[] = [
   },
   {
     id: 'temple',
-    name: 'The Temple of Artemis in Ephesus',
+    name: 'Yámana',
     startingResource: 'papyrus',
     stages: [
       { cost: { stone: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
@@ -37,7 +37,7 @@ export const WONDERS: WonderBoard[] = [
   },
   {
     id: 'babylon',
-    name: 'The Hanging Gardens of Babylon',
+    name: 'Aónikenk',
     startingResource: 'clay',
     stages: [
       { cost: { clay: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
@@ -47,7 +47,7 @@ export const WONDERS: WonderBoard[] = [
   },
   {
     id: 'olympia',
-    name: 'The Statue of Zeus in Olympia',
+    name: "Selk'nam",
     startingResource: 'wood',
     stages: [
       { cost: { wood: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
@@ -57,7 +57,7 @@ export const WONDERS: WonderBoard[] = [
   },
   {
     id: 'halicarnassus',
-    name: 'The Mausoleum of Halicarnassus',
+    name: 'Rankül',
     startingResource: 'loom',
     stages: [
       { cost: { loom: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
@@ -67,7 +67,7 @@ export const WONDERS: WonderBoard[] = [
   },
   {
     id: 'giza',
-    name: 'The Pyramids of Giza',
+    name: 'Ñuke Mapu',
     startingResource: 'stone',
     stages: [
       { cost: { stone: 2 }, effects: [{ type: 'victory_points', points: 3 }] },

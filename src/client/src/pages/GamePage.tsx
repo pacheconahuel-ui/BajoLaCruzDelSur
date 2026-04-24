@@ -102,7 +102,7 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
         <h2 style={{ color: 'var(--color-gold)', marginBottom: 8 }}>Halicarnaso activa</h2>
         <p style={{ color: 'var(--color-text-dim)', lineHeight: 1.6 }}>
           <strong style={{ color: 'var(--color-text)' }}>{pickerName}</strong> está eligiendo
-          una carta del descarte (Etapa 2 de su Maravilla).
+          una carta del descarte (Etapa 2 de su Pueblo).
         </p>
         <p style={{ color: 'var(--color-text-dim)', fontSize: '0.82rem', marginTop: 12 }}>
           El turno continuará cuando elija…
@@ -124,11 +124,12 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
         textAlign: 'center', paddingBottom: 4, paddingTop: 4, marginBottom: 4,
       }}>
         <span style={{
-          fontSize: '1.5rem', fontWeight: 900, color: 'var(--color-gold)',
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-          textShadow: '0 0 18px rgba(212,160,23,0.35)',
+          fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-gold)',
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
+          letterSpacing: '0.08em',
+          textShadow: '0 0 18px rgba(184,192,201,0.35)',
         }}>
-          ⚱ 7 Wonders
+          Bajo la Cruz del Sur
         </span>
       </div>
 
@@ -396,7 +397,7 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
 
       {/* ── Footer ── */}
       <div style={{ textAlign: 'center', padding: '6px 0 2px', color: 'var(--color-text-dim)', fontSize: '0.65rem', letterSpacing: '0.04em' }}>
-        © By Pipo · 7 Wonders Digital
+        © By Pipo · Bajo la Cruz del Sur
       </div>
 
       {/* ── Cheat sheet overlay ── */}
@@ -675,9 +676,9 @@ function ActionPanel({
         {wonderStagesBuilt < 3 && (
           <button
             onClick={() => onAction('build_wonder_stage')}
-            title={`Sacrificás esta carta para construir la etapa ${wonderStagesBuilt + 1} de tu Maravilla. Costo: ${wonderStageCostStr ?? '—'}`}
+            title={`Sacrificás esta carta para construir la etapa ${wonderStagesBuilt + 1} de tu Pueblo. Costo: ${wonderStageCostStr ?? '—'}`}
             style={{
-              background: actionType === 'build_wonder_stage' ? '#b8860b' : 'var(--color-surface)',
+              background: actionType === 'build_wonder_stage' ? 'var(--color-silver-dim)' : 'var(--color-surface)',
               color: '#fff', padding: '7px 13px', fontSize: '0.82rem',
               opacity: wonderAff?.canBuild === false && actionType !== 'build_wonder_stage' ? 0.55 : 1,
             }}
@@ -715,7 +716,7 @@ function ActionPanel({
 
       {!aff.canBuild && !error && actionType !== 'build_wonder_stage' && (
         <div style={{ marginTop: 6, fontSize: '0.75rem', color: 'var(--color-text-dim)' }}>
-          Sin recursos para construir esta carta — podés descartarla (+3💰) o usarla para tu Maravilla.
+          Sin recursos para construir esta carta — podés descartarla (+3💰) o usarla para tu Pueblo.
         </div>
       )}
       {actionType === 'build_wonder_stage' && wonderAff && !wonderAff.canBuild && !error && (
