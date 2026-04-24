@@ -19,9 +19,11 @@ export default function LobbyPage({ onCreate, onJoin, error }: Props) {
 
       {/* Logo / title */}
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
-        <h1 style={{ fontSize: '1.7rem', color: 'var(--color-silver)', letterSpacing: '-0.02em' }}>
-          Bajo la Cruz del Sur
-        </h1>
+        <img
+          src="/assets/logo.png"
+          alt="Bajo la Cruz del Sur"
+          style={{ maxWidth: 320, width: '100%', marginBottom: 8 }}
+        />
         <p style={{ color: 'var(--color-text-dim)', marginTop: 4, fontSize: '0.9rem' }}>
           Partida multijugador · 3–7 jugadores
         </p>

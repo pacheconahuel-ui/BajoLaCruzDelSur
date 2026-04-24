@@ -118,12 +118,9 @@ h1, h2, h3,
 
 /* ── Game layout ─────────────────────────────────────────────────────────── */
 
-/* Table surface — Patagonian night sky */
+/* Table surface — Patagonian pampa night */
 .game-table {
-  background-image:
-    radial-gradient(ellipse at 50% 0%, rgba(42,63,95,0.5) 0%, transparent 65%),
-    radial-gradient(ellipse at 15% 80%, rgba(30,50,70,0.3) 0%, transparent 50%),
-    linear-gradient(170deg, #0d1820 0%, #111e2a 45%, #0a1520 100%);
+  background-image: url('/assets/table-bg.png');
   background-size: cover;
   background-position: center;
   border-radius: 16px;
