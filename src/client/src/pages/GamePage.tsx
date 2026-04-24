@@ -124,11 +124,12 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
         textAlign: 'center', paddingBottom: 4, paddingTop: 4, marginBottom: 4,
       }}>
         <span style={{
-          fontSize: '1.5rem', fontWeight: 900, color: 'var(--color-gold)',
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-          textShadow: '0 0 18px rgba(212,160,23,0.35)',
+          fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-gold)',
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
+          letterSpacing: '0.08em',
+          textShadow: '0 0 18px rgba(184,192,201,0.35)',
         }}>
-          ⚱ 7 Wonders
+          Bajo la Cruz del Sur
         </span>
       </div>
 
@@ -396,7 +397,7 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
 
       {/* ── Footer ── */}
       <div style={{ textAlign: 'center', padding: '6px 0 2px', color: 'var(--color-text-dim)', fontSize: '0.65rem', letterSpacing: '0.04em' }}>
-        © By Pipo · 7 Wonders Digital
+        © By Pipo · Bajo la Cruz del Sur
       </div>
 
       {/* ── Cheat sheet overlay ── */}

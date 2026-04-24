@@ -150,7 +150,7 @@ export const AGE1_CARDS: Card[] = [
   // ── MANUFACTURA (gray) ─────────────────────────────────────────────────────
   {
     id: 'loom_3',
-    name: 'Telar',
+    name: 'Witral',
     color: 'gray',
     age: 1,
     minPlayers: [3],
@@ -160,7 +160,7 @@ export const AGE1_CARDS: Card[] = [
   },
   {
     id: 'loom_6',
-    name: 'Telar',
+    name: 'Witral',
     color: 'gray',
     age: 1,
     minPlayers: [6],

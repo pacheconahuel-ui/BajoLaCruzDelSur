@@ -51,9 +51,9 @@ export default function CheatSheet({ onClose }: { onClose: () => void }) {
         <Section title="🔮 Recursos — manufacturas (cartas grises)">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 6 }}>
             {[
-              ['🔮', 'Vidrio', 'Glass'],
-              ['🧵', 'Telar', 'Loom'],
-              ['📜', 'Papiro', 'Papyrus'],
+              ['🔮', 'Obsidiana', 'Vidrio volcánico'],
+              ['🧵', 'Witral', 'Tejido Mapuche'],
+              ['📜', 'Cuero', 'Cuero de guanaco'],
             ].map(([icon, es, en]) => (
               <div key={en} style={{ background: 'var(--color-surface2)', borderRadius: 6, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: '1.2rem' }}>{icon}</span>
@@ -71,12 +71,12 @@ export default function CheatSheet({ onClose }: { onClose: () => void }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
             {[
               ['#7c4a1e', '🪵 Marrones', 'Producen materias primas (madera, piedra, arcilla, mineral)'],
-              ['#4a5568', '📦 Grises', 'Producen manufacturas (vidrio, telar, papiro)'],
+              ['#4a5568', '📦 Grises', 'Producen manufacturas (obsidiana, witral, cuero)'],
               ['#1a4480', '🔵 Azules', 'Dan puntos de victoria ⭐ directamente'],
               ['#166534', '🟢 Verdes', 'Dan símbolos científicos — puntúan al final'],
               ['#92400e', '🟡 Amarillas', 'Comercio: descuentos, monedas, producción comodín'],
               ['#7f1d1d', '🔴 Rojas', 'Dan escudos 🛡 para batallas militares'],
-              ['#4c1d95', '🟣 Moradas', 'Guilds — puntúan según lo que construyeron tus vecinos'],
+              ['#4c1d95', '🟣 Moradas', 'Lof — puntúan según lo que construyeron tus vecinos'],
             ].map(([color, label, desc]) => (
               <div key={label as string} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <div style={{ width: 14, minWidth: 14, height: 14, marginTop: 3, borderRadius: 3, background: color as string }} />
@@ -110,7 +110,7 @@ export default function CheatSheet({ onClose }: { onClose: () => void }) {
             <div>🏛 <b style={{ color: 'var(--color-text)' }}>Maravilla</b> — PV de etapas construidas</div>
             <div>🔬 <b style={{ color: 'var(--color-text)' }}>Ciencia</b> — compass² + gear² + tablet² + sets×7</div>
             <div>🟡 <b style={{ color: 'var(--color-text)' }}>Comercio</b> — PV de algunas cartas amarillas (Era III)</div>
-            <div>🟣 <b style={{ color: 'var(--color-text)' }}>Guilds</b> — PV de cartas moradas (Era III)</div>
+            <div>🟣 <b style={{ color: 'var(--color-text)' }}>Lof</b> — PV de cartas moradas (Era III)</div>
           </div>
         </Section>
 
