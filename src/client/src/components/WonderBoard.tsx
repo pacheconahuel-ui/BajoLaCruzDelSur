@@ -11,13 +11,13 @@ export const WONDER_NAMES: Record<string, string> = {
 };
 
 const WONDER_IMG: Record<string, string> = {
-  colossus:      '/assets/wonders/wonder-colossus.png',
-  lighthouse:    '/assets/wonders/wonder-lighthouse.png',
-  temple:        '/assets/wonders/wonder-temple.png',
-  babylon:       '/assets/wonders/wonder-babylon.png',
-  olympia:       '/assets/wonders/wonder-olympia.png',
-  halicarnassus: '/assets/wonders/wonder-halicarnassus.png',
-  giza:          '/assets/wonders/wonder-giza.png',
+  colossus:      '/assets/wonders/wonder-kawesqar.png',
+  lighthouse:    '/assets/wonders/wonder-gunun-a-kunna.png',
+  temple:        '/assets/wonders/wonder-yamana.png',
+  babylon:       '/assets/wonders/wonder-aonikenk.png',
+  olympia:       '/assets/wonders/wonder-selknam.png',
+  halicarnassus: '/assets/wonders/wonder-rankul.png',
+  giza:          '/assets/wonders/wonder-nuke-mapu.png',
 };
 
 // Stage effect summary per wonder (client-side, matches wonders.ts)
