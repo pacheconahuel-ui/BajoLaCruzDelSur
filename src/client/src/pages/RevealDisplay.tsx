@@ -65,7 +65,7 @@ export default function RevealDisplay({ state }: Props) {
                   <CardView card={myCard} compact />
                   <span style={{ fontSize: '0.78rem', color: 'var(--color-text-dim)' }}>
                     {myActionType === 'build_structure' ? '🏗 Construye'
-                     : myActionType === 'build_wonder_stage' ? '🏛 Maravilla'
+                     : myActionType === 'build_wonder_stage' ? '🏛 Pueblo'
                      : '🗑 Descarta'}
                   </span>
                 </div>

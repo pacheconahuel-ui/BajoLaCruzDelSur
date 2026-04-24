@@ -99,7 +99,7 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
     return (
       <div style={{ maxWidth: 480, margin: '80px auto', padding: '0 20px', textAlign: 'center' }}>
         <div style={{ fontSize: '2rem', marginBottom: 12 }}>📜</div>
-        <h2 style={{ color: 'var(--color-gold)', marginBottom: 8 }}>Halicarnaso activa</h2>
+        <h2 style={{ color: 'var(--color-gold)', marginBottom: 8 }}>Rankül activa</h2>
         <p style={{ color: 'var(--color-text-dim)', lineHeight: 1.6 }}>
           <strong style={{ color: 'var(--color-text)' }}>{pickerName}</strong> está eligiendo
           una carta del descarte (Etapa 2 de su Pueblo).
