@@ -33,23 +33,42 @@ const SCORE_COLS: { key: keyof PlayerScore; label: string; icon: string }[] = [
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
+// Wonder stages that grant extra_science_symbol (mirrors wonders.ts server-side)
+const WONDER_SCIENCE_EXTRA_STAGES: Record<string, number[]> = {
+  temple:  [1],  // Yámana stage 2
+  olympia: [1],  // Selk'nam stage 2
+};
+
+function bestScienceSymbol(sym: { compass: number; gear: number; tablet: number }): 'compass' | 'gear' | 'tablet' {
+  const delta = (s: 'compass' | 'gear' | 'tablet') => (sym[s] + 1) ** 2 - sym[s] ** 2;
+  const keys = ['compass', 'gear', 'tablet'] as const;
+  return keys.reduce((best, k) => delta(k) > delta(best) ? k : best, 'compass' as const);
+}
+
 function getScienceBreakdown(state: PublicGameState, playerId: string): string {
   const player = state.players.find(p => p.id === playerId);
   if (!player) return '';
-  let compass = 0, gear = 0, tablet = 0;
+  const sym = { compass: 0, gear: 0, tablet: 0 };
   for (const card of player.builtStructures) {
     if (card.color !== 'green') continue;
     for (const e of card.effects as CardEffect[]) {
-      if (e.type === 'science') {
-        if (e.symbol === 'compass') compass++;
-        else if (e.symbol === 'gear') gear++;
-        else if (e.symbol === 'tablet') tablet++;
-      }
+      if (e.type === 'science') sym[e.symbol]++;
     }
   }
-  const sets = Math.min(compass, gear, tablet);
-  const pts = compass ** 2 + gear ** 2 + tablet ** 2 + sets * 7;
-  return `🧭${compass} ⚙️${gear} 📋${tablet} = ${sets > 0 ? `${sets}×7 + ` : ''}${pts}pts`;
+  // Count extra_science_symbol from built structures (Lof de Kimche) + wonder stages
+  let extras = player.builtStructures.flatMap(c => c.effects).filter(e => e.type === 'extra_science_symbol').length;
+  const extraStages = WONDER_SCIENCE_EXTRA_STAGES[player.wonderId] ?? [];
+  for (const stageIdx of extraStages) {
+    if (player.wonderStagesBuilt > stageIdx) extras++;
+  }
+  // Apply extras using best-symbol heuristic (same as server scoring.ts)
+  for (let i = 0; i < extras; i++) {
+    sym[bestScienceSymbol(sym)]++;
+  }
+  const sets = Math.min(sym.compass, sym.gear, sym.tablet);
+  const pts = sym.compass ** 2 + sym.gear ** 2 + sym.tablet ** 2 + sets * 7;
+  const extrasNote = extras > 0 ? ` (+${extras}🧪)` : '';
+  return `🧭${sym.compass} ⚙️${sym.gear} 📋${sym.tablet}${extrasNote} = ${sets > 0 ? `${sets}×7 + ` : ''}${pts}pts`;
 }
 
 export default function ScoringScreen({ state, onReturnToMenu }: Props) {
