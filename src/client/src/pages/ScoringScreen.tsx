@@ -4,6 +4,18 @@ import CityTableau from '../components/CityTableau';
 import WonderBoard from '../components/WonderBoard';
 import { sfx } from '../utils/sfx';
 
+// Fixed VP per stage (stages without VP give 0). Mirrors wonders.ts server-side.
+// Dynamic effects like vp_from_own_color (Günün-a-Künna stage 2) are approximated as 0.
+const WONDER_STAGE_VP: Record<string, number[]> = {
+  colossus:      [0, 5, 7],
+  lighthouse:    [0, 0, 7],
+  temple:        [0, 0, 7],
+  babylon:       [0, 0, 7],
+  olympia:       [3, 0, 7],
+  halicarnassus: [0, 0, 7],
+  giza:          [0, 5, 7],
+};
+
 interface Props {
   state: PublicGameState;
   onReturnToMenu?: () => void;
@@ -13,7 +25,7 @@ const SCORE_COLS: { key: keyof PlayerScore; label: string; icon: string }[] = [
   { key: 'military',   label: 'Militar',   icon: '⚔️' },
   { key: 'treasury',   label: 'Tesoro',    icon: '💰' },
   { key: 'wonder',     label: 'Pueblo',    icon: '🏛' },
-  { key: 'civilian',   label: 'Civil',     icon: '🏛' },
+  { key: 'civilian',   label: 'Civil',     icon: '🔵' },
   { key: 'science',    label: 'Ciencia',   icon: '🧪' },
   { key: 'commercial', label: 'Comercio',  icon: '🟡' },
   { key: 'guilds',     label: 'Lof',       icon: '🟣' },
@@ -63,7 +75,8 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
       : state.players.map(p => {
           const military = p.militaryTokens.reduce((s, t) => s + t.value, 0);
           const treasury = Math.floor(p.coins / 3);
-          const wonder = p.wonderStagesBuilt * 3;
+          const stageVPs = WONDER_STAGE_VP[p.wonderId] ?? [0, 0, 0];
+          const wonder = stageVPs.slice(0, p.wonderStagesBuilt).reduce((s, v) => s + v, 0);
           const civilian = p.builtStructures
             .filter(c => c.color === 'blue')
             .flatMap(c => c.effects)

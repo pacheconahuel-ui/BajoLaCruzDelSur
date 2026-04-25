@@ -19,7 +19,12 @@ function scorePlayer(player: PlayerState, playerIdx: number, state: GameState): 
   let wonderVP = 0;
   for (let i = 0; i < player.wonderStagesBuilt; i++) {
     for (const e of wonder.stages[i].effects) {
-      if (e.type === 'victory_points') wonderVP += e.points;
+      if (e.type === 'victory_points') {
+        wonderVP += e.points;
+      } else if (e.type === 'vp_from_own_color') {
+        // Günün-a-Künna stage 2: 2 VP per yellow card owned
+        wonderVP += e.per_card * countColor(player, e.color);
+      }
     }
   }
 

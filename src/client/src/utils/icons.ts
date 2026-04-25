@@ -78,13 +78,13 @@ export function formatEffectReadable(effects: CardEffect[]): string {
       case 'shields':               return `${e.count} escudo${e.count > 1 ? 's' : ''} militar${e.count > 1 ? 'es' : ''}`;
       case 'science':               return `Símbolo científico: ${SCIENCE_ICON[e.symbol]}`;
       case 'coins':                 return `+${e.amount} monedas`;
-      case 'coins_from_brown':      return `+1💰 por cada carta Materia propia`;
-      case 'coins_from_gray':       return `+2💰 por cada carta Oficio propia`;
-      case 'coins_from_yellow':     return `+1💰 por cada carta Comercio propia`;
-      case 'coins_and_vp_from_brown':  return `+1💰 y +1★ por carta Materia propia`;
-      case 'coins_and_vp_from_gray':   return `+2💰 y +2★ por carta Oficio propia`;
-      case 'coins_and_vp_from_yellow': return `+1💰 y +1★ por carta Comercio propia`;
-      case 'coins_and_vp_from_wonder': return `+3💰 y +1★ por etapa de Pueblo`;
+      case 'coins_from_brown':      return `+${e.per_brown}💰 por carta Materia propia`;
+      case 'coins_from_gray':       return `+${e.per_gray}💰 por carta Oficio propia`;
+      case 'coins_from_yellow':     return `+${e.per_yellow}💰 por carta Comercio propia`;
+      case 'coins_and_vp_from_brown':  return `+${e.per_card}💰 y +${e.vp_per_card}★ por carta Materia propia`;
+      case 'coins_and_vp_from_gray':   return `+${e.per_card}💰 y +${e.vp_per_card}★ por carta Oficio de vecinos`;
+      case 'coins_and_vp_from_yellow': return `+${e.per_card}💰 y +${e.vp_per_card}★ por carta Comercio propia`;
+      case 'coins_and_vp_from_wonder': return `+${e.per_stage}💰 y +${e.vp_per_stage}★ por etapa de Pueblo`;
       case 'trade_discount_left':   return `Compras a la izquierda cuestan 1💰`;
       case 'trade_discount_right':  return `Compras a la derecha cuestan 1💰`;
       case 'trade_discount_both':   return `Compras a ambos vecinos cuestan 1💰`;
@@ -100,6 +100,7 @@ export function formatEffectReadable(effects: CardEffect[]): string {
       case 'vp_from_wonder_stages':    return e.include_self ? `1★ por etapa de Pueblo (todos)` : `1★ por etapa de Pueblo de vecinos`;
       case 'vp_from_defeat_tokens_neighbors': return `1★ por ficha de derrota de vecinos`;
       case 'vp_from_own_brown_gray_purple':   return `1★ por carta Materia/Oficio/Lof propias`;
+      case 'vp_from_own_color':     return `${e.per_card}★ por carta ${COLOR_LABEL[e.color]} propia`;
       case 'extra_science_symbol':  return `Símbolo científico comodín`;
       default:                      return (e as any).type;
     }
@@ -115,13 +116,13 @@ export function formatEffect(effects: CardEffect[]): string {
       case 'shields':               return `${e.count}🛡`;
       case 'science':               return `${SCIENCE_ICON[e.symbol]}`;
       case 'coins':                 return `+${e.amount}💰`;
-      case 'coins_from_brown':      return `+💰/🪵`;
-      case 'coins_from_gray':       return `+💰×2/📦`;
-      case 'coins_from_yellow':     return `+💰/🟡`;
-      case 'coins_and_vp_from_brown':  return `+💰+★/🪵`;
-      case 'coins_and_vp_from_gray':   return `+2💰+2★/📦`;
-      case 'coins_and_vp_from_yellow': return `+💰+★/🟡`;
-      case 'coins_and_vp_from_wonder': return `+3💰+★/🏛`;
+      case 'coins_from_brown':      return `+${e.per_brown}💰/🪵`;
+      case 'coins_from_gray':       return `+${e.per_gray}💰/📦`;
+      case 'coins_from_yellow':     return `+${e.per_yellow}💰/🟡`;
+      case 'coins_and_vp_from_brown':  return `+${e.per_card}💰+${e.vp_per_card}★/🪵`;
+      case 'coins_and_vp_from_gray':   return `+${e.per_card}💰+${e.vp_per_card}★/📦 vecinos`;
+      case 'coins_and_vp_from_yellow': return `+${e.per_card}💰+${e.vp_per_card}★/🟡`;
+      case 'coins_and_vp_from_wonder': return `+${e.per_stage}💰+${e.vp_per_stage}★/🏛`;
       case 'trade_discount_left':   return `← ${e.resources.map(r => r === 'brown' ? 'Materia' : 'Oficio').join('/')} ×1💰`;
       case 'trade_discount_right':  return `→ ${e.resources.map(r => r === 'brown' ? 'Materia' : 'Oficio').join('/')} ×1💰`;
       case 'trade_discount_both':   return `↔ ${e.resources.map(r => r === 'brown' ? 'Materia' : 'Oficio').join('/')} ×1💰`;
@@ -137,6 +138,7 @@ export function formatEffect(effects: CardEffect[]): string {
       case 'vp_from_wonder_stages':    return e.include_self ? `★/etapa (todos)` : `★/etapa vecinos`;
       case 'vp_from_defeat_tokens_neighbors': return `★/derrota vecinos`;
       case 'vp_from_own_brown_gray_purple':   return `★/🪵📦🟣 propias`;
+      case 'vp_from_own_color':     return `${e.per_card}★/${e.color === 'brown' ? '🪵' : e.color === 'gray' ? '📦' : e.color === 'blue' ? '🔵' : e.color === 'green' ? '🟢' : e.color === 'red' ? '🔴' : e.color === 'yellow' ? '🟡' : '🟣'} propias`;
       case 'extra_science_symbol':  return `+🧪 libre`;
       default:                      return (e as any).type;
     }
