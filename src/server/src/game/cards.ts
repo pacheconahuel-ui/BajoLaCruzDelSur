@@ -237,7 +237,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [3],
     cost: { stone: 1 },
-    chainTo: ['Canal de Riego'],
+    chainTo: ['Maloca Ceremonial'],
     effects: [{ type: 'victory_points', points: 3 }],
   },
   {
@@ -247,7 +247,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [7],
     cost: { stone: 1 },
-    chainTo: ['Canal de Riego'],
+    chainTo: ['Maloca Ceremonial'],
     effects: [{ type: 'victory_points', points: 3 }],
   },
   {
@@ -257,7 +257,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [3],
     cost: {},
-    chainTo: ['Kamaruko'],
+    chainTo: ['Parlamento de Lonkos'],
     effects: [{ type: 'victory_points', points: 2 }],
   },
   {
@@ -267,7 +267,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [5],
     cost: {},
-    chainTo: ['Kamaruko'],
+    chainTo: ['Parlamento de Lonkos'],
     effects: [{ type: 'victory_points', points: 2 }],
   },
   {
@@ -277,7 +277,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [3],
     cost: {},
-    chainTo: ['Kemu-Kemu'],
+    chainTo: ['Escuela de la Naturaleza'],
     effects: [{ type: 'victory_points', points: 2 }],
   },
   {
@@ -287,7 +287,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [6],
     cost: {},
-    chainTo: ['Kemu-Kemu'],
+    chainTo: ['Escuela de la Naturaleza'],
     effects: [{ type: 'victory_points', points: 2 }],
   },
 
@@ -300,7 +300,7 @@ export const AGE1_CARDS: Card[] = [
     minPlayers: [3],
     cost: { loom: 1 },
     chainFrom: undefined,
-    chainTo: ['Tropa de Caballos', 'Sanadora'],
+    chainTo: ['Observatorio de la Cruz del Sur', 'Práctica de Arquería'],
     effects: [{ type: 'science', symbol: 'compass' }],
   },
   {
@@ -310,7 +310,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [5],
     cost: { loom: 1 },
-    chainTo: ['Tropa de Caballos', 'Sanadora'],
+    chainTo: ['Observatorio de la Cruz del Sur', 'Práctica de Arquería'],
     effects: [{ type: 'science', symbol: 'compass' }],
   },
   {
@@ -320,7 +320,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [3],
     cost: { glass: 1 },
-    chainTo: ['Arquero', 'Logia de la Luna'],
+    chainTo: ['Taller de Boleadoras y Lazos', 'Huerto de Hierbas Curativas'],
     effects: [{ type: 'science', symbol: 'gear' }],
   },
   {
@@ -330,7 +330,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [7],
     cost: { glass: 1 },
-    chainTo: ['Arquero', 'Logia de la Luna'],
+    chainTo: ['Taller de Boleadoras y Lazos', 'Huerto de Hierbas Curativas'],
     effects: [{ type: 'science', symbol: 'gear' }],
   },
   {
@@ -340,7 +340,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [3],
     cost: { papyrus: 1 },
-    chainTo: ['Consejo de Lonkos', 'Archivo de Quipus'],
+    chainTo: ['Círculo de Historias Orales'],
     effects: [{ type: 'science', symbol: 'tablet' }],
   },
   {
@@ -350,7 +350,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [4],
     cost: { papyrus: 1 },
-    chainTo: ['Consejo de Lonkos', 'Archivo de Quipus'],
+    chainTo: ['Círculo de Historias Orales'],
     effects: [{ type: 'science', symbol: 'tablet' }],
   },
 
@@ -362,7 +362,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [3],
     cost: {},
-    chainTo: ['Tambo'],
+    chainTo: ['Mercado de las Carretas'],
     effects: [{ type: 'trade_discount_right', resources: ['brown'] }],
   },
   {
@@ -372,7 +372,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [7],
     cost: {},
-    chainTo: ['Tambo'],
+    chainTo: ['Mercado de las Carretas'],
     effects: [{ type: 'trade_discount_right', resources: ['brown'] }],
   },
   {
@@ -382,7 +382,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [3],
     cost: {},
-    chainTo: ['Tambo'],
+    chainTo: ['Mercado de las Carretas'],
     effects: [{ type: 'trade_discount_left', resources: ['brown'] }],
   },
   {
@@ -392,7 +392,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [6],
     cost: {},
-    chainTo: ['Tambo'],
+    chainTo: ['Mercado de las Carretas'],
     effects: [{ type: 'trade_discount_left', resources: ['brown'] }],
   },
   {
@@ -402,7 +402,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [3],
     cost: {},
-    chainTo: ['Caravana del Lof'],
+    chainTo: ['Depósito de Vituallas'],
     effects: [{ type: 'trade_discount_both', resources: ['gray'] }],
   },
   {
@@ -412,7 +412,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [7],
     cost: {},
-    chainTo: ['Caravana del Lof'],
+    chainTo: ['Depósito de Vituallas'],
     effects: [{ type: 'trade_discount_both', resources: ['gray'] }],
   },
   {
@@ -559,7 +559,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [3],
     cost: { loom: 1 },
-    chainTo: [],
+    chainTo: ['Observatorio de la Cruz del Sur', 'Práctica de Arquería'],
     effects: [{ type: 'science', symbol: 'compass' }],
   },
   {
@@ -569,7 +569,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [3],
     cost: { glass: 1 },
-    chainTo: [],
+    chainTo: ['Taller de Boleadoras y Lazos', 'Huerto de Hierbas Curativas'],
     effects: [{ type: 'science', symbol: 'gear' }],
   },
   {
@@ -579,7 +579,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [3],
     cost: { papyrus: 1 },
-    chainTo: [],
+    chainTo: ['Círculo de Historias Orales'],
     effects: [{ type: 'science', symbol: 'tablet' }],
   },
 
@@ -611,7 +611,7 @@ export const AGE1_CARDS: Card[] = [
     age: 1,
     minPlayers: [3],
     cost: { wood: 1 },
-    chainTo: [],
+    chainTo: ['Mercado de las Carretas'],
     effects: [{ type: 'trade_discount_both', resources: ['brown', 'gray'] }],
   },
   {
@@ -786,7 +786,7 @@ export const AGE2_CARDS: Card[] = [
     age: 2,
     minPlayers: [3],
     cost: { wood: 2, stone: 1 },
-    chainTo: [],
+    chainTo: ['Asamblea Grande'],
     effects: [{ type: 'victory_points', points: 5 }],
   },
   {
@@ -796,7 +796,7 @@ export const AGE2_CARDS: Card[] = [
     age: 2,
     minPlayers: [4],
     cost: { clay: 2, wood: 1 },
-    chainTo: [],
+    chainTo: ['Nguillatún'],
     effects: [{ type: 'victory_points', points: 4 }],
   },
   {
@@ -816,7 +816,7 @@ export const AGE2_CARDS: Card[] = [
     age: 2,
     minPlayers: [3],
     cost: { wood: 1, papyrus: 1 },
-    chainTo: [],
+    chainTo: ['Jardín del Sur'],
     effects: [{ type: 'victory_points', points: 3 }],
   },
   {
@@ -838,7 +838,7 @@ export const AGE2_CARDS: Card[] = [
     age: 2,
     minPlayers: [3],
     cost: { wood: 1, ore: 2 },
-    chainTo: [],
+    chainTo: ['Tolderia de Armas'],
     effects: [{ type: 'shields', count: 2 }],
   },
   {
@@ -891,7 +891,7 @@ export const AGE2_CARDS: Card[] = [
     age: 2,
     minPlayers: [3],
     cost: { stone: 1, glass: 1 },
-    chainTo: [],
+    chainTo: ['Círculo de Ancianos', 'Academia del Saber'],
     effects: [{ type: 'science', symbol: 'compass' }],
   },
   {
@@ -901,7 +901,7 @@ export const AGE2_CARDS: Card[] = [
     age: 2,
     minPlayers: [3],
     cost: { stone: 1, loom: 1 },
-    chainTo: [],
+    chainTo: ['Observatorio del Cielo', 'Estudio del Cielo'],
     effects: [{ type: 'science', symbol: 'gear' }],
   },
   {
@@ -911,7 +911,7 @@ export const AGE2_CARDS: Card[] = [
     age: 2,
     minPlayers: [4],
     cost: { wood: 1, papyrus: 1 },
-    chainTo: [],
+    chainTo: ['Universidad del Sur'],
     effects: [{ type: 'science', symbol: 'tablet' }],
   },
   {
@@ -921,7 +921,7 @@ export const AGE2_CARDS: Card[] = [
     age: 2,
     minPlayers: [5],
     cost: { wood: 2 },
-    chainTo: [],
+    chainTo: ['Academia del Saber'],
     effects: [{ type: 'science', symbol: 'compass' }],
   },
   {
@@ -931,7 +931,7 @@ export const AGE2_CARDS: Card[] = [
     age: 2,
     minPlayers: [6],
     cost: { clay: 2 },
-    chainTo: [],
+    chainTo: ['Estudio del Cielo'],
     effects: [{ type: 'science', symbol: 'gear' }],
   },
 
@@ -973,7 +973,7 @@ export const AGE2_CARDS: Card[] = [
     age: 2,
     minPlayers: [3],
     cost: { wood: 1, clay: 1 },
-    chainTo: [],
+    chainTo: ['Fogón Guía'],
     effects: [{ type: 'coins_from_yellow', per_yellow: 2 }],
   },
   {
@@ -983,7 +983,7 @@ export const AGE2_CARDS: Card[] = [
     age: 2,
     minPlayers: [6],
     cost: { stone: 1 },
-    chainTo: [],
+    chainTo: ['Caleta'],
     effects: [{ type: 'trade_discount_both', resources: ['brown', 'gray'] }],
   },
 ];
