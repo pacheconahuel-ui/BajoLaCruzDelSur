@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import HowToPlayPage from './HowToPlayPage';
 
 interface Props {
   onCreate: (name: string) => void;
@@ -10,12 +11,20 @@ export default function LobbyPage({ onCreate, onJoin, error }: Props) {
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
   const [tab, setTab] = useState<'create' | 'join'>('create');
+  const [showGuide, setShowGuide] = useState(false);
+
+  if (showGuide) return <HowToPlayPage onBack={() => setShowGuide(false)} />;
 
   function handleCreate() { if (name.trim()) onCreate(name.trim()); }
   function handleJoin()   { if (name.trim() && roomCode.trim()) onJoin(roomCode.trim().toUpperCase(), name.trim()); }
 
   return (
     <div className="lobby-wrap">
+
+      {/* Decorative southern stars */}
+      <div style={{ fontSize: '1.4rem', letterSpacing: '12px', color: 'rgba(184,192,201,0.2)', textAlign: 'center', marginBottom: 16, userSelect: 'none' }}>
+        ✦ ✧ ✦
+      </div>
 
       {/* Logo / title */}
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
@@ -26,6 +35,9 @@ export default function LobbyPage({ onCreate, onJoin, error }: Props) {
         />
         <p style={{ color: 'var(--color-text-dim)', marginTop: 4, fontSize: '0.9rem' }}>
           Partida multijugador · 3–7 jugadores
+          <span style={{ display: 'block', fontSize: '0.75rem', color: 'rgba(184,192,201,0.35)', marginTop: 4, letterSpacing: '0.06em' }}>
+            Kawésqar · Selk'nam · Günün-a-Künna · Ñuke Mapu
+          </span>
         </p>
       </div>
 
@@ -105,6 +117,22 @@ export default function LobbyPage({ onCreate, onJoin, error }: Props) {
         Compartí el código con tus amigos.<br />
         El juego comienza cuando el host hace click en "Iniciar".
       </p>
+
+      <div style={{ marginTop: 28, textAlign: 'center' }}>
+        <button
+          onClick={() => setShowGuide(true)}
+          style={{
+            background: 'transparent',
+            color: 'var(--color-text-dim)',
+            border: '1px solid var(--color-border)',
+            padding: '8px 20px',
+            fontSize: '0.85rem',
+            borderRadius: 8,
+          }}
+        >
+          📖 ¿Cómo se juega?
+        </button>
+      </div>
     </div>
   );
 }

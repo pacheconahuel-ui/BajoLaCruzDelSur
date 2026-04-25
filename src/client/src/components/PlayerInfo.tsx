@@ -43,6 +43,7 @@ export default function PlayerInfo({ player, isMe }: Props) {
       borderRadius: 8,
       padding: '6px 10px',
       border: isMe ? '1px solid var(--color-gold-dim)' : '1px solid var(--color-border)',
+      boxShadow: (!player.hasChosen && !player.isBot) ? '0 0 0 2px rgba(212,160,23,0.3)' : 'none',
       display: 'flex',
       alignItems: 'center',
       gap: 8,
@@ -53,7 +54,7 @@ export default function PlayerInfo({ player, isMe }: Props) {
       <div style={{ fontWeight: 700, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
         {player.isBot ? '🤖 ' : isMe ? '⭐ ' : ''}
         <span style={{ color: isMe ? 'var(--color-gold)' : 'var(--color-text)' }}>{player.name}</span>
-        {player.hasChosen && <span style={{ marginLeft: 5, color: 'var(--color-success)', fontSize: '0.72rem' }}>✓</span>}
+        {player.hasChosen && <span style={{ marginLeft: 5, color: '#4ade80', fontSize: '0.85rem' }}>✓</span>}
       </div>
       <span title="Monedas" style={{ whiteSpace: 'nowrap' }}>💰{player.coins}</span>
       <span title="Escudos militares" style={{ whiteSpace: 'nowrap' }}>🛡{player.shields}</span>

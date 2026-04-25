@@ -22,6 +22,39 @@ interface Props {
   onReturnToMenu?: () => void;
 }
 
+/** Returns a colorized JSX row for an action log entry based on its content. */
+function colorizeLog(entry: string, isLatest: boolean): JSX.Element {
+  const textColor = isLatest ? 'var(--color-text)' : 'var(--color-text-dim)';
+  const textOpacity = isLatest ? 1 : 0.7;
+
+  // Era/phase headers: no dot, golden uppercase text
+  if (/Era|Comienza|comienza/.test(entry)) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+        <span style={{ fontSize: '0.78rem', color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '0.05em', opacity: textOpacity }}>
+          {entry}
+        </span>
+      </div>
+    );
+  }
+
+  let dotColor: string;
+  if (/construyó/.test(entry))                          dotColor = '#3b82f6';
+  else if (/descartó/.test(entry))                      dotColor = '#6b7280';
+  else if (/pueblo|etapa|avanzó/.test(entry))           dotColor = 'var(--color-gold)';
+  else if (/ganó|venció|derrota/.test(entry))           dotColor = '#ef4444';
+  else                                                  dotColor = 'var(--color-text-dim)';
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+      <div style={{ width: 6, height: 6, borderRadius: '50%', background: dotColor, flexShrink: 0 }} />
+      <span style={{ fontSize: '0.75rem', color: textColor, opacity: textOpacity, fontStyle: isLatest ? 'normal' : 'italic' }}>
+        {entry}
+      </span>
+    </div>
+  );
+}
+
 export default function GamePage({ state, onAbandon, chatMessages = [], onChat, onReturnToMenu }: Props) {
   const [selectedCard, setSelectedCard]   = useState<Card | null>(null);
   const [actionType, setActionType]       = useState<'build_structure' | 'build_wonder_stage' | 'discard' | null>(null);
@@ -139,11 +172,45 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
         background: 'var(--color-surface)', borderRadius: 8,
         padding: '7px 12px', marginBottom: 8, flexWrap: 'wrap',
       }}>
-        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--color-gold)' }}>
-          Era {state.age}
-        </span>
+        {/* Era indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--color-gold)' }}>
+            Era {state.age}
+          </span>
+          <div style={{ display: 'flex', gap: 3 }}>
+            {[1, 2, 3].map(era => (
+              <div key={era} style={{
+                width: 18, height: 6, borderRadius: 3,
+                background: era < state.age
+                  ? 'var(--color-gold)'
+                  : era === state.age
+                    ? 'var(--color-gold)'
+                    : 'var(--color-surface2)',
+                opacity: era < state.age ? 0.35 : 1,
+                border: era === state.age ? '1px solid var(--color-gold)' : '1px solid var(--color-border)',
+                boxShadow: era === state.age ? '0 0 6px rgba(184,192,201,0.4)' : 'none',
+              }} />
+            ))}
+          </div>
+        </div>
+        {/* Turn progress */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-dim)' }}>
+            Turno {state.turn}/6
+          </span>
+          <div style={{ display: 'flex', gap: 2 }}>
+            {[1,2,3,4,5,6].map(t => (
+              <div key={t} style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: t <= state.turn ? 'var(--color-gold)' : 'var(--color-surface2)',
+                opacity: t < state.turn ? 0.45 : 1,
+                border: t === state.turn ? '1px solid var(--color-gold)' : '1px solid var(--color-border)',
+              }} />
+            ))}
+          </div>
+        </div>
         <span style={{ fontSize: '0.8rem', color: 'var(--color-text-dim)' }}>
-          Turno {state.turn}/6 · {state.handDirection === 'left' ? '← izquierda' : '→ derecha'}
+          {state.handDirection === 'left' ? '← izquierda' : '→ derecha'}
         </span>
         <span style={{ fontSize: '0.8rem', color: waiting ? 'var(--color-success)' : 'var(--color-gold)' }}>
           {waiting ? '⏳ Esperando…' : '🃏 Tu turno'}
@@ -381,14 +448,7 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
               <div style={{ color: 'var(--color-text-dim)', fontSize: '0.72rem', fontStyle: 'italic', padding: '6px 0' }}>Sin eventos aún.</div>
             ) : (
               [...state.log].reverse().slice(0, 14).map((entry, i) => (
-                <div key={i} style={{
-                  fontSize: '0.75rem', padding: '3px 0',
-                  borderBottom: '1px solid rgba(255,255,255,0.04)',
-                  color: i === 0 ? 'var(--color-text)' : 'var(--color-text-dim)',
-                  fontStyle: i === 0 ? 'normal' : 'italic',
-                }}>
-                  {i === 0 ? '▶ ' : '  '}{entry}
-                </div>
+                <div key={i}>{colorizeLog(entry, i === 0)}</div>
               ))
             )}
           </div>
