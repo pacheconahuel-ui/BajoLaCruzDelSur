@@ -27,7 +27,7 @@ const WONDER_STAGE_INFO: Record<string, string[]> = {
   temple:        ['+🪨/⚙️', '🧪 libre', '7★'],
   babylon:       ['🛡', '🛡🛡', '7★'],
   olympia:       ['3★', '🧪 libre', '7★'],
-  halicarnassus: ['+3💰', 'comercio 1💰', '7★'],
+  halicarnassus: ['+3💰', '♻ del descarte', '7★'],
   giza:          ['+🪨', '5★', '7★'],
 };
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const TABS = ['Intro', 'Turno', 'Recursos', 'Puntuación', 'Consejos'] as const;
+const TABS = ['Intro', 'Pueblos', 'Turno', 'Recursos', 'Puntuación', 'Consejos'] as const;
 type Tab = typeof TABS[number];
 
 export default function HowToPlayPage({ onBack }: { onBack: () => void }) {
@@ -58,6 +58,7 @@ export default function HowToPlayPage({ onBack }: { onBack: () => void }) {
       {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '28px 20px', maxWidth: 720, margin: '0 auto', width: '100%' }}>
         {tab === 'Intro'      && <TabIntro />}
+        {tab === 'Pueblos'    && <TabPueblos />}
         {tab === 'Turno'      && <TabTurno />}
         {tab === 'Recursos'   && <TabRecursos />}
         {tab === 'Puntuación' && <TabPuntuacion />}
@@ -94,6 +95,117 @@ function TabIntro() {
         descartás cualquier carta de tu mano (en lugar de construirla). Cada etapa otorga un poder especial.
       </P>
       <Tip>El Pueblo es tuyo — nadie puede quitártelo ni bloquearte.</Tip>
+    </div>
+  );
+}
+
+/* ─── Tab: Pueblos ───────────────────────────────────────────── */
+const PUEBLOS_INFO = [
+  {
+    nombre: 'Kawésqar', id: 'colossus', recurso: '🌲 Madera',
+    pasiva: 'Señores del Mar',
+    detalle: 'Comprás recursos de producción (marrones) a vecinos por 1💰 en lugar de 2💰.',
+    etapas: ['+🌲 produce madera', '5 ⭐', '7 ⭐'],
+  },
+  {
+    nombre: 'Günün-a-Künna', id: 'lighthouse', recurso: '🧱 Arcilla',
+    pasiva: 'Horizonte Abierto',
+    detalle: 'Empezás con 4💰 en lugar de 3💰.',
+    etapas: ['+4💰', '2⭐ por cada carta amarilla tuya', '7⭐'],
+  },
+  {
+    nombre: 'Yámana', id: 'temple', recurso: '🪨 Piedra',
+    pasiva: 'Fuego Eterno',
+    detalle: 'Cada vez que construís una etapa de tu Pueblo, recibís +1💰 extra.',
+    etapas: ['produce 🪨 o ⚙️', '🧪 símbolo científico libre', '7⭐'],
+  },
+  {
+    nombre: 'Aónikenk', id: 'babylon', recurso: '🌲 Madera',
+    pasiva: 'Memoria Ancestral',
+    detalle: 'Las cartas de Ciencia (verdes) de Era I te cuestan 1 recurso menos al construir.',
+    etapas: ['🛡 1 escudo', '🛡🛡 2 escudos', '7⭐'],
+  },
+  {
+    nombre: "Selk'nam", id: 'olympia', recurso: '🧱 Arcilla',
+    pasiva: 'Espíritu del Hain',
+    detalle: 'Una vez por Era podés construir una carta sin pagar sus recursos (solo comercio si aplica).',
+    etapas: ['3⭐', '🧪 símbolo científico libre', '7⭐'],
+  },
+  {
+    nombre: 'Rankül', id: 'halicarnassus', recurso: '🌲 Madera',
+    pasiva: 'Resistencia Ranquel',
+    detalle: 'Las derrotas militares valen 0 puntos en lugar de -1. Nunca perdés PV por guerra.',
+    etapas: ['+3💰', '♻ construir carta del descarte gratis', '7⭐'],
+  },
+  {
+    nombre: 'Ñuke Mapu', id: 'giza', recurso: '🪨 Piedra',
+    pasiva: 'Mapu Sagrado',
+    detalle: 'Producís 2 Piedra desde el inicio (1 del recurso base + 1 extra pasivo).',
+    etapas: ['+🪨 produce piedra extra', '5⭐', '7⭐'],
+  },
+];
+
+function TabPueblos() {
+  return (
+    <div>
+      <H2>Los 7 Pueblos originarios</H2>
+      <P>
+        Al iniciar la partida, a cada jugador se le asigna un Pueblo al azar. Cada uno tiene
+        un <b>recurso inicial</b>, una <b>habilidad pasiva única</b> (activa desde el turno 1)
+        y <b>3 etapas</b> de Hito que se desbloquean sacrificando cartas.
+      </P>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {PUEBLOS_INFO.map(p => (
+          <div key={p.id} style={{
+            background: 'var(--color-surface)', borderRadius: 10,
+            border: '1px solid var(--color-border)', overflow: 'hidden',
+          }}>
+            <div style={{
+              padding: '10px 14px', borderBottom: '1px solid var(--color-border)',
+              display: 'flex', alignItems: 'center', gap: 12,
+            }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-gold)' }}>{p.nombre}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-dim)', marginTop: 1 }}>
+                  Recurso inicial: {p.recurso}
+                </div>
+              </div>
+              <div style={{
+                background: 'rgba(212,160,23,0.1)', border: '1px solid rgba(212,160,23,0.3)',
+                borderRadius: 6, padding: '3px 8px', fontSize: '0.72rem',
+                color: 'var(--color-gold)', fontWeight: 700, whiteSpace: 'nowrap',
+              }}>
+                {p.pasiva}
+              </div>
+            </div>
+            <div style={{ padding: '10px 14px' }}>
+              <div style={{
+                fontSize: '0.82rem', color: 'var(--color-text)',
+                marginBottom: 10, lineHeight: 1.5,
+                borderLeft: '3px solid var(--color-gold)',
+                paddingLeft: 10,
+              }}>
+                {p.detalle}
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {p.etapas.map((e, i) => (
+                  <div key={i} style={{
+                    flex: 1, background: 'var(--color-surface2)', borderRadius: 6,
+                    padding: '5px 7px', textAlign: 'center',
+                    fontSize: '0.7rem', color: 'var(--color-text-dim)', lineHeight: 1.4,
+                  }}>
+                    <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>Etapa {i + 1}</div>
+                    {e}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <Tip style={{ marginTop: 16 }}>
+        Las pasivas están siempre activas — no necesitás construir ninguna etapa para beneficiarte de ellas.
+      </Tip>
     </div>
   );
 }
@@ -217,7 +329,7 @@ function TabPuntuacion() {
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '8px 12px', background: 'var(--color-surface2)', borderRadius: 6 }}>
           <span style={{ fontSize: '1.2rem' }}>💀</span>
-          <div><b>Perdés</b> → token de <span style={{ color: '#f87171' }}>-1 punto</span> (en todas las eras)</div>
+          <div><b>Perdés</b> → token de <span style={{ color: '#f87171' }}>-1 punto</span> (en todas las eras) · <span style={{ color: 'var(--color-text-dim)', fontSize: '0.8rem' }}>Rankül: siempre 0</span></div>
         </div>
       </div>
       <Tip>No necesitás dominar lo militar — a veces 1-2 escudos alcanzan para no perder puntos.</Tip>
@@ -273,9 +385,9 @@ function P({ children, style }: { children: React.ReactNode; style?: React.CSSPr
   return <p style={{ fontSize: '0.88rem', color: 'var(--color-text-dim)', lineHeight: 1.7, marginBottom: 12, ...style }}>{children}</p>;
 }
 
-function Tip({ children }: { children: React.ReactNode }) {
+function Tip({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <div style={{ background: 'rgba(184,192,201,0.06)', border: '1px solid rgba(184,192,201,0.15)', borderLeft: '3px solid var(--color-gold)', borderRadius: 6, padding: '8px 12px', fontSize: '0.84rem', color: 'var(--color-text)', lineHeight: 1.6 }}>
+    <div style={{ background: 'rgba(184,192,201,0.06)', border: '1px solid rgba(184,192,201,0.15)', borderLeft: '3px solid var(--color-gold)', borderRadius: 6, padding: '8px 12px', fontSize: '0.84rem', color: 'var(--color-text)', lineHeight: 1.6, ...style }}>
       {children}
     </div>
   );

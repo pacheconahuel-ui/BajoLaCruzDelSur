@@ -109,7 +109,7 @@ export const WONDERS: WonderBoard[] = [
       },
       {
         cost: { wood: 2, ore: 1 },
-        effects: [{ type: 'trade_discount_both', resources: ['brown', 'gray'] }],
+        effects: [{ type: 'build_from_discard' }],
       },
       {
         cost: { wood: 3, glass: 1 },

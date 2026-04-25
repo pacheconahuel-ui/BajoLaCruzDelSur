@@ -93,7 +93,7 @@ export default function CheatSheet({ onClose }: { onClose: () => void }) {
         <Section title="⭐ Íconos clave">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <Row icon="⭐" label="Puntos de victoria" desc="Lo que gana el juego. Se suman todos al final." />
-            <Row icon="🛡" label="Escudos militares" desc="Al final de cada era, el que tenga más escudos que su vecino gana tokens de victoria. Empate = nada. Derrota = -1 PV." />
+            <Row icon="🛡" label="Escudos militares" desc="Al final de cada era, el que tenga más escudos que su vecino gana tokens de victoria. Empate = nada. Derrota = -1 PV (Rankül: 0 PV)." />
             <Row icon="💰" label="Monedas" desc="Para pagar comercio (comprar recursos a vecinos). También valen 1 PV por cada 3 monedas al final." />
             <Row icon="🧭⚙📋" label="Ciencia" desc="Los 3 símbolos científicos. Cada uno cuadrado = puntos. Tener 1 de cada uno = +7 PV adicionales." />
             <Row icon="⛓" label="Cadena" desc="Esta carta desbloquea otra gratis en la próxima era. Hover sobre el ícono para ver cuál." />
@@ -111,6 +111,25 @@ export default function CheatSheet({ onClose }: { onClose: () => void }) {
             <div>🔬 <b style={{ color: 'var(--color-text)' }}>Ciencia</b> — compass² + gear² + tablet² + sets×7</div>
             <div>🟡 <b style={{ color: 'var(--color-text)' }}>Comercio</b> — PV de algunas cartas amarillas (Era III)</div>
             <div>🟣 <b style={{ color: 'var(--color-text)' }}>Lof</b> — PV de cartas moradas (Era III)</div>
+          </div>
+        </Section>
+
+        <Section title="🏘 Pasivas de Pueblos (siempre activas)">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.8rem' }}>
+            {[
+              ['Kawésqar',       'Compra recursos marrones a vecinos por 1💰 (no 2💰)'],
+              ['Günün-a-Künna',  'Empieza con 4💰 en lugar de 3💰'],
+              ['Yámana',         '+1💰 cada vez que construís una etapa de Pueblo'],
+              ['Aónikenk',       'Cartas verdes de Era I cuestan 1 recurso menos'],
+              ["Selk'nam",       '1 construcción gratis por Era (sin pagar recursos)'],
+              ['Rankül',         'Derrotas militares valen 0 PV en lugar de -1'],
+              ['Ñuke Mapu',      'Produce 2 Piedra desde el inicio'],
+            ].map(([nombre, pasiva]) => (
+              <div key={nombre} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                <span style={{ color: 'var(--color-gold)', fontWeight: 700, minWidth: 110, flexShrink: 0 }}>{nombre}</span>
+                <span style={{ color: 'var(--color-text-dim)' }}>{pasiva}</span>
+              </div>
+            ))}
           </div>
         </Section>
 
