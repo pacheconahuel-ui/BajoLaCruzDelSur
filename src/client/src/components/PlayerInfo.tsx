@@ -1,14 +1,16 @@
 import { PublicPlayerState, CardEffect, MilitaryToken } from '@7wonders/shared';
 
-// Wonder stage VPs (client-side copy matching wonders.ts)
+// Wonder stage fixed VPs (client-side copy matching wonders.ts).
+// Dynamic effects (vp_from_own_color, extra_science_symbol, produce_*, shields, coins) count as 0 here
+// since they're excluded from this rough mid-game estimate anyway.
 const WONDER_STAGE_VP: Record<string, number[]> = {
-  colossus:      [3, 0, 7],
-  lighthouse:    [3, 0, 7],
-  temple:        [3, 0, 7],
-  babylon:       [3, 0, 7],
-  olympia:       [3, 0, 7],
-  halicarnassus: [3, 0, 0],
-  giza:          [3, 5, 7],
+  colossus:      [0, 5, 7],   // +wood, 5★, 7★
+  lighthouse:    [0, 0, 7],   // +4💰, 2★/🟡(dynamic), 7★
+  temple:        [0, 0, 7],   // +🪨/⚙️, 🧪 libre, 7★
+  babylon:       [0, 0, 7],   // 🛡, 🛡🛡, 7★
+  olympia:       [3, 0, 7],   // 3★, 🧪 libre, 7★
+  halicarnassus: [0, 0, 7],   // +3💰, ♻ del descarte, 7★
+  giza:          [0, 5, 7],   // +🪨, 5★, 7★
 };
 
 /** Quick visible-point estimate (excludes science, guilds, and commercial-VP cards). */
