@@ -124,6 +124,9 @@ function scoreGuildCard(card: { name: string; effects: { type: string; [k: strin
         vp += left.militaryTokens.filter(t => t.value < 0).length +
               right.militaryTokens.filter(t => t.value < 0).length;
         break;
+      case 'vp_from_own_color':
+        vp += e.per_card * countColor(player, e.color);
+        break;
     }
   }
   return vp;

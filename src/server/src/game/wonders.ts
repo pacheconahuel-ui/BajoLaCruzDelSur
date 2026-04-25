@@ -3,76 +3,137 @@ import { WonderBoard } from '@7wonders/shared';
 export const WONDERS: WonderBoard[] = [
   {
     id: 'colossus',
-    name: 'Kawésqar',
-    startingResource: 'ore',
+    name: 'Kawésqar — Nómades del Canal',
+    startingResource: 'wood',
     stages: [
-      { cost: { ore: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
-      { cost: { ore: 3 }, effects: [{ type: 'shields', count: 2 }] },
-      { cost: { ore: 4 }, effects: [{ type: 'victory_points', points: 7 }] },
+      {
+        cost: { wood: 2 },
+        effects: [{ type: 'produce_resource', resource: 'wood' }],
+      },
+      {
+        cost: { stone: 2, glass: 1 },
+        effects: [{ type: 'victory_points', points: 5 }],
+      },
+      {
+        cost: { wood: 3, loom: 1 },
+        effects: [{ type: 'victory_points', points: 7 }],
+      },
     ],
   },
   {
     id: 'lighthouse',
-    name: 'Günün-a-Künna',
-    startingResource: 'papyrus',
+    name: 'Günün-a-Künna — Rastros de la Pampa',
+    startingResource: 'clay',
     stages: [
-      { cost: { stone: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
       {
-        cost: { ore: 2, glass: 1 },
-        // Produces any raw material of choice each turn (not tradeable)
-        effects: [{ type: 'produce_choice', options: ['wood', 'stone', 'clay', 'ore'] }],
+        cost: { clay: 2 },
+        effects: [{ type: 'coins', amount: 4 }],
       },
-      { cost: { glass: 2, papyrus: 1 }, effects: [{ type: 'victory_points', points: 7 }] },
+      {
+        cost: { wood: 2, papyrus: 1 },
+        effects: [{ type: 'vp_from_own_color', color: 'yellow', per_card: 2 }],
+      },
+      {
+        cost: { clay: 3, loom: 1 },
+        effects: [{ type: 'victory_points', points: 7 }],
+      },
     ],
   },
   {
     id: 'temple',
-    name: 'Yámana',
-    startingResource: 'papyrus',
+    name: 'Yámana — Hogares de Fuego',
+    startingResource: 'stone',
     stages: [
-      { cost: { stone: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
-      { cost: { papyrus: 2 }, effects: [{ type: 'coins', amount: 9 }] },
-      { cost: { stone: 3, papyrus: 2 }, effects: [{ type: 'victory_points', points: 7 }] },
+      {
+        cost: { stone: 2 },
+        effects: [{ type: 'produce_choice', options: ['stone', 'ore'] }],
+      },
+      {
+        cost: { clay: 2, glass: 1 },
+        // Copia un símbolo de ciencia extra (equivalente temático de copy_neighbor_science)
+        effects: [{ type: 'extra_science_symbol' }],
+      },
+      {
+        cost: { stone: 3, papyrus: 1 },
+        effects: [{ type: 'victory_points', points: 7 }],
+      },
     ],
   },
   {
     id: 'babylon',
-    name: 'Aónikenk',
-    startingResource: 'clay',
+    name: 'Aónikenk — Gigantes de la Estepa',
+    startingResource: 'wood',
     stages: [
-      { cost: { clay: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
-      { cost: { clay: 3 }, effects: [{ type: 'extra_science_symbol' }] },
-      { cost: { clay: 2, papyrus: 3 }, effects: [{ type: 'victory_points', points: 7 }] },
+      {
+        cost: { wood: 2 },
+        effects: [{ type: 'shields', count: 1 }],
+      },
+      {
+        cost: { stone: 2, ore: 1 },
+        effects: [{ type: 'shields', count: 2 }],
+      },
+      {
+        cost: { wood: 3, glass: 1 },
+        effects: [{ type: 'victory_points', points: 7 }],
+      },
     ],
   },
   {
     id: 'olympia',
-    name: "Selk'nam",
-    startingResource: 'wood',
+    name: "Selk'nam — Misterio del Hain",
+    startingResource: 'clay',
     stages: [
-      { cost: { wood: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
-      { cost: { loom: 2, stone: 1 }, effects: [{ type: 'free_build_per_age' }] },
-      { cost: { stone: 2, ore: 1 }, effects: [{ type: 'victory_points', points: 7 }] },
+      {
+        cost: { clay: 2 },
+        effects: [{ type: 'victory_points', points: 3 }],
+      },
+      {
+        cost: { stone: 2, loom: 1 },
+        // Símbolo de ciencia comodín (science_wildcard de Gemini → extra_science_symbol)
+        effects: [{ type: 'extra_science_symbol' }],
+      },
+      {
+        cost: { clay: 3, papyrus: 1 },
+        effects: [{ type: 'victory_points', points: 7 }],
+      },
     ],
   },
   {
     id: 'halicarnassus',
-    name: 'Rankül',
-    startingResource: 'loom',
+    name: 'Rankül — Monte del Caldén',
+    startingResource: 'wood',
     stages: [
-      { cost: { loom: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
-      { cost: { ore: 3, loom: 1 }, effects: [{ type: 'build_from_discard' }] },
-      { cost: { glass: 2, ore: 2 }, effects: [{ type: 'copy_guild' }] },
+      {
+        cost: { wood: 2 },
+        effects: [{ type: 'coins', amount: 3 }],
+      },
+      {
+        cost: { wood: 2, ore: 1 },
+        effects: [{ type: 'trade_discount_both', resources: ['brown', 'gray'] }],
+      },
+      {
+        cost: { wood: 3, glass: 1 },
+        effects: [{ type: 'victory_points', points: 7 }],
+      },
     ],
   },
   {
     id: 'giza',
-    name: 'Ñuke Mapu',
+    name: 'Ñuke Mapu — Sabiduría de la Tierra',
     startingResource: 'stone',
     stages: [
-      { cost: { stone: 2 }, effects: [{ type: 'victory_points', points: 3 }] },
-      { cost: { wood: 3 }, effects: [{ type: 'victory_points', points: 5 }] },
-      { cost: { stone: 4 }, effects: [{ type: 'victory_points', points: 7 }] },
+      {
+        cost: { stone: 2 },
+        effects: [{ type: 'produce_resource', resource: 'stone' }],
+      },
+      {
+        cost: { clay: 2, loom: 2 },
+        effects: [{ type: 'victory_points', points: 5 }],
+      },
+      {
+        cost: { stone: 3, papyrus: 1 },
+        effects: [{ type: 'victory_points', points: 7 }],
+      },
     ],
   },
 ];

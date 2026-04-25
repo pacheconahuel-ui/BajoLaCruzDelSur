@@ -4,12 +4,12 @@ type ResourcePool = Record<Resource, number>;
 type ChoicePool = Resource[][];
 
 const WONDER_STARTING: Record<string, Resource> = {
-  colossus: 'ore',
-  lighthouse: 'papyrus',
-  temple: 'papyrus',
-  babylon: 'clay',
-  olympia: 'wood',
-  halicarnassus: 'loom',
+  colossus: 'wood',
+  lighthouse: 'clay',
+  temple: 'stone',
+  babylon: 'wood',
+  olympia: 'clay',
+  halicarnassus: 'wood',
   giza: 'stone',
 };
 
@@ -21,6 +21,8 @@ function getFixedResources(player: PlayerState | PublicPlayerState): ResourcePoo
   const pool = emptyPool();
   const startRes = WONDER_STARTING[player.wonderId];
   if (startRes) pool[startRes]++;
+  // Ñuke Mapu pasiva: +1 piedra extra desde el inicio
+  if (player.wonderId === 'giza') pool.stone++;
   // Wonder stage production effects
   const stageProduction = WONDER_STAGE_PRODUCTION[player.wonderId] ?? [];
   for (let i = 0; i < player.wonderStagesBuilt; i++) {
@@ -90,6 +92,8 @@ function hasChain(player: PlayerState, card: Card): boolean {
 }
 
 function tradeCostFor(buyer: PlayerState, dir: 'left' | 'right', color: 'brown' | 'gray'): number {
+  // Kawésqar pasiva: recursos marrones cuestan 1 moneda al comerciar
+  const base = (buyer.wonderId === 'colossus' && color === 'brown') ? 1 : 2;
   for (const card of buyer.builtStructures) {
     for (const e of card.effects as CardEffect[]) {
       if (
@@ -99,7 +103,7 @@ function tradeCostFor(buyer: PlayerState, dir: 'left' | 'right', color: 'brown' 
       ) return 1;
     }
   }
-  return 2;
+  return base;
 }
 
 function getTradeableFixed(neighbor: PlayerState | PublicPlayerState): ResourcePool {
@@ -118,29 +122,26 @@ function getTradeableFixed(neighbor: PlayerState | PublicPlayerState): ResourceP
   return pool;
 }
 
-// Wonder stage costs (client-side copy so we don't need to round-trip to server)
+// Wonder stage costs — mirrors wonders.ts on the server exactly
 const WONDER_STAGE_COSTS: Record<string, ResourceCost[]> = {
-  colossus:      [{ ore: 2 }, { ore: 3 }, { ore: 4 }],
-  lighthouse:    [{ stone: 2 }, { ore: 2, glass: 1 }, { glass: 2, papyrus: 1 }],
-  temple:        [{ stone: 2 }, { papyrus: 2 }, { stone: 3, papyrus: 2 }],
-  babylon:       [{ clay: 2 }, { clay: 3 }, { clay: 2, papyrus: 3 }],
-  olympia:       [{ wood: 2 }, { loom: 2, stone: 1 }, { stone: 2, ore: 1 }],
-  halicarnassus: [{ loom: 2 }, { ore: 3, loom: 1 }, { glass: 2, ore: 2 }],
-  giza:          [{ stone: 2 }, { wood: 3 }, { stone: 4 }],
+  colossus:      [{ wood: 2 }, { stone: 2, glass: 1 }, { wood: 3, loom: 1 }],
+  lighthouse:    [{ clay: 2 }, { wood: 2, papyrus: 1 }, { clay: 3, loom: 1 }],
+  temple:        [{ stone: 2 }, { clay: 2, glass: 1 }, { stone: 3, papyrus: 1 }],
+  babylon:       [{ wood: 2 }, { stone: 2, ore: 1 }, { wood: 3, glass: 1 }],
+  olympia:       [{ clay: 2 }, { stone: 2, loom: 1 }, { clay: 3, papyrus: 1 }],
+  halicarnassus: [{ wood: 2 }, { wood: 2, ore: 1 }, { wood: 3, glass: 1 }],
+  giza:          [{ stone: 2 }, { clay: 2, loom: 2 }, { stone: 3, papyrus: 1 }],
 };
 
-/**
- * Production granted by built wonder stages (mirrors wonders.ts on the server).
- * Each entry is an array of per-stage effects: 'fixed:wood', 'choice:wood/stone/...'
- */
+// Production from built wonder stages — mirrors wonders.ts on the server exactly
 const WONDER_STAGE_PRODUCTION: Record<string, Array<{ fixed?: Resource; choice?: Resource[] }[]>> = {
-  colossus:      [[], [], []],
-  lighthouse:    [[], [{ choice: ['wood', 'stone', 'clay', 'ore'] }], []],
-  temple:        [[], [], []],
+  colossus:      [[{ fixed: 'wood' }], [], []],
+  lighthouse:    [[], [], []],
+  temple:        [[{ choice: ['stone', 'ore'] }], [], []],
   babylon:       [[], [], []],
   olympia:       [[], [], []],
   halicarnassus: [[], [], []],
-  giza:          [[], [], []],
+  giza:          [[{ fixed: 'stone' }], [], []],
 };
 
 export function getWonderStageCost(wonderId: string, stageIndex: number): ResourceCost | null {
@@ -190,6 +191,11 @@ export function computeAffordability(
   }
 
   const needed = costToPool(card.cost);
+  // Aónikenk pasiva: cartas verdes de Era 1 cuestan 1 recurso menos
+  if (player.wonderId === 'babylon' && card.color === 'green' && card.age === 1) {
+    const resOrder: Resource[] = ['wood', 'stone', 'clay', 'ore', 'glass', 'loom', 'papyrus'];
+    for (const res of resOrder) { if (needed[res] > 0) { needed[res]--; break; } }
+  }
   const fixed = getFixedResources(player);
   const choices = getChoiceResources(player);
 

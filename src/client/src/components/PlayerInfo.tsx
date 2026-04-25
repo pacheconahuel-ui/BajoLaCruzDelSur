@@ -1,4 +1,4 @@
-import { PublicPlayerState, CardEffect } from '@7wonders/shared';
+import { PublicPlayerState, CardEffect, MilitaryToken } from '@7wonders/shared';
 
 // Wonder stage VPs (client-side copy matching wonders.ts)
 const WONDER_STAGE_VP: Record<string, number[]> = {
@@ -25,7 +25,7 @@ function estimateScore(p: PublicPlayerState): number {
   for (let i = 0; i < p.wonderStagesBuilt && i < stageVPs.length; i++) {
     vp += stageVPs[i];
   }
-  const military = p.militaryTokens.reduce((s, t) => s + t.value, 0);
+  const military = p.militaryTokens.reduce((s: number, t: MilitaryToken) => s + t.value, 0);
   const treasury = Math.floor(p.coins / 3);
   return vp + military + treasury;
 }

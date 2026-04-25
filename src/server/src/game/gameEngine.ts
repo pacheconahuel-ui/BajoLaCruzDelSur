@@ -37,6 +37,8 @@ export class GameEngine {
       players[i].hand = hands[i];
       players[i].pendingAction = undefined;
       players[i].isReady = false;
+      // Selk'nam pasiva: 1 construcción gratis por era (sin necesitar construir el hito)
+      if (players[i].wonderId === 'olympia') players[i].freeBuildsLeft++;
     }
 
     this.state.turn = 1;
@@ -195,6 +197,8 @@ export class GameEngine {
       this.state.discardPile.push(card); // card used as stage marker goes face-down
       player.wonderStagesBuilt++;
       this.applyWonderStageEffects(player, stage);
+      // Yámana pasiva: +1 moneda al construir cada etapa del hito
+      if (player.wonderId === 'temple') player.coins++;
       this.addLog(`${player.name} construyó la etapa ${stageIdx + 1} de su Maravilla.`);
       return;
     }
@@ -580,12 +584,14 @@ export function createGameState(
 
   const playerStates: PlayerState[] = players.map((p, i) => {
     const wonder = WONDERS.find(w => w.id === wonderIds[i])!;
+    // Günün-a-Künna pasiva: +1 moneda inicial
+    const startingCoins = wonder.id === 'lighthouse' ? 4 : 3;
     return {
       id: p.id,
       name: p.name,
       wonderId: wonder.id,
       wonderStagesBuilt: 0,
-      coins: 3,
+      coins: startingCoins,
       hand: [],
       builtStructures: [],
       militaryTokens: [],
