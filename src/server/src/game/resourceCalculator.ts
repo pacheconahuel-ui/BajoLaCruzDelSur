@@ -16,6 +16,9 @@ export function getFixedResources(player: PlayerState): ResourcePool {
   const wonder = WONDERS.find(w => w.id === player.wonderId);
   if (wonder) pool[wonder.startingResource]++;
 
+  // Ñuke Mapu pasiva: +1 piedra adicional al recurso inicial
+  if (player.wonderId === 'giza') pool.stone++;
+
   // Wonder stage effects (stages built)
   for (let i = 0; i < player.wonderStagesBuilt; i++) {
     const stage = wonder?.stages[i];
@@ -130,6 +133,9 @@ export function tradeCostFor(
   direction: 'left' | 'right',
   resourceColor: 'brown' | 'gray',
 ): number {
+  // Kawésqar pasiva: recursos marrones cuestan 1 moneda (recursos grises precio normal)
+  const base = (buyer.wonderId === 'colossus' && resourceColor === 'brown') ? 1 : 2;
+
   for (const card of buyer.builtStructures) {
     for (const effect of card.effects) {
       if (
@@ -141,7 +147,7 @@ export function tradeCostFor(
       }
     }
   }
-  return 2;
+  return base;
 }
 
 /**

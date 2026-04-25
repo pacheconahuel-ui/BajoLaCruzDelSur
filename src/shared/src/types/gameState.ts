@@ -31,7 +31,7 @@ export interface PendingAction {
 
 export interface MilitaryToken {
   age: Age;
-  value: 1 | 3 | 5 | -1;
+  value: 1 | 3 | 5 | -1 | 0;
 }
 
 export interface PlayerState {

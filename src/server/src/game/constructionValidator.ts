@@ -64,6 +64,15 @@ export function validateBuildStructure(
   }
 
   const needed = costToPool(card.cost);
+
+  // Aónikenk pasiva: cartas verdes de Era 1 cuestan -1 unidad de recurso
+  if (player.wonderId === 'babylon' && card.color === 'green' && card.age === 1) {
+    const resOrder: (keyof typeof needed)[] = ['wood', 'stone', 'clay', 'ore', 'glass', 'loom', 'papyrus'];
+    for (const res of resOrder) {
+      if (needed[res] > 0) { needed[res]--; break; }
+    }
+  }
+
   const bankCoins = card.cost.coins ?? 0;
 
   // Check if player can afford bank coin payment

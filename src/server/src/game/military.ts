@@ -15,7 +15,8 @@ export function resolveMilitary(state: GameState): void {
       if (player.shields > neighbor.shields) {
         token = { age, value: victoryValue as 1 | 3 | 5 };
       } else if (player.shields < neighbor.shields) {
-        token = { age, value: -1 };
+        // Rankül pasiva: derrota militar vale 0 en lugar de -1
+        token = { age, value: player.wonderId === 'halicarnassus' ? 0 : -1 };
       } else {
         continue; // tie → no token
       }

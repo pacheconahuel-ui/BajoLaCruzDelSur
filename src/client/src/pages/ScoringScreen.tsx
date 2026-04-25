@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PublicGameState, PlayerScore, CardEffect } from '@7wonders/shared';
 import CityTableau from '../components/CityTableau';
 import WonderBoard from '../components/WonderBoard';
+import { sfx } from '../utils/sfx';
 
 interface Props {
   state: PublicGameState;
@@ -41,34 +42,72 @@ function getScienceBreakdown(state: PublicGameState, playerId: string): string {
 
 export default function ScoringScreen({ state, onReturnToMenu }: Props) {
   const [expandedCity, setExpandedCity] = useState<string | null>(null);
+  const [animatedTotals, setAnimatedTotals] = useState<Record<string, number>>({});
+
+  useEffect(() => { sfx.victory(); }, []);
 
   // Sort by total, then by final coins as tiebreaker (7 Wonders rules)
-  function sortScores(arr: PlayerScore[]): PlayerScore[] {
+  const sortScores = (arr: PlayerScore[]): PlayerScore[] => {
     return [...arr].sort((a, b) => {
       if (b.total !== a.total) return b.total - a.total;
       const aCoins = state.players.find(p => p.id === a.playerId)?.coins ?? 0;
       const bCoins = state.players.find(p => p.id === b.playerId)?.coins ?? 0;
       return bCoins - aCoins;
     });
-  }
+  };
 
-  const scores: PlayerScore[] = state.scores?.length
-    ? sortScores(state.scores)
-    : state.players.map(p => {
-        const military = p.militaryTokens.reduce((s, t) => s + t.value, 0);
-        const treasury = Math.floor(p.coins / 3);
-        const wonder = p.wonderStagesBuilt * 3;
-        const civilian = p.builtStructures
-          .filter(c => c.color === 'blue')
-          .flatMap(c => c.effects)
-          .filter(e => e.type === 'victory_points')
-          .reduce((s, e) => s + (e as any).points, 0);
-        const total = military + treasury + wonder + civilian;
-        return { playerId: p.id, playerName: p.name, military, treasury, wonder, civilian, science: 0, commercial: 0, guilds: 0, total };
-      }).sort((a, b) => b.total - a.total);
+  // Compute scores (extracted for reuse in animation)
+  const computeScores = () => {
+    return state.scores?.length
+      ? sortScores(state.scores)
+      : state.players.map(p => {
+          const military = p.militaryTokens.reduce((s, t) => s + t.value, 0);
+          const treasury = Math.floor(p.coins / 3);
+          const wonder = p.wonderStagesBuilt * 3;
+          const civilian = p.builtStructures
+            .filter(c => c.color === 'blue')
+            .flatMap(c => c.effects)
+            .filter(e => e.type === 'victory_points')
+            .reduce((s, e) => s + (e as any).points, 0);
+          const total = military + treasury + wonder + civilian;
+          return { playerId: p.id, playerName: p.name, military, treasury, wonder, civilian, science: 0, commercial: 0, guilds: 0, total };
+        }).sort((a, b) => b.total - a.total);
+  };
+
+  // Animate score totals on mount
+  useEffect(() => {
+    const scores = computeScores();
+    const animationDuration = 2000;
+    const startTime = Date.now();
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / animationDuration, 1);
+      const eased = 1 - (1 - progress) ** 2;
+
+      const newTotals: Record<string, number> = {};
+      scores.forEach((s: PlayerScore) => {
+        newTotals[s.playerId] = Math.round(eased * s.total);
+      });
+      setAnimatedTotals(newTotals);
+
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+
+    requestAnimationFrame(animate);
+  }, []);
+
+  const scores = computeScores();
 
   const winner = scores[0];
   const maxTotal = winner?.total ?? 1;
+
+  // Calcular mejor puntaje por categoría
+  const bestPerCol: Partial<Record<keyof PlayerScore, number>> = {};
+  for (const col of SCORE_COLS) {
+    const vals = scores.map(s => s[col.key] as number).filter(v => v > 0);
+    if (vals.length > 0) bestPerCol[col.key] = Math.max(...vals);
+  }
 
   return (
     <div style={{
@@ -86,7 +125,7 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
           Ganador:&nbsp;
           <strong style={{ color: 'var(--color-gold)', fontSize: '1.1rem' }}>{winner?.playerName}</strong>
           &nbsp;con&nbsp;
-          <strong style={{ color: '#fff', fontSize: '1.1rem' }}>{winner?.total}</strong>
+          <strong style={{ color: '#fff', fontSize: '1.1rem' }}>{winner ? (animatedTotals[winner.playerId] ?? winner.total) : 0}</strong>
           &nbsp;puntos
         </div>
       </div>
@@ -97,7 +136,8 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
         marginBottom: 28, padding: '0 12px',
       }}>
         {scores.slice(0, Math.min(scores.length, 5)).map((s, i) => {
-          const barH = Math.max(28, Math.round((s.total / maxTotal) * 100));
+          const displayTotal = animatedTotals[s.playerId] ?? s.total;
+          const barH = Math.max(28, Math.round((displayTotal / maxTotal) * 100));
           const isWinner = i === 0;
           return (
             <div key={s.playerId} style={{ flex: 1, maxWidth: 140, textAlign: 'center' }}>
@@ -122,7 +162,7 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
                 boxShadow: isWinner ? '0 0 16px rgba(212,160,23,0.4)' : 'none',
                 transition: 'height 0.6s ease',
               }}>
-                {s.total}
+                {displayTotal}
               </div>
             </div>
           );
@@ -188,18 +228,20 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
                   </td>
                   {SCORE_COLS.map(col => {
                     const v = row[col.key] as number;
+                    const isBest = v > 0 && bestPerCol[col.key] === v;
                     const tooltip = col.key === 'science' && v > 0
                       ? getScienceBreakdown(state, row.playerId)
                       : undefined;
                     return (
                       <td key={col.key} title={tooltip} style={{
                         padding: '10px 8px', textAlign: 'center',
-                        color: v > 0 ? 'var(--color-text)' : v < 0 ? '#f87171' : 'var(--color-text-dim)',
-                        fontWeight: v !== 0 ? 500 : 400,
+                        color: isBest ? '#fde68a' : v > 0 ? 'var(--color-text)' : v < 0 ? '#f87171' : 'var(--color-text-dim)',
+                        fontWeight: isBest ? 800 : v !== 0 ? 500 : 400,
+                        background: isBest ? 'rgba(212,160,23,0.13)' : undefined,
                         cursor: tooltip ? 'help' : 'default',
                         textDecoration: tooltip ? 'underline dotted' : 'none',
                       }}>
-                        {v !== 0 ? v : '—'}
+                        {isBest ? '⭐' : ''}{v !== 0 ? v : '—'}
                       </td>
                     );
                   })}
@@ -214,7 +256,7 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
                     fontWeight: 800, fontSize: '1rem',
                     color: i === 0 ? 'var(--color-gold)' : 'var(--color-text)',
                   }}>
-                    {row.total}
+                    {animatedTotals[row.playerId] ?? row.total}
                   </td>
                 </tr>
               ))}
@@ -242,8 +284,8 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
           🏛 Ciudades finales
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {scores.map((s, i) => {
-            const player = state.players.find(p => p.id === s.playerId);
+          {scores.map((s: PlayerScore, i: number) => {
+            const player = state.players.find((p) => p.id === s.playerId);
             const isExpanded = expandedCity === s.playerId;
             if (!player) return null;
             return (

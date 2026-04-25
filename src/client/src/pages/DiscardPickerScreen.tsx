@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PublicGameState, Card } from '@7wonders/shared';
+import { PublicGameState, Card, PublicPlayerState } from '@7wonders/shared';
 import { socket } from '../socket/socket';
 import CardView from '../components/CardView';
 
@@ -12,7 +12,7 @@ export default function DiscardPickerScreen({ state }: Props) {
   const [error, setError] = useState('');
 
   const isMyTurn = state.pendingDiscardPlayerId === state.myState.id;
-  const chooserName = state.players.find(p => p.id === state.pendingDiscardPlayerId)?.name ?? '...';
+  const chooserName = state.players.find((p: PublicPlayerState) => p.id === state.pendingDiscardPlayerId)?.name ?? '...';
   const isEmpty = state.discardPile.length === 0;
 
   function confirm() {

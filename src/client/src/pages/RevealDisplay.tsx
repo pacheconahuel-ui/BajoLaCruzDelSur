@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { PublicGameState } from '@7wonders/shared';
 import CardView from '../components/CardView';
 
@@ -5,90 +6,137 @@ interface Props {
   state: PublicGameState;
 }
 
+const ACTION_LABELS: Record<string, { icon: string; label: string; color: string }> = {
+  build_structure:   { icon: '🏗', label: 'Construye',   color: '#3b82f6' },
+  build_wonder_stage: { icon: '🏛', label: 'Avanza Pueblo', color: '#f5c542' },
+  discard:           { icon: '🗑', label: 'Descarta',    color: '#6b7280' },
+};
+
 export default function RevealDisplay({ state }: Props) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const t = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(t);
+  }, []);
+
+  const myPending = state.myState.pendingAction;
+  const myCard = myPending ? state.myState.hand.find(c => c.id === myPending.cardId) ?? null : null;
+  const myAction = myPending ? ACTION_LABELS[myPending.action.type] : null;
+
   return (
     <div style={{
-      maxWidth: 700,
-      margin: '60px auto',
-      padding: '0 24px',
-      textAlign: 'center',
+      minHeight: '100svh',
+      background: 'radial-gradient(ellipse at center top, #1a1206 0%, #0d0a04 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '32px 16px',
+      gap: 28,
     }}>
-      <div style={{ fontSize: '2rem', marginBottom: 8 }}>⚡</div>
-      <h2 style={{ fontSize: '1.6rem', marginBottom: 6, color: 'var(--color-gold)' }}>
-        Era {state.age} · Turno {state.turn}
-      </h2>
-      <p style={{ color: 'var(--color-text-dim)', marginBottom: 24, fontSize: '0.85rem' }}>
-        Todos eligieron — resolviendo acciones…
-      </p>
+      {/* Header */}
+      <div style={{
+        textAlign: 'center',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(-16px)',
+        transition: 'opacity 0.35s ease, transform 0.35s ease',
+      }}>
+        <div style={{ fontSize: '2.4rem', marginBottom: 6 }}>⚡</div>
+        <h2 style={{
+          fontSize: '1.8rem',
+          color: 'var(--color-gold)',
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
+          letterSpacing: '0.05em',
+          marginBottom: 4,
+        }}>
+          ¡Todos eligieron!
+        </h2>
+        <p style={{ color: 'var(--color-text-dim)', fontSize: '0.82rem' }}>
+          Era {state.age} · Turno {state.turn} — resolviendo acciones…
+        </p>
+      </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* My chosen card (prominent) */}
+      {myCard && myAction && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 10,
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'scale(1)' : 'scale(0.9)',
+          transition: 'opacity 0.4s ease 0.15s, transform 0.4s ease 0.15s',
+        }}>
+          <CardView card={myCard} />
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            background: 'rgba(255,255,255,0.06)',
+            border: `1px solid ${myAction.color}44`,
+            borderRadius: 20,
+            padding: '5px 14px',
+            fontSize: '0.82rem',
+            color: myAction.color,
+            fontWeight: 700,
+          }}>
+            {myAction.icon} {myAction.label}
+          </div>
+        </div>
+      )}
+
+      {/* Players list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', maxWidth: 420 }}>
         {state.players.map((p, i) => {
           const isMe = i === state.myIndex;
-          const myCard = isMe && state.myState.pendingAction
-            ? state.myState.hand.find(c => c.id === state.myState.pendingAction!.cardId)
-            : null;
-          const myActionType = isMe && state.myState.pendingAction
-            ? state.myState.pendingAction.action.type
-            : null;
+          const delayMs = 80 + i * 60;
           return (
             <div
               key={p.id}
               style={{
-                background: isMe
-                  ? 'linear-gradient(135deg, #1c1912, #141209)'
-                  : 'var(--color-surface)',
-                borderRadius: 10,
-                padding: '12px 16px',
+                background: isMe ? 'rgba(212,160,23,0.08)' : 'var(--color-surface)',
+                border: isMe ? '1px solid rgba(212,160,23,0.35)' : '1px solid rgba(255,255,255,0.06)',
+                borderRadius: 9,
+                padding: '10px 14px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 14,
-                border: isMe
-                  ? '1.5px solid var(--color-gold-dim)'
-                  : '1px solid rgba(255,255,255,0.06)',
-                boxShadow: isMe ? '0 0 12px rgba(212,160,23,0.08)' : 'none',
-                textAlign: 'left',
+                gap: 10,
+                opacity: visible ? 1 : 0,
+                transform: visible ? 'translateX(0)' : 'translateX(-20px)',
+                transition: `opacity 0.3s ease ${delayMs}ms, transform 0.3s ease ${delayMs}ms`,
               }}
             >
-              {/* Player name */}
-              <div style={{
-                fontWeight: 700,
-                minWidth: 100,
-                fontSize: '0.9rem',
+              <span style={{
+                fontSize: '0.88rem',
+                fontWeight: isMe ? 700 : 400,
                 color: isMe ? 'var(--color-gold)' : 'var(--color-text)',
+                flex: 1,
               }}>
-                {isMe ? '⭐ ' : ''}{p.name}
-              </div>
+                {isMe ? '⭐ ' : p.isBot ? '🤖 ' : ''}{p.name}
+              </span>
 
-              {/* Action display */}
-              {myCard && myActionType ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <CardView card={myCard} compact />
-                  <span style={{ fontSize: '0.78rem', color: 'var(--color-text-dim)' }}>
-                    {myActionType === 'build_structure' ? '🏗 Construye'
-                     : myActionType === 'build_wonder_stage' ? '🏛 Pueblo'
-                     : '🗑 Descarta'}
-                  </span>
-                </div>
-              ) : p.hasChosen ? (
-                <div style={{
-                  fontSize: '0.8rem', color: '#4ade80', fontWeight: 600,
-                  display: 'flex', alignItems: 'center', gap: 6,
+              {p.hasChosen ? (
+                <span style={{
+                  fontSize: '0.72rem',
+                  color: '#4ade80',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontWeight: 600,
                 }}>
                   <span style={{
-                    display: 'inline-block',
-                    width: 8, height: 8, borderRadius: '50%',
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
                     background: '#4ade80',
-                    boxShadow: '0 0 6px #4ade80',
+                    boxShadow: '0 0 5px #4ade80',
+                    display: 'inline-block',
                   }} />
-                  Eligió — resolviendo…
-                </div>
+                  Listo
+                </span>
               ) : (
-                <div style={{
-                  fontSize: '0.8rem', color: 'var(--color-text-dim)',
-                  display: 'flex', alignItems: 'center', gap: 6,
-                }}>
-                  <span>⏳ Pensando…</span>
-                </div>
+                <span style={{ fontSize: '0.72rem', color: 'var(--color-text-dim)' }}>⏳</span>
               )}
             </div>
           );

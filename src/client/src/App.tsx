@@ -3,6 +3,8 @@ import { PublicGameState } from '@7wonders/shared';
 import { socket } from './socket/socket';
 import LobbyPage from './pages/LobbyPage';
 import GamePage from './pages/GamePage';
+import PuebloCard from './components/PuebloCard';
+import { PUEBLOS } from './data/pueblos';
 
 export interface ChatMessage {
   playerName: string;
@@ -50,7 +52,7 @@ export default function App() {
       // Attempt to rejoin a previous session on (re)connect
       const saved = loadSession();
       if (saved) {
-        socket.emit('game:rejoin', saved.roomId, saved.playerId, (err) => {
+        socket.emit('game:rejoin', saved.roomId, saved.playerId, (err?: string) => {
           if (err) {
             clearSession();
           } else {
@@ -66,27 +68,27 @@ export default function App() {
 
     socket.on('connect', onConnect);
 
-    socket.on('lobby:updated', players => {
+    socket.on('lobby:updated', (players: { id: string; name: string; isBot?: boolean }[]) => {
       setLobbyPlayers(players);
     });
 
-    socket.on('game:state', state => {
+    socket.on('game:state', (state: PublicGameState) => {
       setGameState(state);
       setScreen('game');
       // Clear session when the game ends (scoring is the terminal phase)
       if (state.phase === 'finished' || state.phase === 'scoring') clearSession();
     });
 
-    socket.on('game:error', msg => {
+    socket.on('game:error', (msg: string) => {
       setError(msg);
       showToast(msg);
     });
 
-    socket.on('game:chat', (playerName, text, time) => {
+    socket.on('game:chat', (playerName: string, text: string, time: number) => {
       setChatMessages(prev => [...prev.slice(-99), { playerName, text, time }]);
     });
 
-    socket.on('game:abandoned', reason => {
+    socket.on('game:abandoned', (reason: string) => {
       showToast(reason);
       clearSession();
       setChatMessages([]);
@@ -108,7 +110,7 @@ export default function App() {
   }, []);
 
   function handleCreate(playerName: string) {
-    socket.emit('lobby:create', playerName, (id, pid) => {
+    socket.emit('lobby:create', playerName, (id: string, pid: string) => {
       setRoomId(id);
       setPlayerId(pid);
       setScreen('waiting');
@@ -117,7 +119,7 @@ export default function App() {
   }
 
   function handleJoin(roomCode: string, playerName: string) {
-    socket.emit('lobby:join', roomCode, playerName, (err, pid) => {
+    socket.emit('lobby:join', roomCode, playerName, (err: string | undefined, pid: string | undefined) => {
       if (err) { setError(err); return; }
       setRoomId(roomCode);
       setPlayerId(pid ?? '');
@@ -127,13 +129,13 @@ export default function App() {
   }
 
   function handleStartGame() {
-    socket.emit('lobby:start', (err) => {
+    socket.emit('lobby:start', (err: string | undefined) => {
       if (err) setError(err);
     });
   }
 
   function handleAbandon() {
-    socket.emit('game:abandon', (err) => {
+    socket.emit('game:abandon', (err: string | undefined) => {
       if (err) showToast(err ?? 'Error al abandonar');
       // server will broadcast game:abandoned to everyone including us
     });
@@ -222,6 +224,7 @@ function WaitingRoom({
   error: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const [showPueblos, setShowPueblos] = useState(false);
 
   function addBot() {
     socket.emit('lobby:add_bot', (err?: string) => {
@@ -285,6 +288,19 @@ function WaitingRoom({
         ))}
       </div>
 
+      {/* Botón ver pueblos */}
+      <button
+        onClick={() => setShowPueblos(true)}
+        style={{
+          width: '100%', padding: 10, fontSize: '0.9rem', marginBottom: 10,
+          background: 'var(--color-surface2)',
+          color: 'var(--color-text-dim)',
+          border: '1px solid var(--color-border)',
+        }}
+      >
+        🏘 Ver los 7 Pueblos disponibles
+      </button>
+
       {isHost && players.length < 7 && (
         <button
           onClick={addBot}
@@ -297,6 +313,28 @@ function WaitingRoom({
         >
           🤖 Agregar Bot ({players.length}/7)
         </button>
+      )}
+
+      {/* Modal de pueblos */}
+      {showPueblos && (
+        <div className="overlay-bg" onClick={() => setShowPueblos(false)}>
+          <div className="overlay-box" onClick={e => e.stopPropagation()} style={{ maxWidth: 600 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ color: 'var(--color-gold)', fontSize: '1.1rem', fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+                Los 7 Pueblos del Sur
+              </h3>
+              <button onClick={() => setShowPueblos(false)} style={{ background: 'transparent', color: 'var(--color-text-dim)', padding: '2px 8px', border: '1px solid var(--color-border)', fontSize: '0.8rem' }}>✕</button>
+            </div>
+            <p style={{ fontSize: '0.78rem', color: 'var(--color-text-dim)', marginBottom: 14, lineHeight: 1.5 }}>
+              Los pueblos se asignan aleatoriamente al iniciar la partida. Cada uno tiene una <strong style={{ color: 'var(--color-text)' }}>habilidad pasiva única</strong> y un Hito de 3 etapas.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10, maxHeight: '60vh', overflowY: 'auto' }}>
+              {PUEBLOS.map(p => (
+                <PuebloCard key={p.wonderId} pueblo={p} />
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {error && <p style={{ color: 'var(--color-accent)', marginBottom: 12, textAlign: 'center' }}>✗ {error}</p>}

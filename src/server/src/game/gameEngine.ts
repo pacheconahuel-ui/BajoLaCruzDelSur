@@ -37,6 +37,8 @@ export class GameEngine {
       players[i].hand = hands[i];
       players[i].pendingAction = undefined;
       players[i].isReady = false;
+      // Selk'nam pasiva: 1 construcción gratis por era (sin necesitar construir el hito)
+      if (players[i].wonderId === 'olympia') players[i].freeBuildsLeft++;
     }
 
     this.state.turn = 1;
@@ -195,6 +197,8 @@ export class GameEngine {
       this.state.discardPile.push(card); // card used as stage marker goes face-down
       player.wonderStagesBuilt++;
       this.applyWonderStageEffects(player, stage);
+      // Yámana pasiva: +1 moneda al construir cada etapa del hito
+      if (player.wonderId === 'temple') player.coins++;
       this.addLog(`${player.name} construyó la etapa ${stageIdx + 1} de su Maravilla.`);
       return;
     }
@@ -448,10 +452,11 @@ export class GameEngine {
       }
     }
     // Existing shields for threat assessment
+    // Rankül (halicarnassus): defeats cost 0 VP, so military losses don't matter
     const myShields = player.shields;
     const leftShields = left.shields;
     const rightShields = right.shields;
-    const threatBonus = (myShields <= leftShields || myShields <= rightShields) ? 3 : 0;
+    const threatBonus = (player.wonderId !== 'halicarnassus' && (myShields <= leftShields || myShields <= rightShields)) ? 3 : 0;
 
     // Cards already in the chain pipeline (have a chainTo card in the hand)
     const handNames = new Set(player.hand.map(c => c.name));
@@ -488,7 +493,12 @@ export class GameEngine {
           case 'coins_and_vp_from_wonder': v += age === 3 ? 6 : 4; break;
           case 'trade_discount_left':
           case 'trade_discount_right':
-          case 'trade_discount_both': v += age === 1 ? 5 : (age === 2 ? 3 : 1); break;
+          // Kawésqar: brown resources already cost 1 — trade cards less valuable
+          case 'trade_discount_both': {
+            const baseTrade = age === 1 ? 5 : (age === 2 ? 3 : 1);
+            v += (player.wonderId === 'colossus') ? Math.max(1, baseTrade - 2) : baseTrade;
+            break;
+          }
           case 'extra_science_symbol': v += 12; break;
           // Guild cards: use simple VP estimate
           case 'vp_from_brown_neighbors':
@@ -546,6 +556,8 @@ export class GameEngine {
           else if (e.type === 'produce_choice') stageValue += age === 1 ? 6 : 3;
           else stageValue += 3;
         }
+        // Yámana (temple): each wonder stage gives +1 coin as a bonus
+        if (player.wonderId === 'temple') stageValue += 1;
         // Build wonder stage if it's more valuable than best available card, or 15% chance
         if (stageValue >= topCardValue || Math.random() < 0.15) {
           // Sacrifice the least valuable card in hand
@@ -580,12 +592,14 @@ export function createGameState(
 
   const playerStates: PlayerState[] = players.map((p, i) => {
     const wonder = WONDERS.find(w => w.id === wonderIds[i])!;
+    // Günün-a-Künna pasiva: +1 moneda inicial
+    const startingCoins = wonder.id === 'lighthouse' ? 4 : 3;
     return {
       id: p.id,
       name: p.name,
       wonderId: wonder.id,
       wonderStagesBuilt: 0,
-      coins: 3,
+      coins: startingCoins,
       hand: [],
       builtStructures: [],
       militaryTokens: [],
