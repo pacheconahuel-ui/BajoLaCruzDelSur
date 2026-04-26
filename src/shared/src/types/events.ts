@@ -9,6 +9,7 @@ export interface ClientToServerEvents {
   'game:action': (action: PendingAction, callback: (error?: string) => void) => void;
   'game:rejoin': (roomId: string, playerId: string, callback: (error?: string) => void) => void;
   'game:choose_from_discard': (cardId: string, callback: (error?: string) => void) => void;
+  'game:choose_extra_card': (cardId: string | null, action: 'build' | 'discard', callback: (error?: string) => void) => void;
   'game:abandon': (callback: (error?: string) => void) => void;
   'game:chat': (message: string) => void;
   'game:skip_discard_pick': (callback: (error?: string) => void) => void;

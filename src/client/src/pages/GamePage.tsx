@@ -9,6 +9,7 @@ import RevealDisplay from './RevealDisplay';
 import MilitaryDisplay from './MilitaryDisplay';
 import ScoringScreen from './ScoringScreen';
 import DiscardPickerScreen from './DiscardPickerScreen';
+import ExtraCardPickerScreen from './ExtraCardPickerScreen';
 import { computeAffordability, computeWonderAffordability, getWonderStageCost, WonderAffordability } from '../utils/affordability';
 import { formatCost } from '../utils/icons';
 import CheatSheet from '../components/CheatSheet';
@@ -136,6 +137,28 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
         <p style={{ color: 'var(--color-text-dim)', lineHeight: 1.6 }}>
           <strong style={{ color: 'var(--color-text)' }}>{pickerName}</strong> está eligiendo
           una carta del descarte (Etapa 2 de su Pueblo).
+        </p>
+        <p style={{ color: 'var(--color-text-dim)', fontSize: '0.82rem', marginTop: 12 }}>
+          El turno continuará cuando elija…
+        </p>
+      </div>
+    );
+  }
+
+  if (state.phase === 'choose_extra_card') {
+    // If it's my turn to play an extra card, show the picker screen
+    if (state.pendingExtraCardPlayerId === state.myState.id) {
+      return <ExtraCardPickerScreen state={state} />;
+    }
+    // Otherwise show a waiting message
+    const pickerName = state.players.find(p => p.id === state.pendingExtraCardPlayerId)?.name ?? '…';
+    return (
+      <div style={{ maxWidth: 480, margin: '80px auto', padding: '0 20px', textAlign: 'center' }}>
+        <div style={{ fontSize: '2rem', marginBottom: 12 }}>🔥</div>
+        <h2 style={{ color: 'var(--color-gold)', marginBottom: 8 }}>Ofrenda del Fuego — Yámana</h2>
+        <p style={{ color: 'var(--color-text-dim)', lineHeight: 1.6 }}>
+          <strong style={{ color: 'var(--color-text)' }}>{pickerName}</strong> está eligiendo
+          su carta extra (Ofrenda del Fuego de Yámana).
         </p>
         <p style={{ color: 'var(--color-text-dim)', fontSize: '0.82rem', marginTop: 12 }}>
           El turno continuará cuando elija…

@@ -140,6 +140,23 @@ export class GameEngine {
       return;
     }
 
+    // Yámana "Ofrenda del Fuego": pause to let the player play a bonus card from hand.
+    // playExtraCard() / skipExtraCard() will resume the turn flow.
+    if ((this.state.phase as string) === 'choose_extra_card') {
+      if (this.state.turn === 6) {
+        // On the last turn, all OTHER players' remaining cards go to discard;
+        // the Yámana player's hand is left intact for their pick.
+        const yamanaId = this.state.pendingExtraCardPlayerId;
+        for (const player of this.state.players) {
+          if (player.id !== yamanaId && player.hand.length > 0) {
+            this.state.discardPile.push(...player.hand);
+            player.hand = [];
+          }
+        }
+      }
+      return;
+    }
+
     // Handle last turn of age (turn 6 → discard last card, no coins)
     if (this.state.turn === 6) {
       for (const player of this.state.players) {
@@ -197,8 +214,17 @@ export class GameEngine {
       this.state.discardPile.push(card); // card used as stage marker goes face-down
       player.wonderStagesBuilt++;
       this.applyWonderStageEffects(player, stage);
-      // Yámana pasiva: +1 moneda al construir cada etapa del hito
-      if (player.wonderId === 'temple') player.coins++;
+      // Yámana "Ofrenda del Fuego": +3 monedas y carta extra al construir cada etapa del hito
+      if (player.wonderId === 'temple') {
+        player.coins += 3;
+        // Only trigger the extra card phase if there are more cards in hand beyond the sacrificed one
+        // (the sacrificed card is removed from hand after applyAction returns)
+        // player.hand still contains the sacrificed card here, so hand.length > 1 means extras exist
+        if (player.hand.length > 1) {
+          this.state.phase = 'choose_extra_card';
+          this.state.pendingExtraCardPlayerId = player.id;
+        }
+      }
       this.addLog(`${player.name} construyó la etapa ${stageIdx + 1} de su Maravilla.`);
       return;
     }
@@ -293,7 +319,73 @@ export class GameEngine {
     return null;
   }
 
-  /** Halicarnaso etapa 2: build a card from discard pile for free. */
+  /** Yámana Ofrenda del Fuego: play (free build) or discard a bonus card, or skip. */
+  playExtraCard(playerId: string, cardId: string | null, action: 'build' | 'discard'): string | null {
+    if (this.state.phase !== 'choose_extra_card') return 'Not in choose_extra_card phase';
+    if (this.state.pendingExtraCardPlayerId !== playerId) return 'Not your turn to play extra card';
+
+    const player = this.state.players.find(p => p.id === playerId)!;
+    const playerIdx = this.state.players.findIndex(p => p.id === playerId);
+
+    if (cardId !== null) {
+      const cardIdx = player.hand.findIndex(c => c.id === cardId);
+      if (cardIdx === -1) return 'Card not found in hand';
+      const card = player.hand[cardIdx];
+
+      if (action === 'build') {
+        // Build the card for free (no cost required)
+        player.hand.splice(cardIdx, 1);
+        player.builtStructures.push(card);
+        this.applyCardEffects(player, card, this.leftNeighbor(playerIdx), this.rightNeighbor(playerIdx));
+        this.addLog(`${player.name} jugó ${card.name} como Ofrenda del Fuego (gratis).`);
+      } else {
+        // Discard the card for +3 coins
+        player.hand.splice(cardIdx, 1);
+        this.state.discardPile.push(card);
+        player.coins += 3;
+        this.addLog(`${player.name} descartó ${card.name} (Ofrenda del Fuego) y ganó 3 monedas.`);
+      }
+    } else {
+      this.addLog(`${player.name} no jugó carta extra (Ofrenda del Fuego).`);
+    }
+
+    this.state.pendingExtraCardPlayerId = undefined;
+    return this.resumeAfterExtraCard();
+  }
+
+  /** Yámana Ofrenda del Fuego: skip the bonus card play. */
+  skipExtraCard(playerId: string): string | null {
+    if (this.state.phase !== 'choose_extra_card') return 'Not in choose_extra_card phase';
+    if (this.state.pendingExtraCardPlayerId !== playerId) return 'Not your turn to play extra card';
+    const player = this.state.players.find(p => p.id === playerId)!;
+    this.addLog(`${player.name} no jugó carta extra (Ofrenda del Fuego).`);
+    this.state.pendingExtraCardPlayerId = undefined;
+    return this.resumeAfterExtraCard();
+  }
+
+  private resumeAfterExtraCard(): string | null {
+    if (this.state.turn === 6) {
+      // Discard Yámana's remaining hand (if any) then end age
+      for (const player of this.state.players) {
+        if (player.hand.length > 0) {
+          this.state.discardPile.push(...player.hand);
+          player.hand = [];
+        }
+      }
+      this.endAge();
+    } else {
+      this.passHands();
+      for (const p of this.state.players) {
+        p.isReady = false;
+        p.pendingAction = undefined;
+      }
+      this.state.turn++;
+      this.state.phase = 'choose';
+    }
+    return null;
+  }
+
+  /** Rankül etapa 2: build a card from discard pile for free. */
   buildFromDiscard(playerId: string, cardId: string): string | null {
     if (this.state.phase !== 'choose_from_discard') return 'Not in choose_from_discard phase';
     if (this.state.pendingDiscardPlayerId !== playerId) return 'Not your turn to choose from discard';
@@ -556,8 +648,8 @@ export class GameEngine {
           else if (e.type === 'produce_choice') stageValue += age === 1 ? 6 : 3;
           else stageValue += 3;
         }
-        // Yámana (temple): each wonder stage gives +1 coin as a bonus
-        if (player.wonderId === 'temple') stageValue += 1;
+        // Yámana (temple): "Ofrenda del Fuego" — +3 coins + free card play per stage
+        if (player.wonderId === 'temple') stageValue += 6;
         // Build wonder stage if it's more valuable than best available card, or 15% chance
         if (stageValue >= topCardValue || Math.random() < 0.15) {
           // Sacrifice the least valuable card in hand
@@ -592,8 +684,8 @@ export function createGameState(
 
   const playerStates: PlayerState[] = players.map((p, i) => {
     const wonder = WONDERS.find(w => w.id === wonderIds[i])!;
-    // Günün-a-Künna pasiva: +1 moneda inicial
-    const startingCoins = wonder.id === 'lighthouse' ? 4 : 3;
+    // Günün-a-Künna pasiva: +3 monedas iniciales (Caravana de la Estepa)
+    const startingCoins = wonder.id === 'lighthouse' ? 6 : 3;
     return {
       id: p.id,
       name: p.name,

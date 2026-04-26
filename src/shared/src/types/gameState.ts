@@ -8,7 +8,8 @@ export type TurnPhase =
   | 'choose'               // players are picking a card
   | 'reveal'               // cards are being revealed (brief animation phase)
   | 'action'               // server processing actions (auto, no input needed)
-  | 'choose_from_discard'  // Halicarnaso etapa 2: one player picks a card from discard pile
+  | 'choose_from_discard'  // Rankül etapa 2: one player picks a card from discard pile
+  | 'choose_extra_card'    // Yámana "Ofrenda del Fuego": one player plays a bonus card from hand
   | 'military'             // end-of-age military resolution display
   | 'scoring'              // final scoring screen
   | 'finished';            // game over
@@ -78,7 +79,8 @@ export interface GameState {
   discardPile: Card[];
   log: string[];       // human-readable event log (last 20 entries)
   scores?: PlayerScore[];
-  pendingDiscardPlayerId?: string;  // set during 'choose_from_discard' phase
+  pendingDiscardPlayerId?: string;   // set during 'choose_from_discard' phase
+  pendingExtraCardPlayerId?: string; // set during 'choose_extra_card' phase (Yámana Ofrenda del Fuego)
   militaryAge?: Age;   // the age whose military was just resolved (set during 'military' phase)
 }
 

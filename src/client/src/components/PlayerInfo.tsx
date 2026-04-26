@@ -6,8 +6,8 @@ import { PublicPlayerState, CardEffect, MilitaryToken } from '@7wonders/shared';
 const WONDER_STAGE_VP: Record<string, number[]> = {
   colossus:      [0, 5, 7],   // +wood, 5★, 7★
   lighthouse:    [0, 0, 7],   // +4💰, 2★/🟡(dynamic), 7★
-  temple:        [0, 0, 7],   // +🪨/⚙️, 🧪 libre, 7★
-  babylon:       [0, 0, 7],   // 🛡, 🛡🛡, 7★
+  temple:        [0, 0, 7],   // +🪨/⚙️ (🔥+3💰+carta), 🧪 libre (🔥), 7★ (🔥)
+  babylon:       [0, 0, 7],   // 🛡, 🛡🛡, 7★ — rec. inicial: Obsidiana (⚙️)
   olympia:       [3, 0, 7],   // 3★, 🧪 libre, 7★
   halicarnassus: [0, 0, 7],   // +3💰, ♻ del descarte, 7★
   giza:          [0, 5, 7],   // +🪨, 5★, 7★

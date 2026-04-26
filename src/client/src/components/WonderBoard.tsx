@@ -7,7 +7,7 @@ export const WONDER_NAMES: Record<string, string> = {
   babylon:       'Aónikenk',
   olympia:       "Selk'nam",
   halicarnassus: 'Rankül',
-  giza:          'Ñuke Mapu',
+  giza:          'Ñuke Mapu (Mapuche)',
 };
 
 const WONDER_IMG: Record<string, string> = {
@@ -24,7 +24,7 @@ const WONDER_IMG: Record<string, string> = {
 const WONDER_STAGE_INFO: Record<string, string[]> = {
   colossus:      ['+🌲', '5★', '7★'],
   lighthouse:    ['+4💰', '2★/🟡', '7★'],
-  temple:        ['+🪨/⚙️', '🧪 libre', '7★'],
+  temple:        ['+🪨/⚙️ 🔥', '🧪 libre 🔥', '7★ 🔥'],  // 🔥 = Ofrenda del Fuego: +3💰+carta bonus
   babylon:       ['🛡', '🛡🛡', '7★'],
   olympia:       ['3★', '🧪 libre', '7★'],
   halicarnassus: ['+3💰', '♻ del descarte', '7★'],

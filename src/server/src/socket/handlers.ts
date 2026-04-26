@@ -84,6 +84,23 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
     scheduleRevealAndAdvance(io, roomId);
   });
 
+  socket.on('game:choose_extra_card', (cardId: string | null, action: 'build' | 'discard', callback: (err?: string) => void) => {
+    const { roomId, playerId } = socket.data;
+    if (!roomId || !playerId) { callback('Not in a room'); return; }
+
+    const engine = getEngine(roomId);
+    if (!engine) { callback('No active game'); return; }
+
+    const error = cardId === null
+      ? engine.skipExtraCard(playerId)
+      : engine.playExtraCard(playerId, cardId, action);
+    if (error) { callback(error); return; }
+
+    callback();
+    broadcastGameState(io, roomId);
+    scheduleRevealAndAdvance(io, roomId);
+  });
+
   socket.on('game:choose_from_discard', (cardId: string, callback: (err?: string) => void) => {
     const { roomId, playerId } = socket.data;
     if (!roomId || !playerId) { callback('Not in a room'); return; }
@@ -186,6 +203,7 @@ function broadcastGameState(io: AppServer, roomId: string): void {
 
   if (state.phase === 'choose') triggerBots(io, roomId);
   if (state.phase === 'choose_from_discard') triggerBotDiscardPick(io, roomId);
+  if (state.phase === 'choose_extra_card') triggerBotExtraCard(io, roomId);
 }
 
 /** Auto-pick a discard card for a bot player who triggered Halicarnaso stage 2. */
@@ -237,6 +255,57 @@ function triggerBotDiscardPick(io: AppServer, roomId: string): void {
       broadcastGameState(io, roomId);
       scheduleRevealAndAdvance(io, roomId);
     }
+  }, delay);
+}
+
+/** Auto-play the bonus card for a bot Yámana player (Ofrenda del Fuego). */
+function triggerBotExtraCard(io: AppServer, roomId: string): void {
+  const botIds = getBotIds(roomId);
+  if (botIds.length === 0) return;
+
+  const engine = getEngine(roomId);
+  if (!engine) return;
+
+  const state = engine.getState();
+  if (!state.pendingExtraCardPlayerId) return;
+  if (!botIds.includes(state.pendingExtraCardPlayerId)) return;
+
+  const delay = 600 + Math.floor(Math.random() * 400);
+  setTimeout(() => {
+    const currentEngine = getEngine(roomId);
+    if (!currentEngine) return;
+    const currentState = currentEngine.getState();
+    if (currentState.phase !== 'choose_extra_card') return;
+    if (!currentState.pendingExtraCardPlayerId) return;
+    if (!getBotIds(roomId).includes(currentState.pendingExtraCardPlayerId)) return;
+
+    const botId = currentState.pendingExtraCardPlayerId;
+    const botPlayer = currentState.players.find(p => p.id === botId);
+    if (!botPlayer || botPlayer.hand.length === 0) {
+      currentEngine.skipExtraCard(botId);
+    } else {
+      // Build the highest-VP card available, otherwise discard for coins
+      const scored = botPlayer.hand.map(card => {
+        let v = 0;
+        for (const e of card.effects) {
+          if (e.type === 'victory_points') v += (e as any).points * 3;
+          else if (e.type === 'shields') v += (e as any).count * 3;
+          else if (e.type === 'science') v += 6;
+          else if (e.type === 'produce_resource') v += 4;
+          else if (e.type === 'produce_choice') v += 3;
+          else v += 1;
+        }
+        return { card, v };
+      });
+      scored.sort((a, b) => b.v - a.v);
+      const best = scored[0];
+      // Build if valuable, otherwise discard for coins
+      const action = best.v >= 3 ? 'build' : 'discard';
+      currentEngine.playExtraCard(botId, best.card.id, action);
+    }
+
+    broadcastGameState(io, roomId);
+    scheduleRevealAndAdvance(io, roomId);
   }, delay);
 }
 

@@ -7,7 +7,7 @@ const WONDER_STARTING: Record<string, Resource> = {
   colossus: 'wood',
   lighthouse: 'clay',
   temple: 'stone',
-  babylon: 'wood',
+  babylon: 'ore',   // Aónikenk: Obsidiana (cambio de Arcilla → Mineral)
   olympia: 'clay',
   halicarnassus: 'wood',
   giza: 'stone',

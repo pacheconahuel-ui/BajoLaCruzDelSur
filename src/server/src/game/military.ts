@@ -14,6 +14,10 @@ export function resolveMilitary(state: GameState): void {
       let token: MilitaryToken;
       if (player.shields > neighbor.shields) {
         token = { age, value: victoryValue as 1 | 3 | 5 };
+        // Rankül "Botín de Guerra": +1 moneda por cada escudo del vecino derrotado
+        if (player.wonderId === 'halicarnassus') {
+          player.coins += neighbor.shields;
+        }
       } else if (player.shields < neighbor.shields) {
         // Rankül pasiva: derrota militar vale 0 en lugar de -1
         token = { age, value: player.wonderId === 'halicarnassus' ? 0 : -1 };

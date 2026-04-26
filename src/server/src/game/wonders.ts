@@ -3,7 +3,7 @@ import { WonderBoard } from '@7wonders/shared';
 export const WONDERS: WonderBoard[] = [
   {
     id: 'colossus',
-    name: 'Kawésqar — Nómades del Canal',
+    name: 'Kawésqar — Nómadas de los Canales y Archipiélagos',
     startingResource: 'wood',
     stages: [
       {
@@ -41,7 +41,7 @@ export const WONDERS: WonderBoard[] = [
   },
   {
     id: 'temple',
-    name: 'Yámana — Hogares de Fuego',
+    name: 'Yámana — Canal de Beagle',
     startingResource: 'stone',
     stages: [
       {
@@ -62,7 +62,7 @@ export const WONDERS: WonderBoard[] = [
   {
     id: 'babylon',
     name: 'Aónikenk — Gigantes de la Estepa',
-    startingResource: 'wood',
+    startingResource: 'ore',
     stages: [
       {
         cost: { wood: 2 },
@@ -119,7 +119,7 @@ export const WONDERS: WonderBoard[] = [
   },
   {
     id: 'giza',
-    name: 'Ñuke Mapu — Sabiduría de la Tierra',
+    name: 'Ñuke Mapu (Mapuche) — Sabiduría de la Tierra',
     startingResource: 'stone',
     stages: [
       {
