@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { PublicGameState, Card, PublicPlayerState } from '@7wonders/shared';
 import { socket } from '../socket/socket';
 import CardView from '../components/CardView';
+import { COLOR_ACCENT, COLOR_LABEL, COLOR_BG, formatCost, formatEffectReadable } from '../utils/icons';
 
 interface Props {
   state: PublicGameState;
@@ -10,6 +11,7 @@ interface Props {
 export default function DiscardPickerScreen({ state }: Props) {
   const [selected, setSelected] = useState<Card | null>(null);
   const [error, setError] = useState('');
+  const [detailCard, setDetailCard] = useState<Card | null>(null);
 
   const isMyTurn = state.pendingDiscardPlayerId === state.myState.id;
   const chooserName = state.players.find((p: PublicPlayerState) => p.id === state.pendingDiscardPlayerId)?.name ?? '...';
@@ -69,7 +71,7 @@ export default function DiscardPickerScreen({ state }: Props) {
               onClick={() => isMyTurn && setSelected(prev => prev?.id === card.id ? null : card)}
               style={{ cursor: isMyTurn ? 'pointer' : 'default', opacity: isMyTurn ? 1 : 0.55 }}
             >
-              <CardView card={card} selected={selected?.id === card.id} />
+              <CardView card={card} selected={selected?.id === card.id} onInfoPress={setDetailCard} />
             </div>
           ))}
         </div>
@@ -106,6 +108,41 @@ export default function DiscardPickerScreen({ state }: Props) {
               Continuar sin construir →
             </button>
           )}
+        </div>
+      )}
+
+      {/* Card detail bottom-sheet */}
+      {detailCard && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 900, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+          onClick={() => setDetailCard(null)}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: '#141018', border: `1px solid ${COLOR_ACCENT[detailCard.color]}`,
+              borderRadius: '16px 16px 0 0', padding: '20px 20px 28px',
+              width: '100%', maxWidth: 480, boxShadow: '0 -8px 40px rgba(0,0,0,0.8)',
+            }}
+          >
+            <div style={{ width: 40, height: 4, background: 'rgba(255,255,255,0.15)', borderRadius: 2, margin: '0 auto 14px' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <div style={{ background: COLOR_BG[detailCard.color], borderRadius: 6, padding: '3px 10px', fontSize: '0.68rem', fontWeight: 700, color: '#fff', textTransform: 'uppercase' as const }}>
+                {COLOR_LABEL[detailCard.color]}
+              </div>
+              <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#fff', flex: 1 }}>{detailCard.name}</div>
+              <button onClick={() => setDetailCard(null)} style={{ background: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '1.1rem', border: 'none', cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '10px 14px', marginBottom: 10, borderLeft: `3px solid ${COLOR_ACCENT[detailCard.color]}` }}>
+              {formatEffectReadable(detailCard.effects).split('\n').filter(Boolean).map((line, i) => (
+                <div key={i} style={{ fontSize: '0.88rem', color: '#dde6ef', lineHeight: 1.6 }}>{line}</div>
+              ))}
+            </div>
+            <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)' }}>
+              Costo original: {formatCost(detailCard.cost) || 'Gratis'}
+              {detailCard.chainFrom && <span style={{ marginLeft: 12, color: '#4ade80' }}>⛓ {detailCard.chainFrom}</span>}
+            </div>
+          </div>
         </div>
       )}
     </div>

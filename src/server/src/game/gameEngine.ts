@@ -9,6 +9,7 @@ import {
   WonderStage,
 } from '@7wonders/shared';
 import { buildAgeDeck, dealHands, shuffle } from './deckBuilder';
+import { pickEraEvent } from './eraEvents';
 import { WONDERS } from './wonders';
 import { validateBuildStructure, validateBuildWonderStage, alreadyBuilt, hasChain } from './constructionValidator';
 import { computeScores } from './scoring';
@@ -43,7 +44,8 @@ export class GameEngine {
 
     this.state.turn = 1;
     this.state.phase = 'choose';
-    this.addLog(`Comienza la Era ${age}.`);
+    this.state.eraEvent = pickEraEvent(age);
+    this.addLog(`Comienza la Era ${age}: ${this.state.eraEvent.nombre}.`);
   }
 
   /** Record a player's chosen action. Returns error string or null on success. */

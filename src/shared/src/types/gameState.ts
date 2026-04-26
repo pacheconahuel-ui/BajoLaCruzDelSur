@@ -69,6 +69,16 @@ export interface PlayerScore {
   total: number;
 }
 
+/** Narrative era event — chosen randomly at the start of each age. Flavor only. */
+export interface EraEvent {
+  id: string;
+  nombre: string;
+  icono: string;
+  descripcion: string;   // 1-2 sentences of historical context
+  efecto: string;        // game-flavored description of the effect
+  tipo: 'clima' | 'politico' | 'cultural' | 'militar';
+}
+
 export interface GameState {
   roomId: string;
   age: Age;
@@ -82,6 +92,7 @@ export interface GameState {
   pendingDiscardPlayerId?: string;   // set during 'choose_from_discard' phase
   pendingExtraCardPlayerId?: string; // set during 'choose_extra_card' phase (Yámana Ofrenda del Fuego)
   militaryAge?: Age;   // the age whose military was just resolved (set during 'military' phase)
+  eraEvent?: EraEvent; // narrative event for the current age (picked at startAge)
 }
 
 // Subset of player state safe to send to other players (hides hand contents)

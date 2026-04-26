@@ -14,6 +14,7 @@ import { computeAffordability, computeWonderAffordability, getWonderStageCost, W
 import { formatCost, formatEffectReadable, COLOR_ACCENT, COLOR_LABEL, COLOR_BG } from '../utils/icons';
 import CheatSheet from '../components/CheatSheet';
 import HowToPlayPage from './HowToPlayPage';
+import EraEventBanner from '../components/EraEventBanner';
 import type { ChatMessage } from '../App';
 
 interface Props {
@@ -310,6 +311,15 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
           <PlayerInfo key={p.id} player={p} isMe={i === myIndex} />
         ))}
       </div>
+
+      {/* ── Era event banner ── */}
+      {state.eraEvent && (
+        <EraEventBanner
+          evento={state.eraEvent}
+          era={state.age}
+          isNew={state.turn === 1}
+        />
+      )}
 
       {/* ── Mobile tab bar ── */}
       <div className="mobile-tabs">
