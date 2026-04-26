@@ -37,9 +37,15 @@ export function buildAgeDeck(age: 1 | 2 | 3, playerCount: number): Card[] {
     shuffle(guilds);
     const selectedGuilds = guilds.slice(0, Math.min(playerCount + 2, guilds.length));
 
-    const deck = [...nonGuilds, ...selectedGuilds];
+    // Trim non-guilds so all selected guilds are guaranteed to survive in the deck.
+    // (Without this, ensureSize could trim away guilds after shuffling everything together.)
+    shuffle(nonGuilds);
+    const nonGuildSlots = target - selectedGuilds.length;
+    const trimmedNonGuilds = nonGuilds.slice(0, nonGuildSlots);
+
+    const deck = [...trimmedNonGuilds, ...selectedGuilds];
     shuffle(deck);
-    return ensureSize(deck, target);
+    return deck; // exactly `target` cards with all selected guilds present
   }
 
   shuffle(eligible);

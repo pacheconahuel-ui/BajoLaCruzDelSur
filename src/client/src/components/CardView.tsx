@@ -12,6 +12,7 @@ interface Props {
   compact?: boolean;
   tradeCost?: { total: number; leftCoins?: number; rightCoins?: number };
   freeReason?: 'chain' | 'olympia';
+  onInfoPress?: (card: Card) => void;
 }
 
 function CardTooltip({ card, accent }: { card: Card; accent: string }) {
@@ -52,7 +53,7 @@ function CardTooltip({ card, accent }: { card: Card; accent: string }) {
   );
 }
 
-export default function CardView({ card, selected, onClick, disabled, dimmed, compact, tradeCost, freeReason }: Props) {
+export default function CardView({ card, selected, onClick, disabled, dimmed, compact, tradeCost, freeReason, onInfoPress }: Props) {
   const [hovered, setHovered] = useState(false);
   const bg     = COLOR_BG[card.color];
   const img    = COLOR_IMG[card.color];
@@ -210,6 +211,31 @@ export default function CardView({ card, selected, onClick, disabled, dimmed, co
         </div>
       </div>
       </div>{/* end inner clip wrapper */}
+
+      {/* Info button — tap to see full card details (useful on mobile) */}
+      {onInfoPress && (
+        <button
+          onClick={e => { e.stopPropagation(); onInfoPress(card); }}
+          style={{
+            position: 'absolute', bottom: -6, left: -6,
+            background: 'rgba(30,30,40,0.9)',
+            border: `1px solid ${accent}88`,
+            borderRadius: '50%',
+            width: 22, height: 22,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '0.6rem', color: accent, fontWeight: 800,
+            boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
+            cursor: 'pointer',
+            zIndex: 20,
+            lineHeight: 1,
+            padding: 0,
+          }}
+          title="Ver detalle de carta"
+          aria-label="Ver detalle"
+        >
+          ⓘ
+        </button>
+      )}
 
       {/* Trade cost badge with direction */}
       {tradeCost && tradeCost.total > 0 && (() => {

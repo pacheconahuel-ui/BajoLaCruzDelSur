@@ -11,7 +11,7 @@ import ScoringScreen from './ScoringScreen';
 import DiscardPickerScreen from './DiscardPickerScreen';
 import ExtraCardPickerScreen from './ExtraCardPickerScreen';
 import { computeAffordability, computeWonderAffordability, getWonderStageCost, WonderAffordability } from '../utils/affordability';
-import { formatCost } from '../utils/icons';
+import { formatCost, formatEffectReadable, COLOR_ACCENT, COLOR_LABEL, COLOR_BG } from '../utils/icons';
 import CheatSheet from '../components/CheatSheet';
 import HowToPlayPage from './HowToPlayPage';
 import type { ChatMessage } from '../App';
@@ -67,6 +67,7 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
   const [showStats, setShowStats]         = useState(false);
   const [showMilitary, setShowMilitary]   = useState(false);
   const [showManual, setShowManual]       = useState(false);
+  const [detailCard, setDetailCard]       = useState<Card | null>(null);
   const [chatInput, setChatInput]         = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -374,6 +375,7 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
                           setActionType(null);
                           setError('');
                         }}
+                        onInfoPress={setDetailCard}
                       />
                     );
                   })}
@@ -503,6 +505,9 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
 
       {/* ── Cheat sheet overlay ── */}
       {showHelp && <CheatSheet onClose={() => setShowHelp(false)} />}
+
+      {/* ── Card detail modal ── */}
+      {detailCard && <CardDetailModal card={detailCard} onClose={() => setDetailCard(null)} />}
 
       {/* ── Abandon confirmation modal ── */}
       {showAbandon && (
@@ -702,6 +707,120 @@ function WaitingDots({ players, myIndex }: { players: { name: string; hasChosen:
           {p.hasChosen ? '✓ ' : '⏳ '}{p.name}
         </span>
       ))}
+    </div>
+  );
+}
+
+/* ── Card detail modal ──────────────────────────────────────────────────── */
+function CardDetailModal({ card, onClose }: { card: Card; onClose: () => void }) {
+  const accent = COLOR_ACCENT[card.color];
+  const bg     = COLOR_BG[card.color];
+  const label  = COLOR_LABEL[card.color];
+  const effectLines = formatEffectReadable(card.effects).split('\n').filter(Boolean);
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 900,
+        background: 'rgba(0,0,0,0.75)',
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+      }}
+      onClick={onClose}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: '#141018',
+          border: `1px solid ${accent}`,
+          borderRadius: '16px 16px 0 0',
+          padding: '20px 20px 28px',
+          width: '100%',
+          maxWidth: 480,
+          boxShadow: `0 -8px 40px rgba(0,0,0,0.8), 0 0 0 1px ${accent}44`,
+          animation: 'slideUp 0.18s ease',
+        }}
+      >
+        {/* Handle bar */}
+        <div style={{ width: 40, height: 4, background: 'rgba(255,255,255,0.15)', borderRadius: 2, margin: '0 auto 16px' }} />
+
+        {/* Color badge + name */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+          <div style={{
+            background: bg, border: `1px solid ${accent}`,
+            borderRadius: 6, padding: '3px 10px',
+            fontSize: '0.68rem', fontWeight: 700, color: '#fff',
+            textTransform: 'uppercase', letterSpacing: '0.05em',
+          }}>
+            {label}
+          </div>
+          <div style={{
+            fontWeight: 700, fontSize: '1.15rem',
+            color: '#fff',
+            fontFamily: "'Cormorant Garamond', Georgia, serif",
+          }}>
+            {card.name}
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              marginLeft: 'auto', background: 'transparent', color: 'rgba(255,255,255,0.4)',
+              fontSize: '1.1rem', border: 'none', cursor: 'pointer', padding: '0 4px',
+            }}
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Effect lines */}
+        <div style={{
+          background: 'rgba(255,255,255,0.04)', borderRadius: 8,
+          padding: '12px 14px', marginBottom: 12,
+          borderLeft: `3px solid ${accent}`,
+        }}>
+          <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+            Efecto
+          </div>
+          {effectLines.map((line, i) => (
+            <div key={i} style={{ fontSize: '0.9rem', color: '#dde6ef', lineHeight: 1.6 }}>
+              {line}
+            </div>
+          ))}
+        </div>
+
+        {/* Cost + chains */}
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{
+            background: 'rgba(255,255,255,0.04)', borderRadius: 8,
+            padding: '8px 12px', flex: 1, minWidth: 120,
+          }}>
+            <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>COSTO</div>
+            <div style={{ fontSize: '0.88rem', color: '#fff' }}>{formatCost(card.cost) || 'Gratis'}</div>
+          </div>
+
+          {card.chainFrom && (
+            <div style={{
+              background: 'rgba(74,222,128,0.06)', borderRadius: 8,
+              padding: '8px 12px', flex: 1, minWidth: 120,
+              border: '1px solid rgba(74,222,128,0.2)',
+            }}>
+              <div style={{ fontSize: '0.68rem', color: '#4ade80', marginBottom: 4 }}>GRATIS SI TENÉS</div>
+              <div style={{ fontSize: '0.85rem', color: '#4ade80' }}>⛓ {card.chainFrom}</div>
+            </div>
+          )}
+
+          {card.chainTo && card.chainTo.length > 0 && (
+            <div style={{
+              background: 'rgba(252,211,77,0.06)', borderRadius: 8,
+              padding: '8px 12px', flex: 1, minWidth: 120,
+              border: '1px solid rgba(252,211,77,0.2)',
+            }}>
+              <div style={{ fontSize: '0.68rem', color: '#fcd34d', marginBottom: 4 }}>DESBLOQUEA</div>
+              <div style={{ fontSize: '0.85rem', color: '#fcd34d' }}>⛓→ {card.chainTo.join(', ')}</div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

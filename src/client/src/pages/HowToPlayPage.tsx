@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const TABS = ['Intro', 'Pueblos', 'Turno', 'Recursos', 'Puntuación', 'Consejos'] as const;
+const TABS = ['Intro', 'Pueblos', 'Lore', 'Turno', 'Recursos', 'Puntuación', 'Consejos'] as const;
 type Tab = typeof TABS[number];
 
 export default function HowToPlayPage({ onBack }: { onBack: () => void }) {
@@ -59,6 +59,7 @@ export default function HowToPlayPage({ onBack }: { onBack: () => void }) {
       <div style={{ flex: 1, overflowY: 'auto', padding: '28px 20px', maxWidth: 720, margin: '0 auto', width: '100%' }}>
         {tab === 'Intro'      && <TabIntro />}
         {tab === 'Pueblos'    && <TabPueblos />}
+        {tab === 'Lore'       && <TabLore />}
         {tab === 'Turno'      && <TabTurno />}
         {tab === 'Recursos'   && <TabRecursos />}
         {tab === 'Puntuación' && <TabPuntuacion />}
@@ -205,6 +206,176 @@ function TabPueblos() {
       </div>
       <Tip style={{ marginTop: 16 }}>
         Las pasivas están siempre activas — no necesitás construir ninguna etapa para beneficiarte de ellas.
+      </Tip>
+    </div>
+  );
+}
+
+/* ─── Tab: Lore ──────────────────────────────────────────────── */
+const LORE_PUEBLOS = [
+  {
+    nombre: 'Kawésqar',
+    subtitulo: 'Nómadas de los Canales y Archipiélagos',
+    zona: 'Canales fueguinos y archipiélagos del extremo sur de la Patagonia',
+    historia: 'Los Kawésqar vivieron durante siglos navegando los laberínticos canales del extremo sur. Sus canoas de corteza eran su hogar: llevaban fuego a bordo para no helarse, comían crustáceos y lobos marinos, y pocas veces pisaban tierra firme. Su nombre significa "gente del mar y los canales". Cuando los europeos llegaron, quedaron asombrados por estos navegantes que sobrevivían en uno de los climas más hostiles del planeta.',
+    fortaleza: ['🛶 El Primer Faro — una hoguera en la roca más alta del canal, guía a los canoeros de regreso.', '🌊 Alianza de los Mares — los clanes de distintos archipiélagos se unen para pescar y comerciar.', '⭐ El Gran Viaje — la travesía legendaria que unió todos los canales bajo un mismo linaje.'],
+    materia: '🌲 Madera de los bosques húmedos costeros (ciprés, coigüe, lenga).',
+    color: '#1a3a5c',
+  },
+  {
+    nombre: 'Günün-a-Künna',
+    subtitulo: 'Tehuelche del Norte — Caravana de la Estepa',
+    zona: 'Estepa patagónica norte, valles del Chubut y Río Negro',
+    historia: 'Los Günün-a-Künna ("gente del norte" en günün yajich) eran grandes cazadores de guanaco y ñandú. Recorrían la meseta patagónica en amplios circuitos estacionales, llevando pieles, carne seca y objetos de trueque. Su dominio del caballo a partir del siglo XVII los convirtió en comerciantes formidables, acumulando riqueza en moneda y bienes de intercambio. Esta prosperidad inicial es su ventaja en el juego.',
+    fortaleza: ['+💰 Caravana del Trueque — la primera gran feria de la estepa, donde los clanes intercambian bienes.', '⭐⭐ Alianza Comercial — un pacto entre lonkos que asegura precios justos para todos.', '⭐⭐⭐ Gran Toldo del Lonko — el campamento central donde confluyen todas las caravanas.'],
+    materia: '🧱 Arcilla de las barrancas de los ríos patagónicos, moldeada en vasijas para el transporte de alimentos.',
+    color: '#3a2a0a',
+  },
+  {
+    nombre: 'Yámana',
+    subtitulo: 'Pueblo del Canal de Beagle',
+    zona: 'Canal de Beagle, islas del Cabo de Hornos y costas de Tierra del Fuego',
+    historia: 'Los Yámana (también llamados Yahgán) vivían en el extremo más austral del continente americano. Lo que más sorprendió a los exploradores europeos fue que andaban casi desnudos pese al frío extremo, cubriéndose con grasa de lobo marino y encendiendo hogueras permanentes en sus canoas y campamentos. De estas hogueras inextinguibles nace su poder en el juego: la "Ofrenda del Fuego", un ritual de agradecimiento que concede energía extra para actuar dos veces en el mismo turno.',
+    fortaleza: ['🔥+💰 Primera Ofrenda — una hoguera ritual al inicio de cada estación. +3💰 y carta extra.', '🧪🔥 Canto del Canal — el chamán descifra nuevas técnicas en las llamas. Símbolo científico libre + ofrenda.', '⭐🔥 El Fuego Eterno — la hoguera que nunca se apagó, símbolo de la permanencia del pueblo. 7PV + ofrenda.'],
+    materia: '🪨 Piedra del canal, extraída de las costas rocosas del Beagle para construir abrigos y herramientas.',
+    color: '#2c1a0a',
+  },
+  {
+    nombre: 'Aónikenk',
+    subtitulo: 'Tehuelche del Sur — Guardianes de la Obsidiana',
+    zona: 'Patagonia austral, desde el Río Santa Cruz hasta el Estrecho de Magallanes',
+    historia: 'Los Aónikenk ("gente del sur") eran los habitantes más altos que los europeos encontraron en América, lo que dio origen al mito de los "patagones" gigantes. Expertos en caza de guanaco a pie y luego a caballo, controlaban las rutas de obsidiana volcánica, el material más cortante conocido antes del metal. Esta obsidiana — llamada Mineral en el juego — era tan valiosa que se comerciaba hasta el norte de la Patagonia y más allá.',
+    fortaleza: ['🛡 Campamento de Caza — la primera base estacional, donde se preparan las armas de obsidiana.', '🛡🛡 Toldería de Invierno — el gran refugio comunal donde los clanes esperan juntos el deshielo.', '⭐⭐⭐ Gran Reunión Aónikenk — la asamblea anual donde se resuelven alianzas y disputas territoriales.'],
+    materia: '⚙️ Obsidiana volcánica (Mineral), la piedra más afilada de la Patagonia, tallada en puntas de lanza y raspadores.',
+    color: '#1a1a2c',
+  },
+  {
+    nombre: "Selk'nam",
+    subtitulo: 'Pueblo del Interior de Tierra del Fuego',
+    zona: 'Interior boscoso de la Isla Grande de Tierra del Fuego',
+    historia: "Los Selk'nam (u Ona) habitaban el interior de Tierra del Fuego, cazando guanaco en los bosques de lenga y ñire. Su ceremonia más importante era el Hain: un rito de iniciación masculina donde los adultos se pintaban el cuerpo entero y adoptaban identidades de espíritus para instruir a los jóvenes. Este sistema de conocimiento secreto — el Espíritu del Hain — se traduce en juego como la capacidad de construir una carta por era sin pagar sus costos.",
+    fortaleza: ['⭐⭐⭐ Casa del Iniciado — el primer recinto sagrado del Hain, donde el joven entra como niño y sale como adulto.', '🧪 Ritual del Hain — el momento culminante, donde los espíritus revelan el conocimiento ancestral. Símbolo científico libre.', '⭐⭐⭐ El Kloketen — la gran celebración final, cuando el iniciado recibe su nombre y su lugar en la comunidad.'],
+    materia: '🧱 Arcilla de los valles fueguinos, usada para pintar el cuerpo en los rituales y para fabricar recipientes.',
+    color: '#2c1a3a',
+  },
+  {
+    nombre: 'Rankül',
+    subtitulo: 'Pueblo Ranquel — Guerreros y Diplomáticos de La Pampa',
+    zona: 'La Pampa, sur de Córdoba y San Luis, llanuras del Caldenal',
+    historia: 'Los Rankül (o Ranqueles) eran una rama del pueblo mapuche que se había asentado en las llanuras pampeanas. A diferencia de otros grupos, combinaban la guerra con la diplomacia: fueron protagonistas de algunos de los tratados de paz más importantes del siglo XIX con el gobierno argentino, incluyendo el famoso tratado del "Lonko Painé". Su habilidad para transformar las derrotas en oportunidades económicas — el "Botín de Guerra" — refleja esta doble naturaleza guerrera-política.',
+    fortaleza: ['+💰 Malón Relámpago — un ataque rápido que genera monedas del pillaje. +3💰.', '♻ El Pacto del Fortín — el legendario acuerdo de paz: los prisioneros son liberados, las cartas descartadas se recuperan.', '⭐⭐⭐ Gran Tolderías — el campamento central donde convergen todas las facciones del pueblo Rankül.'],
+    materia: '🌲 Madera del caldén, el árbol endémico de la pampa, duro y resistente, usado para postes, armas y estructuras.',
+    color: '#3a1a0a',
+  },
+  {
+    nombre: 'Ñuke Mapu (Mapuche)',
+    subtitulo: 'Sabiduría de la Tierra — Pueblo de Ambos Lados de los Andes',
+    zona: 'Neuquén, Río Negro, y el otro lado de los Andes en Chile (Araucanía)',
+    historia: 'Ñuke Mapu significa "Madre Tierra" en mapudungún, la lengua del pueblo mapuche. Los mapuche son el pueblo originario más numeroso de la Patagonia y protagonizaron más de 300 años de resistencia contra los imperios coloniales — español y argentino — en la llamada "Guerra de Arauco". Su vínculo profundo con la tierra (el Mapu) se expresa en su capacidad de producir más piedra que nadie, pues la tierra misma es su fortaleza más grande.',
+    fortaleza: ['+🪨 Ruca Sagrada — la casa ceremonial, construida con piedra y madera, centro del Lof (comunidad).', '⭐⭐⭐⭐⭐ El Rehue — el poste ceremonial del nguillatun, eje del cosmos mapuche. 5PV.', '⭐⭐⭐⭐⭐⭐⭐ El Gran Nguillatun — la ceremonia colectiva de renovación del pacto entre el pueblo y la Madre Tierra. 7PV.'],
+    materia: '🪨 Piedra de los Andes, abundante en ambas vertientes de la cordillera, usada en rucas, molinos y ceremonias.',
+    color: '#1a2c1a',
+  },
+];
+
+function TabLore() {
+  const [open, setOpen] = useState<string | null>(null);
+  return (
+    <div>
+      <H2>Crónicas del Sur — Historia de los Pueblos</H2>
+      <P>
+        Cada pueblo originario de <b>Bajo la Cruz del Sur</b> tiene una historia real y un territorio propio.
+        Aquí encontrás el contexto histórico y geográfico que inspiró sus habilidades en el juego.
+      </P>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+        {LORE_PUEBLOS.map(p => {
+          const isOpen = open === p.nombre;
+          return (
+            <div key={p.nombre} style={{
+              background: 'var(--color-surface)',
+              borderRadius: 10,
+              border: `1px solid ${p.color}88`,
+              overflow: 'hidden',
+            }}>
+              {/* Header — always visible, tap to expand */}
+              <button
+                onClick={() => setOpen(isOpen ? null : p.nombre)}
+                style={{
+                  width: '100%', background: `${p.color}33`, border: 'none',
+                  padding: '12px 14px', textAlign: 'left', borderRadius: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  cursor: 'pointer',
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-gold)' }}>
+                    {p.nombre}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-dim)', marginTop: 1 }}>
+                    {p.subtitulo}
+                  </div>
+                </div>
+                <span style={{ color: 'var(--color-text-dim)', fontSize: '0.8rem', flexShrink: 0, marginLeft: 8 }}>
+                  {isOpen ? '▲' : '▼'}
+                </span>
+              </button>
+
+              {isOpen && (
+                <div style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {/* Zona */}
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '1rem', flexShrink: 0, marginTop: 1 }}>🗺</span>
+                    <div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Territorio</div>
+                      <div style={{ fontSize: '0.83rem', color: 'var(--color-text-dim)', lineHeight: 1.5 }}>{p.zona}</div>
+                    </div>
+                  </div>
+
+                  {/* Historia */}
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '1rem', flexShrink: 0, marginTop: 1 }}>📜</span>
+                    <div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Historia</div>
+                      <div style={{ fontSize: '0.83rem', color: 'var(--color-text-dim)', lineHeight: 1.6 }}>{p.historia}</div>
+                    </div>
+                  </div>
+
+                  {/* Etapas lore */}
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '1rem', flexShrink: 0, marginTop: 1 }}>🏛</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Etapas del Pueblo</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                        {p.fortaleza.map((f, i) => (
+                          <div key={i} style={{
+                            background: 'var(--color-surface2)', borderRadius: 6,
+                            padding: '6px 10px', fontSize: '0.8rem', color: 'var(--color-text)',
+                            borderLeft: `3px solid ${p.color}cc`, lineHeight: 1.4,
+                          }}>
+                            <span style={{ color: 'var(--color-text-dim)', fontSize: '0.68rem', marginRight: 4 }}>Etapa {i + 1}:</span>
+                            {f}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Materia prima */}
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '1rem', flexShrink: 0, marginTop: 1 }}>⛏</span>
+                    <div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Materia Prima</div>
+                      <div style={{ fontSize: '0.83rem', color: 'var(--color-text-dim)', lineHeight: 1.5 }}>{p.materia}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <Tip>
+        📚 La historia de los pueblos originarios patagónicos es compleja y viva. Esta lore es una síntesis inspirada en fuentes históricas, simplificada para el juego.
       </Tip>
     </div>
   );

@@ -169,36 +169,88 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
       }}>
         {scores.slice(0, Math.min(scores.length, 5)).map((s, i) => {
           const displayTotal = animatedTotals[s.playerId] ?? s.total;
-          const barH = Math.max(28, Math.round((displayTotal / maxTotal) * 100));
+          const barH = Math.max(40, Math.round((displayTotal / maxTotal) * 110));
           const isWinner = i === 0;
+          const isMe = s.playerId === state.myState.id;
+
+          // Build stacked bar segments for category breakdown
+          const catColors: Record<string, string> = {
+            military: '#ef4444', treasury: '#f59e0b', wonder: '#a855f7',
+            civilian: '#3b82f6', science: '#10b981', commercial: '#f97316', guilds: '#ec4899',
+          };
+          const catOrder = ['military', 'treasury', 'wonder', 'civilian', 'science', 'commercial', 'guilds'] as const;
+          const segments = catOrder
+            .map(k => ({ key: k, val: Math.max(0, s[k] as number), color: catColors[k] }))
+            .filter(seg => seg.val > 0);
+
           return (
             <div key={s.playerId} style={{ flex: 1, maxWidth: 140, textAlign: 'center' }}>
               <div style={{
-                fontSize: '0.75rem', fontWeight: 700,
-                color: isWinner ? 'var(--color-gold)' : 'var(--color-text-dim)',
-                marginBottom: 4,
+                fontSize: '0.72rem', fontWeight: isMe ? 700 : 600,
+                color: isWinner ? 'var(--color-gold)' : isMe ? '#93c5fd' : 'var(--color-text-dim)',
+                marginBottom: 4, lineHeight: 1.3,
               }}>
                 {MEDALS[i] ?? `${i + 1}.`} {s.playerName}
+                {isMe && <span style={{ display: 'block', fontSize: '0.6rem', color: '#93c5fd', fontWeight: 600 }}>← Vos</span>}
               </div>
+              {/* Stacked bar */}
               <div style={{
                 height: barH,
-                background: isWinner
-                  ? 'linear-gradient(180deg, #f0c040, #c8650f)'
-                  : 'linear-gradient(180deg, #3d3425, #252015)',
                 borderRadius: '4px 4px 0 0',
-                border: isWinner ? '1px solid var(--color-gold)' : '1px solid var(--color-border)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: isWinner ? '1.1rem' : '0.95rem',
-                fontWeight: 800,
-                color: isWinner ? '#1c1410' : 'var(--color-text)',
-                boxShadow: isWinner ? '0 0 16px rgba(212,160,23,0.4)' : 'none',
+                border: isWinner
+                  ? '1px solid var(--color-gold)'
+                  : isMe
+                    ? '1px solid #3b82f6'
+                    : '1px solid var(--color-border)',
+                overflow: 'hidden',
+                display: 'flex', flexDirection: 'column-reverse',
+                boxShadow: isWinner ? '0 0 16px rgba(212,160,23,0.4)' : isMe ? '0 0 10px rgba(59,130,246,0.3)' : 'none',
                 transition: 'height 0.6s ease',
+                position: 'relative',
               }}>
-                {displayTotal}
+                {segments.length > 0 ? segments.map(seg => (
+                  <div
+                    key={seg.key}
+                    title={`${SCORE_COLS.find(c => c.key === seg.key)?.label ?? seg.key}: ${seg.val}`}
+                    style={{
+                      background: seg.color,
+                      flex: seg.val,
+                      opacity: 0.85,
+                    }}
+                  />
+                )) : (
+                  <div style={{
+                    flex: 1,
+                    background: isWinner
+                      ? 'linear-gradient(180deg, #f0c040, #c8650f)'
+                      : 'linear-gradient(180deg, #3d3425, #252015)',
+                  }} />
+                )}
+                {/* Total overlay */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: isWinner ? '1.1rem' : '0.95rem',
+                  fontWeight: 800,
+                  color: '#fff',
+                  textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+                }}>
+                  {displayTotal}
+                </div>
               </div>
             </div>
           );
         })}
+      </div>
+
+      {/* ── Podium legend ── */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 20 }}>
+        {SCORE_COLS.map(col => (
+          <span key={col.key} style={{ fontSize: '0.65rem', color: 'var(--color-text-dim)', display: 'flex', alignItems: 'center', gap: 3 }}>
+            <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: ({military:'#ef4444',treasury:'#f59e0b',wonder:'#a855f7',civilian:'#3b82f6',science:'#10b981',commercial:'#f97316',guilds:'#ec4899'} as Record<string,string>)[col.key as string] }} />
+            {col.label}
+          </span>
+        ))}
       </div>
 
       {/* ── Score table ── */}
@@ -245,17 +297,22 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
               </tr>
             </thead>
             <tbody>
-              {scores.map((row, i) => (
+              {scores.map((row, i) => {
+                const isMe = row.playerId === state.myState.id;
+                return (
                 <tr key={row.playerId} style={{
                   background: i === 0
                     ? 'rgba(212,160,23,0.06)'
-                    : i % 2 ? 'var(--color-surface2)' : 'transparent',
+                    : isMe
+                      ? 'rgba(59,130,246,0.06)'
+                      : i % 2 ? 'var(--color-surface2)' : 'transparent',
                   borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  outline: isMe ? '1px solid rgba(59,130,246,0.25)' : 'none',
                 }}>
                   <td style={{ padding: '10px 14px', whiteSpace: 'nowrap' }}>
                     <span style={{ marginRight: 6 }}>{MEDALS[i] ?? `${i + 1}.`}</span>
-                    <span style={{ fontWeight: i === 0 ? 700 : 400, color: i === 0 ? 'var(--color-gold)' : 'var(--color-text)' }}>
-                      {row.playerName}
+                    <span style={{ fontWeight: i === 0 || isMe ? 700 : 400, color: i === 0 ? 'var(--color-gold)' : isMe ? '#93c5fd' : 'var(--color-text)' }}>
+                      {row.playerName}{isMe ? ' ←' : ''}
                     </span>
                   </td>
                   {SCORE_COLS.map(col => {
@@ -286,12 +343,13 @@ export default function ScoringScreen({ state, onReturnToMenu }: Props) {
                   <td style={{
                     padding: '10px 14px', textAlign: 'center',
                     fontWeight: 800, fontSize: '1rem',
-                    color: i === 0 ? 'var(--color-gold)' : 'var(--color-text)',
+                    color: i === 0 ? 'var(--color-gold)' : isMe ? '#93c5fd' : 'var(--color-text)',
                   }}>
                     {animatedTotals[row.playerId] ?? row.total}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
