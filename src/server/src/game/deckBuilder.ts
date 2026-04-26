@@ -13,34 +13,60 @@ export function shuffle<T>(arr: T[]): T[] {
 /**
  * Build the deck for a given age and player count.
  * Age III: guilds are filtered to exactly playerCount + 2 random cards.
- * Result: playerCount × 7 cards total.
+ * Result: always exactly playerCount × 7 cards.
+ *
+ * Each entry in a card's minPlayers array contributes ONE copy of that card
+ * (e.g. minPlayers:[3,5] → 1 copy for 3-4p, 2 copies for 5+p).
  */
 export function buildAgeDeck(age: 1 | 2 | 3, playerCount: number): Card[] {
   const allCards = age === 1 ? AGE1_CARDS : age === 2 ? AGE2_CARDS : AGE3_CARDS;
+  const target = playerCount * 7;
 
-  // Filter by player count
-  const eligible = allCards.filter(c => c.minPlayers.some(min => playerCount >= min));
+  // flatMap: one copy per qualifying minPlayers entry (gives unique IDs for dupes)
+  const eligible = allCards.flatMap(c => {
+    const copies = c.minPlayers.filter(min => playerCount >= min);
+    return copies.map((_, idx) =>
+      idx === 0 ? { ...c } : { ...c, id: `${c.id}_c${idx}` }
+    );
+  });
 
-  if (age !== 3) {
-    shuffle(eligible);
-    return eligible;
+  if (age === 3) {
+    const guilds = eligible.filter(c => c.color === 'purple');
+    const nonGuilds = eligible.filter(c => c.color !== 'purple');
+
+    shuffle(guilds);
+    const selectedGuilds = guilds.slice(0, Math.min(playerCount + 2, guilds.length));
+
+    const deck = [...nonGuilds, ...selectedGuilds];
+    shuffle(deck);
+    return ensureSize(deck, target);
   }
 
-  // Age III: separate guilds and randomly select playerCount + 2
-  const guilds = eligible.filter(c => c.color === 'purple');
-  const nonGuilds = eligible.filter(c => c.color !== 'purple');
-
-  const guildCount = playerCount + 2;
-  shuffle(guilds);
-  const selectedGuilds = guilds.slice(0, guildCount);
-
-  const deck = [...nonGuilds, ...selectedGuilds];
-  shuffle(deck);
-  return deck;
+  shuffle(eligible);
+  return ensureSize(eligible, target);
 }
 
 /**
- * Deal cards from the deck into hands of 7 for each player.
+ * Guarantee exactly `target` cards.
+ * Trims if there are too many; pads with cycled copies (unique IDs) if too few.
+ */
+function ensureSize(deck: Card[], target: number): Card[] {
+  if (deck.length === target) return deck;
+  if (deck.length > target) return deck.slice(0, target);
+
+  // Undercount — pad by cycling through the deck with suffixed IDs
+  const result = [...deck];
+  let cycle = 1;
+  for (let i = 0; result.length < target; i++) {
+    const src = deck[i % deck.length];
+    if (i > 0 && i % deck.length === 0) cycle++;
+    result.push({ ...src, id: `${src.id}_x${cycle}` });
+  }
+  return result;
+}
+
+/**
+ * Deal cards from the deck into hands of exactly 7 for each player.
  */
 export function dealHands(deck: Card[], playerCount: number): Card[][] {
   const hands: Card[][] = Array.from({ length: playerCount }, () => []);

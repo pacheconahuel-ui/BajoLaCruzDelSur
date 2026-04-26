@@ -13,6 +13,7 @@ import ExtraCardPickerScreen from './ExtraCardPickerScreen';
 import { computeAffordability, computeWonderAffordability, getWonderStageCost, WonderAffordability } from '../utils/affordability';
 import { formatCost } from '../utils/icons';
 import CheatSheet from '../components/CheatSheet';
+import HowToPlayPage from './HowToPlayPage';
 import type { ChatMessage } from '../App';
 
 interface Props {
@@ -65,6 +66,7 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
   const [showAbandon, setShowAbandon]     = useState(false);
   const [showStats, setShowStats]         = useState(false);
   const [showMilitary, setShowMilitary]   = useState(false);
+  const [showManual, setShowManual]       = useState(false);
   const [chatInput, setChatInput]         = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -172,6 +174,15 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
   // Check if any era has completed military tokens
   const hasAnyMilitary = state.players.some(p => p.militaryTokens.length > 0);
 
+  // Full-screen manual overlay — renders on top of everything
+  if (showManual) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, zIndex: 1000 }}>
+        <HowToPlayPage onBack={() => setShowManual(false)} />
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: '6px 10px', maxWidth: 1600, margin: '0 auto', paddingBottom: 16 }}>
 
@@ -267,6 +278,13 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
               )}
             </div>
           )}
+
+          <button
+            onClick={() => setShowManual(true)}
+            style={{ background: 'var(--color-surface2)', color: 'var(--color-text-dim)', padding: '4px 10px', fontSize: '0.78rem', borderRadius: 20 }}
+          >
+            📖 Manual
+          </button>
 
           <button
             onClick={() => setShowHelp(true)}
