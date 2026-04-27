@@ -4,9 +4,10 @@ import { COLOR_BG, COLOR_IMG, COLOR_ACCENT, COLOR_LABEL, formatCost, formatEffec
 interface Props {
   card: Card;
   size?: 'md' | 'sm';
+  onClick?: () => void;
 }
 
-export default function TableauCard({ card, size = 'md' }: Props) {
+export default function TableauCard({ card, size = 'md', onClick }: Props) {
   const bg     = COLOR_BG[card.color];
   const accent = COLOR_ACCENT[card.color];
   const label  = COLOR_LABEL[card.color];
@@ -24,6 +25,7 @@ export default function TableauCard({ card, size = 'md' }: Props) {
   return (
     <div
       title={`${card.name} | ${label} | Costo: ${costStr} | ${effectStr}`}
+      onClick={onClick}
       style={{
         width: w,
         background: bg,
@@ -33,6 +35,7 @@ export default function TableauCard({ card, size = 'md' }: Props) {
         boxShadow: '0 4px 10px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.5)',
         userSelect: 'none',
         flexShrink: 0,
+        cursor: onClick ? 'pointer' : undefined,
       }}
     >
       {/* Illustration */}

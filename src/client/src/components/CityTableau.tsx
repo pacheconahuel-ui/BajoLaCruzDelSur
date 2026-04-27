@@ -35,9 +35,10 @@ const COL_W: Record<'md' | 'sm', number> = { md: 122, sm: 76 };
 interface Props {
   structures: Card[];
   size?: 'md' | 'sm';
+  onCardPress?: (card: Card) => void;
 }
 
-export default function CityTableau({ structures, size = 'md' }: Props) {
+export default function CityTableau({ structures, size = 'md', onCardPress }: Props) {
   const byColor: Partial<Record<CardColor, Card[]>> = {};
   for (const card of structures) {
     (byColor[card.color] ??= []).push(card);
@@ -99,7 +100,7 @@ export default function CityTableau({ structures, size = 'md' }: Props) {
                     zIndex: i + 1,
                   }}
                 >
-                  <TableauCard card={card} size={size} />
+                  <TableauCard card={card} size={size} onClick={onCardPress ? () => onCardPress(card) : undefined} />
                 </div>
               ))}
             </div>

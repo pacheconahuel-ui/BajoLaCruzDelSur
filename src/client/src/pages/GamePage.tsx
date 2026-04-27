@@ -359,7 +359,7 @@ export default function GamePage({ state, onAbandon, chatMessages = [], onChat, 
                 <div style={{ fontSize: '0.7rem', color: 'var(--color-text-dim)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   Ciudad · {me.builtStructures.length} estructuras
                 </div>
-                <CityTableau structures={me.builtStructures} size="md" />
+                <CityTableau structures={me.builtStructures} size="md" onCardPress={setDetailCard} />
               </div>
             )}
 
