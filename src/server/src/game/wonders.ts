@@ -89,8 +89,8 @@ export const WONDERS: WonderBoard[] = [
       },
       {
         cost: { stone: 2, loom: 1 },
-        // Símbolo de ciencia comodín (science_wildcard de Gemini → extra_science_symbol)
-        effects: [{ type: 'extra_science_symbol' }],
+        // 5 puntos de victoria (Selk'nam diferenciado de Yámana que ya tiene extra_science_symbol)
+        effects: [{ type: 'victory_points', points: 5 }],
       },
       {
         cost: { clay: 3, papyrus: 1 },
@@ -127,7 +127,7 @@ export const WONDERS: WonderBoard[] = [
         effects: [{ type: 'produce_resource', resource: 'stone' }],
       },
       {
-        cost: { clay: 2, loom: 2 },
+        cost: { clay: 2, loom: 1 },
         effects: [{ type: 'victory_points', points: 5 }],
       },
       {

@@ -27,7 +27,7 @@ const WONDER_STAGE_INFO: Record<string, string[]> = {
   lighthouse:    ['+4💰', '2★/🟡', '7★'],
   temple:        ['+🪨/⚙️ 🔥', '🧪 libre 🔥', '7★ 🔥'],  // 🔥 = Ofrenda del Fuego: +3💰+carta bonus
   babylon:       ['🛡', '🛡🛡', '7★'],
-  olympia:       ['3★', '🧪 libre', '7★'],
+  olympia:       ['3★', '5★', '7★'],
   halicarnassus: ['+3💰', '♻ del descarte', '7★'],
   giza:          ['+🪨', '5★', '7★'],
 };
@@ -56,7 +56,7 @@ const WONDER_STAGE_DETAIL: Record<string, Array<{ cost: string; effect: string }
   ],
   olympia: [
     { cost: '2 🟫 arcilla',                  effect: '3 puntos de victoria.' },
-    { cost: '2 🪨 piedra + 1 🧵 textiles',   effect: 'Símbolo de ciencia comodín: copia cualquier símbolo científico que ya tengas.' },
+    { cost: '2 🪨 piedra + 1 🧵 textiles',   effect: '5 puntos de victoria.' },
     { cost: '3 🟫 arcilla + 1 📜 papiro',    effect: '7 puntos de victoria.' },
   ],
   halicarnassus: [
@@ -66,7 +66,7 @@ const WONDER_STAGE_DETAIL: Record<string, Array<{ cost: string; effect: string }
   ],
   giza: [
     { cost: '2 🪨 piedra',                   effect: 'Produce 1 🪨 piedra extra permanentemente.' },
-    { cost: '2 🟫 arcilla + 2 🧵 textiles',  effect: '5 puntos de victoria.' },
+    { cost: '2 🟫 arcilla + 1 🧵 textiles',  effect: '5 puntos de victoria.' },
     { cost: '3 🪨 piedra + 1 📜 papiro',     effect: '7 puntos de victoria.' },
   ],
 };
